@@ -1,0 +1,16 @@
+enum Gender {
+    MALE
+    FEMALE
+    OTHERS
+}
+
+enum UserType {
+    LOGICLOUD
+    STAFF
+    ADMIN
+}
+
+enum UserStatus {
+    INACTIVE
+    ACTIVE
+}
