@@ -30,7 +30,7 @@ func InitDB() *gorm.DB {
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	DbExceptionHandle(err)
-	//Migrate(db)
+	Migrate(db)
 	//migration function
 	return db
 }

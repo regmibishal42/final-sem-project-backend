@@ -6,10 +6,10 @@ type Todo {
   id: ID!
   text: String!
   done: Boolean!
-  user: User!
+  user: UserTodo!
 }
 
-type User {
+type UserTodo {
   id: ID!
   name: String!
 }

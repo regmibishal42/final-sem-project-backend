@@ -2,19 +2,171 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+
+)
+
+type AuthToken struct {
+	AccessToken string `json:"accessToken"`
+}
+
+type LoginInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type NewTodo struct {
 	Text   string `json:"text"`
 	UserID string `json:"userId"`
 }
 
 type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+	ID   string    `json:"id"`
+	Text string    `json:"text"`
+	Done bool      `json:"done"`
+	User *UserTodo `json:"user"`
 }
 
-type User struct {
+
+
+type UserInput struct {
+	Email     string `json:"email"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Password  string `json:"password"`
+}
+
+type UserTodo struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type Gender string
+
+const (
+	GenderMale   Gender = "MALE"
+	GenderFemale Gender = "FEMALE"
+	GenderOthers Gender = "OTHERS"
+)
+
+var AllGender = []Gender{
+	GenderMale,
+	GenderFemale,
+	GenderOthers,
+}
+
+func (e Gender) IsValid() bool {
+	switch e {
+	case GenderMale, GenderFemale, GenderOthers:
+		return true
+	}
+	return false
+}
+
+func (e Gender) String() string {
+	return string(e)
+}
+
+func (e *Gender) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Gender(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Gender", str)
+	}
+	return nil
+}
+
+func (e Gender) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type UserStatus string
+
+const (
+	UserStatusInactive UserStatus = "INACTIVE"
+	UserStatusActive   UserStatus = "ACTIVE"
+)
+
+var AllUserStatus = []UserStatus{
+	UserStatusInactive,
+	UserStatusActive,
+}
+
+func (e UserStatus) IsValid() bool {
+	switch e {
+	case UserStatusInactive, UserStatusActive:
+		return true
+	}
+	return false
+}
+
+func (e UserStatus) String() string {
+	return string(e)
+}
+
+func (e *UserStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UserStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UserStatus", str)
+	}
+	return nil
+}
+
+func (e UserStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type UserType string
+
+const (
+	UserTypeLogicloud UserType = "LOGICLOUD"
+	UserTypeStaff     UserType = "STAFF"
+	UserTypeAdmin     UserType = "ADMIN"
+)
+
+var AllUserType = []UserType{
+	UserTypeLogicloud,
+	UserTypeStaff,
+	UserTypeAdmin,
+}
+
+func (e UserType) IsValid() bool {
+	switch e {
+	case UserTypeLogicloud, UserTypeStaff, UserTypeAdmin:
+		return true
+	}
+	return false
+}
+
+func (e UserType) String() string {
+	return string(e)
+}
+
+func (e *UserType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UserType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UserType", str)
+	}
+	return nil
+}
+
+func (e UserType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

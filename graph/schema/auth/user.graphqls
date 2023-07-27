@@ -1,0 +1,25 @@
+type User{
+    id:ID!
+    email:String!
+    userType:UserType!
+    isVerified:Boolean!
+    status:UserStatus!
+    createdAt:Time!
+    updatedAt:Time
+    deletedAt:Time
+}
+
+type AuthToken{
+    accessToken:String!
+}
+input UserInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
