@@ -1,0 +1,32 @@
+interface MutationError{
+    message:String!
+    code:Int!
+}
+
+interface QueryError{
+    message:String!
+    code:Int!
+}
+
+type BadRequestError implements QueryError & MutationError{
+    message:String!
+    code:Int!
+}
+
+type NotFoundError implements QueryError & MutationError {
+    message:String!
+    code:Int!
+}
+type ServerError implements QueryError & MutationError {
+    message:String!
+    code:Int!
+}
+type ValidationError implements MutationError{
+    message:String!
+    code:Int!
+    # field: [InvalidData!]
+}
+type AuthorizationError implements QueryError & MutationError {
+    message:String!
+    code:Int!
+}

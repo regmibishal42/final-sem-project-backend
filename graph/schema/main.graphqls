@@ -1,0 +1,9 @@
+# Mutation
+type Mutation{
+    auth:UserMutation!
+}
+
+type Query{
+    auth:UserQuery!
+}
+

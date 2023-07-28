@@ -11,15 +11,14 @@ import (
 	"fmt"
 )
 
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+// Auth is the resolver for the auth field.
+func (r *mutationResolver) Auth(ctx context.Context) (*model.UserMutation, error) {
+	return &model.UserMutation{}, nil
 }
 
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	todos := []*model.Todo{}
-	return todos, nil
+// Auth is the resolver for the auth field.
+func (r *queryResolver) Auth(ctx context.Context) (*model.UserQuery, error) {
+	panic(fmt.Errorf("not implemented: Auth - auth"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

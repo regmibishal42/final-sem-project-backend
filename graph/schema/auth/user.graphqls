@@ -23,3 +23,22 @@ input LoginInput {
   email: String!
   password: String!
 }
+
+type AuthMutationResponse{
+    data:User
+    error:MutationError
+}
+
+type AuthQueryResponse{
+    data:[User]
+    error:QueryError
+}
+
+
+type UserMutation{
+    createUser(input:UserInput!):AuthMutationResponse! @goField(forceResolver:true)
+}
+
+type UserQuery{
+    getAllUsers:AuthQueryResponse! @goField(forceResolver:true)
+}
