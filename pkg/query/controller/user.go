@@ -6,5 +6,5 @@ import (
 )
 
 type UserQueryInterface interface {
-	CreateUser(ctx context.Context, user *model.User) (*model.User, error)
+	CreateUser(ctx context.Context, user *model.User) error
 }

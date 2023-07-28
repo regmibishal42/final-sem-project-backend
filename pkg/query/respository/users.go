@@ -5,6 +5,10 @@ import (
 	"context"
 )
 
-func (r QueryRepository) CreateUser(ctx context.Context, user *model.User) (*model.User, error) {
-	return nil, nil
+func (r QueryRepository) CreateUser(ctx context.Context, user *model.User) error {
+	err := r.db.Model(&model.User{}).Create(&user).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
