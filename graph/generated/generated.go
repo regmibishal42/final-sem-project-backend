@@ -554,8 +554,8 @@ type AuthorizationError implements QueryError & MutationError {
     code:Int!
 }`, BuiltIn: false},
 	{Name: "../schema/shared/scalar.graphqls", Input: `scalar Time
-# scalar InvalidData
-# scalar JSONB`, BuiltIn: false},
+scalar InvalidData
+scalar JSONB`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

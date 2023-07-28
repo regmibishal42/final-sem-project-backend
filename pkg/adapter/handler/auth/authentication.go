@@ -1,22 +1,21 @@
 package auth_handler
 
 import (
+	"backend/exception"
 	"backend/graph/model"
 	"context"
-	"time"
 )
 
 func (r AuthRepository) CreateUser(ctx context.Context, input model.UserInput) *model.AuthMutationResponse {
 	user := model.User{
-		Email:     input.Email,
-		UserType:  model.UserTypeAdmin,
-		CreatedAt: time.Now(),
+		Email:    input.Email,
+		UserType: model.UserTypeAdmin,
 	}
 	err := r.TableUser.CreateUser(ctx, &user)
 	if err != nil {
 		return &model.AuthMutationResponse{
 			Data:  nil,
-			Error: model.ServerError{Message: err.Error(), Code: 500},
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
 		}
 	}
 
