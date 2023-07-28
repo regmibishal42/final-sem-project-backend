@@ -13,7 +13,7 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *userMutationResolver) CreateUser(ctx context.Context, obj *model.UserMutation, input model.UserInput) (*model.AuthMutationResponse, error) {
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+	return r.AuthDomain.CreateUser(ctx, input), nil
 }
 
 // GetAllUsers is the resolver for the getAllUsers field.
