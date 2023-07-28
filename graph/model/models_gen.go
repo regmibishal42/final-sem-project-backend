@@ -6,31 +6,82 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-
 )
+
+type MutationError interface {
+	IsMutationError()
+	GetMessage() string
+	GetCode() int
+}
+
+type QueryError interface {
+	IsQueryError()
+	GetMessage() string
+	GetCode() int
+}
+
+type AuthMutationResponse struct {
+	Data  *User         `json:"data,omitempty"`
+	Error MutationError `json:"error,omitempty"`
+}
+
+type AuthQueryResponse struct {
+	Data  []*User    `json:"data,omitempty"`
+	Error QueryError `json:"error,omitempty"`
+}
 
 type AuthToken struct {
 	AccessToken string `json:"accessToken"`
 }
+
+type AuthorizationError struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+}
+
+func (AuthorizationError) IsQueryError()           {}
+func (this AuthorizationError) GetMessage() string { return this.Message }
+func (this AuthorizationError) GetCode() int       { return this.Code }
+
+func (AuthorizationError) IsMutationError() {}
+
+type BadRequestError struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+}
+
+func (BadRequestError) IsQueryError()           {}
+func (this BadRequestError) GetMessage() string { return this.Message }
+func (this BadRequestError) GetCode() int       { return this.Code }
+
+func (BadRequestError) IsMutationError() {}
 
 type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type NotFoundError struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
 }
 
-type Todo struct {
-	ID   string    `json:"id"`
-	Text string    `json:"text"`
-	Done bool      `json:"done"`
-	User *UserTodo `json:"user"`
+func (NotFoundError) IsQueryError()           {}
+func (this NotFoundError) GetMessage() string { return this.Message }
+func (this NotFoundError) GetCode() int       { return this.Code }
+
+func (NotFoundError) IsMutationError() {}
+
+type ServerError struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
 }
 
+func (ServerError) IsQueryError()           {}
+func (this ServerError) GetMessage() string { return this.Message }
+func (this ServerError) GetCode() int       { return this.Code }
 
+func (ServerError) IsMutationError() {}
 
 type UserInput struct {
 	Email     string `json:"email"`
@@ -39,10 +90,22 @@ type UserInput struct {
 	Password  string `json:"password"`
 }
 
-type UserTodo struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type UserMutation struct {
+	CreateUser *AuthMutationResponse `json:"createUser"`
 }
+
+type UserQuery struct {
+	GetAllUsers *AuthQueryResponse `json:"getAllUsers"`
+}
+
+type ValidationError struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+}
+
+func (ValidationError) IsMutationError()        {}
+func (this ValidationError) GetMessage() string { return this.Message }
+func (this ValidationError) GetCode() int       { return this.Code }
 
 type Gender string
 
