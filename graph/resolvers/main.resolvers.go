@@ -8,7 +8,6 @@ import (
 	"backend/graph/generated"
 	"backend/graph/model"
 	"context"
-	"fmt"
 )
 
 // Auth is the resolver for the auth field.
@@ -16,9 +15,19 @@ func (r *mutationResolver) Auth(ctx context.Context) (*model.UserMutation, error
 	return &model.UserMutation{}, nil
 }
 
+// Profile is the resolver for the profile field.
+func (r *mutationResolver) Profile(ctx context.Context) (*model.ProfileMutation, error) {
+	return &model.ProfileMutation{}, nil
+}
+
 // Auth is the resolver for the auth field.
 func (r *queryResolver) Auth(ctx context.Context) (*model.UserQuery, error) {
-	panic(fmt.Errorf("not implemented: Auth - auth"))
+	return &model.UserQuery{}, nil
+}
+
+// Profile is the resolver for the profile field.
+func (r *queryResolver) Profile(ctx context.Context) (*model.ProfileQuery, error) {
+	return &model.ProfileQuery{}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

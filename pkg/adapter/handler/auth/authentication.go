@@ -29,6 +29,11 @@ func (r AuthRepository) CreateUser(ctx context.Context, input model.UserInput) *
 	}
 	user.Password = hashedPassword
 
+	//create user
+	user.Profile = &model.Profile{
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+	}
 	err = r.TableUser.CreateUser(ctx, &user)
 	if err != nil {
 		return &model.AuthMutationResponse{
@@ -36,6 +41,13 @@ func (r AuthRepository) CreateUser(ctx context.Context, input model.UserInput) *
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
 		}
 	}
+	//create user profile
+	// profile := model.Profile{
+	// 	UserID:    user.ID,
+	// 	FirstName: input.FirstName,
+	// 	LastName:  input.LastName,
+	// }
+	// err := r.TableProfile
 
 	return &model.AuthMutationResponse{
 		Data:  &user,

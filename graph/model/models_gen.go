@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
 type MutationError interface {
@@ -20,6 +21,14 @@ type QueryError interface {
 	GetCode() int
 }
 
+
+
+type AddressInput struct {
+	City     *string `json:"City,omitempty"`
+	District *string `json:"District,omitempty"`
+	State    *string `json:"State,omitempty"`
+}
+
 type AuthMutationResponse struct {
 	Data  *User         `json:"data,omitempty"`
 	Error MutationError `json:"error,omitempty"`
@@ -28,6 +37,12 @@ type AuthMutationResponse struct {
 type AuthQueryResponse struct {
 	Data  []*User    `json:"data,omitempty"`
 	Error QueryError `json:"error,omitempty"`
+}
+
+type AuthResponse struct {
+	ID    *string       `json:"id,omitempty"`
+	Data  *AuthToken    `json:"data,omitempty"`
+	Error MutationError `json:"error,omitempty"`
 }
 
 type AuthToken struct {
@@ -56,6 +71,18 @@ func (this BadRequestError) GetCode() int       { return this.Code }
 
 func (BadRequestError) IsMutationError() {}
 
+type CreateProfileInput struct {
+	FirstName     string        `json:"firstName"`
+	LastName      string        `json:"lastName"`
+	ContactNumber string        `json:"contactNumber"`
+	DateOfBirth   *time.Time    `json:"DateOfBirth,omitempty"`
+	Address       *AddressInput `json:"Address,omitempty"`
+}
+
+type GetByIDInput struct {
+	ID string `json:"ID"`
+}
+
 type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -72,6 +99,27 @@ func (this NotFoundError) GetCode() int       { return this.Code }
 
 func (NotFoundError) IsMutationError() {}
 
+
+
+type ProfileMutation struct {
+	CreateProfile *ProfileMutationResponse `json:"createProfile"`
+	UpdateProfile *ProfileMutationResponse `json:"updateProfile"`
+}
+
+type ProfileMutationResponse struct {
+	Data  *Profile      `json:"data,omitempty"`
+	Error MutationError `json:"error,omitempty"`
+}
+
+type ProfileQuery struct {
+	GetProfile *ProfileQueryResponse `json:"getProfile"`
+}
+
+type ProfileQueryResponse struct {
+	Data  *Profile      `json:"data,omitempty"`
+	Error MutationError `json:"error,omitempty"`
+}
+
 type ServerError struct {
 	Message string `json:"message"`
 	Code    int    `json:"code"`
@@ -83,6 +131,15 @@ func (this ServerError) GetCode() int       { return this.Code }
 
 func (ServerError) IsMutationError() {}
 
+type UpdateProfileInput struct {
+	UserID        string        `json:"userID"`
+	FirstName     *string       `json:"firstName,omitempty"`
+	LastName      *string       `json:"lastName,omitempty"`
+	ContactNumber *string       `json:"contactNumber,omitempty"`
+	DateOfBirth   *time.Time    `json:"DateOfBirth,omitempty"`
+	Address       *AddressInput `json:"Address,omitempty"`
+}
+
 type UserInput struct {
 	Email     string `json:"email"`
 	FirstName string `json:"firstName"`
@@ -92,6 +149,7 @@ type UserInput struct {
 
 type UserMutation struct {
 	CreateUser *AuthMutationResponse `json:"createUser"`
+	LoginUser  *AuthResponse         `json:"loginUser"`
 }
 
 type UserQuery struct {

@@ -15,3 +15,9 @@ func NewUserQueryRepository(db *gorm.DB) query_controller.UserQueryInterface {
 		db: db,
 	}
 }
+
+func NewProfileQueryRepository(db *gorm.DB) query_controller.ProfileQueryInterface {
+	return QueryRepository{
+		db: db,
+	}
+}

@@ -11,14 +11,19 @@ import (
 	"fmt"
 )
 
-// Password is the resolver for the password field.
-func (r *userResolver) Password(ctx context.Context, obj *model.User) (string, error) {
-	panic(fmt.Errorf("not implemented: Password - password"))
+// Profile is the resolver for the profile field.
+func (r *userResolver) Profile(ctx context.Context, obj *model.User) (*model.Profile, error) {
+	panic(fmt.Errorf("not implemented: Profile - profile"))
 }
 
 // CreateUser is the resolver for the createUser field.
 func (r *userMutationResolver) CreateUser(ctx context.Context, obj *model.UserMutation, input model.UserInput) (*model.AuthMutationResponse, error) {
 	return r.AuthDomain.CreateUser(ctx, input), nil
+}
+
+// LoginUser is the resolver for the loginUser field.
+func (r *userMutationResolver) LoginUser(ctx context.Context, obj *model.UserMutation, input model.LoginInput) (*model.AuthResponse, error) {
+	panic(fmt.Errorf("not implemented: LoginUser - loginUser"))
 }
 
 // GetAllUsers is the resolver for the getAllUsers field.
@@ -45,6 +50,9 @@ type userQueryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *userResolver) Password(ctx context.Context, obj *model.User) (string, error) {
+	panic(fmt.Errorf("not implemented: Password - password"))
+}
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserInput) (*model.AuthMutationResponse, error) {
 	return r.AuthDomain.CreateUser(ctx, input), nil
 }
