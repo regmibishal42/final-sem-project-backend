@@ -20,7 +20,6 @@ type contextKey struct {
 func UserForContext(ctx context.Context) *model.User {
 	user := ctx.Value(UserCtxKey).(*model.User)
 	return user
-	return nil
 }
 
 func DomainForContext(ctx context.Context) Domain {
