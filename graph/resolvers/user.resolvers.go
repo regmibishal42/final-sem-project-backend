@@ -11,6 +11,11 @@ import (
 	"fmt"
 )
 
+// Password is the resolver for the password field.
+func (r *userResolver) Password(ctx context.Context, obj *model.User) (string, error) {
+	panic(fmt.Errorf("not implemented: Password - password"))
+}
+
 // CreateUser is the resolver for the createUser field.
 func (r *userMutationResolver) CreateUser(ctx context.Context, obj *model.UserMutation, input model.UserInput) (*model.AuthMutationResponse, error) {
 	return r.AuthDomain.CreateUser(ctx, input), nil
@@ -21,12 +26,16 @@ func (r *userQueryResolver) GetAllUsers(ctx context.Context, obj *model.UserQuer
 	panic(fmt.Errorf("not implemented: GetAllUsers - getAllUsers"))
 }
 
+// User returns generated.UserResolver implementation.
+func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
+
 // UserMutation returns generated.UserMutationResolver implementation.
 func (r *Resolver) UserMutation() generated.UserMutationResolver { return &userMutationResolver{r} }
 
 // UserQuery returns generated.UserQueryResolver implementation.
 func (r *Resolver) UserQuery() generated.UserQueryResolver { return &userQueryResolver{r} }
 
+type userResolver struct{ *Resolver }
 type userMutationResolver struct{ *Resolver }
 type userQueryResolver struct{ *Resolver }
 

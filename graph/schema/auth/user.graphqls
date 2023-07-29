@@ -4,6 +4,7 @@ type User{
     userType:UserType!
     isVerified:Boolean!
     status:UserStatus!
+    password:String!
     createdAt:Time!
     updatedAt:Time
     deletedAt:Time
