@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -37,7 +38,7 @@ func (u *User) Token() (*AuthToken, error) {
 		return nil, nil
 	}
 	if !u.IsVerified {
-		return nil, nil
+		return nil, errors.New("not verified user")
 	}
 	authToken, err := u._AuthToken()
 
@@ -63,7 +64,8 @@ func ParseAuthToken(tokenString string) (*string, error) {
 		if float64(time.Now().Unix()) > expiresAt {
 			return nil, errors.New("token expired")
 		}
-		userId := claims["userId"].(string)
+		fmt.Println("************User ID IN Token", claims["UserId"])
+		userId := claims["UserId"].(string)
 		return &userId, nil
 	} else {
 		return nil, errors.New("invalid token")

@@ -21,3 +21,13 @@ func (r QueryRepository) GetUserByID(ctx context.Context, userID *string) (*mode
 	}
 	return &user, nil
 }
+
+//get user by email
+func (r QueryRepository) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
+	user := model.User{}
+	err := r.db.Where("deleted_at IS NULL AND email = ?", email).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
