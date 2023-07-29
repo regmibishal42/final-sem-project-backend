@@ -1,0 +1,60 @@
+
+type Profile{
+    userID:ID!
+    firstName:String!
+    lastName:String!
+    contactNumber:String!
+    DateOfBirth:Time
+    Address:Address
+}
+
+type Address{
+    City:String!
+    District:String!
+    State:String!
+}
+
+# Inputs
+input AddressInput{
+    City:String
+    District:String
+    State:String
+}
+input CreateProfileInput{
+    firstName:String!
+    lastName:String!
+    contactNumber:String!
+    DateOfBirth:Time
+    Address:AddressInput
+}
+
+input UpdateProfileInput{
+    userID:ID!
+    firstName:String
+    lastName:String
+    contactNumber:String
+    DateOfBirth:Time
+    Address:AddressInput
+}
+input GetByIDInput{
+    ID:ID!
+}
+
+# Responses
+type ProfileMutationResponse{
+    data:Profile
+    error:MutationError
+}
+type ProfileQueryResponse{
+    data:Profile
+    error:MutationError
+}
+
+type ProfileMutation{
+    createProfile(input:CreateProfileInput!):ProfileMutationResponse! @goField(forceResolver:true)
+    updateProfile(input:UpdateProfileInput!):ProfileMutationResponse! @goField(forceResolver:true)
+}
+
+type ProfileQuery{
+    getProfile(input:GetByIDInput):ProfileQueryResponse! @goField(forceResolver:true)
+}

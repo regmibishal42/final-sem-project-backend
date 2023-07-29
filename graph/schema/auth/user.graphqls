@@ -5,6 +5,7 @@ type User{
     isVerified:Boolean!
     status:UserStatus!
     password:String!
+    profile:Profile @goField(forceResolver:true)
     createdAt:Time!
     updatedAt:Time
     deletedAt:Time
@@ -34,10 +35,16 @@ type AuthQueryResponse{
     data:[User]
     error:QueryError
 }
+type AuthResponse{
+    id:ID
+    data:AuthToken
+    error:MutationError
+}
 
 
 type UserMutation{
     createUser(input:UserInput!):AuthMutationResponse! @goField(forceResolver:true)
+    loginUser(input:LoginInput!):AuthResponse! @goField(forceResolver:true)
 }
 
 type UserQuery{

@@ -1,9 +1,11 @@
 # Mutation
 type Mutation{
     auth:UserMutation!
+    profile:ProfileMutation!
 }
 
 type Query{
     auth:UserQuery!
+    profile:ProfileQuery!
 }
 
