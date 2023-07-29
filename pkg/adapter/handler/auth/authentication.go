@@ -24,3 +24,12 @@ func (r AuthRepository) CreateUser(ctx context.Context, input model.UserInput) *
 		Error: nil,
 	}
 }
+
+func (r AuthRepository) GetUserByID(ctx context.Context, userID *string) (*model.User, error) {
+	user, err := r.TableUser.GetUserByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+
+}

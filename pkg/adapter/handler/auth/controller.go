@@ -11,4 +11,5 @@ type AuthController struct {
 
 type AuthInterface interface {
 	CreateUser(ctx context.Context, input model.UserInput) *model.AuthMutationResponse
+	GetUserByID(ctx context.Context, userID *string) (*model.User, error)
 }
