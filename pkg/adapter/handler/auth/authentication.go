@@ -8,19 +8,13 @@ import (
 )
 
 func (r AuthRepository) CreateUser(ctx context.Context, input model.UserInput) *model.AuthMutationResponse {
-	user := model.User{
-		UserType: model.UserTypeAdmin,
-	}
-
-	//validate email
-	err := util.IsEmailValid(input.Email)
-	if err != nil {
+	user, validationError := input.Validator()
+	if validationError != nil {
 		return &model.AuthMutationResponse{
-			Error: exception.MutationErrorHandler(ctx, err, exception.VALIDATION_ERROR, util.Ref("email")),
+			Data:  nil,
+			Error: validationError,
 		}
 	}
-	user.Email = input.Email
-	//hash password
 	hashedPassword, err := util.HashPassword(input.Password)
 	if err != nil {
 		return &model.AuthMutationResponse{
@@ -34,23 +28,16 @@ func (r AuthRepository) CreateUser(ctx context.Context, input model.UserInput) *
 		FirstName: input.FirstName,
 		LastName:  input.LastName,
 	}
-	err = r.TableUser.CreateUser(ctx, &user)
+	err = r.TableUser.CreateUser(ctx, user)
 	if err != nil {
 		return &model.AuthMutationResponse{
 			Data:  nil,
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
 		}
 	}
-	//create user profile
-	// profile := model.Profile{
-	// 	UserID:    user.ID,
-	// 	FirstName: input.FirstName,
-	// 	LastName:  input.LastName,
-	// }
-	// err := r.TableProfile
 
 	return &model.AuthMutationResponse{
-		Data:  &user,
+		Data:  user,
 		Error: nil,
 	}
 }

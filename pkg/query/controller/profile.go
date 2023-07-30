@@ -7,4 +7,5 @@ import (
 
 type ProfileQueryInterface interface {
 	CreateUserProfile(ctx context.Context, profile *model.Profile) error
+	GetProfileByUserID(ctx context.Context, userID string) (*model.Profile, error)
 }
