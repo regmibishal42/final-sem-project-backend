@@ -26,6 +26,10 @@ input LoginInput {
   password: String!
 }
 
+input GetUserInput{
+    id:ID!
+}
+
 type AuthMutationResponse{
     data:User
     error:MutationError
@@ -48,5 +52,5 @@ type UserMutation{
 }
 
 type UserQuery{
-    getAllUsers:AuthQueryResponse! @goField(forceResolver:true)
+    getUserDetails(input:GetUserInput):AuthQueryResponse! @goField(forceResolver:true)
 }

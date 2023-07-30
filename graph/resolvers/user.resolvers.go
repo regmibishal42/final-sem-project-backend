@@ -9,12 +9,11 @@ import (
 	"backend/graph/generated"
 	"backend/graph/model"
 	"context"
-	"fmt"
 )
 
 // Profile is the resolver for the profile field.
 func (r *userResolver) Profile(ctx context.Context, obj *model.User) (*model.Profile, error) {
-	panic(fmt.Errorf("not implemented: Profile - profile"))
+	return r.AuthDomain.GetProfileByUserID(ctx, obj.ID)
 }
 
 // CreateUser is the resolver for the createUser field.
@@ -27,8 +26,11 @@ func (r *userMutationResolver) LoginUser(ctx context.Context, obj *model.UserMut
 	return r.AuthDomain.Login(ctx, &input), nil
 }
 
-// GetAllUsers is the resolver for the getAllUsers field.
-func (r *userQueryResolver) GetAllUsers(ctx context.Context, obj *model.UserQuery) (*model.AuthQueryResponse, error) {
+// GetUserDetails is the resolver for the getUserDetails field.
+func (r *userQueryResolver) GetUserDetails(ctx context.Context, obj *model.UserQuery, input *model.GetUserInput) (*model.AuthQueryResponse, error) {
+	if input != nil {
+		return r.AuthDomain.GetUserDetailsByID(ctx, &input.ID), nil
+	}
 	user := UserForContext(ctx)
 	err := CheckLoggedIn(user)
 	if err != nil {
@@ -37,7 +39,7 @@ func (r *userQueryResolver) GetAllUsers(ctx context.Context, obj *model.UserQuer
 			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
 		}, nil
 	}
-	panic(fmt.Errorf("not implemented: GetAllUsers - getAllUsers"))
+	return r.AuthDomain.GetUserDetailsByID(ctx, &user.ID), nil
 }
 
 // User returns generated.UserResolver implementation.
