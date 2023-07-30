@@ -29,6 +29,10 @@ input LoginInput {
 input GetUserInput{
     id:ID!
 }
+input userVerificationInput{
+    otp:String!
+    userID:ID!
+}
 
 type AuthMutationResponse{
     data:User
@@ -49,6 +53,8 @@ type AuthResponse{
 type UserMutation{
     createUser(input:UserInput!):AuthMutationResponse! @goField(forceResolver:true)
     loginUser(input:LoginInput!):AuthResponse! @goField(forceResolver:true)
+    otp:ResendOtpMutation!
+    verifyUser(input:userVerificationInput!):AuthMutationResponse! @goField(forceResolver:true)
 }
 
 type UserQuery{

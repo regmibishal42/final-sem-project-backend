@@ -4,4 +4,5 @@ type AuthQueryController struct {
 	//tables eg TableUser
 	TableUser    UserQueryInterface
 	TableProfile ProfileQueryInterface
+	TableOtp     OtpQueryInterface
 }

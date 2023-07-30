@@ -21,3 +21,9 @@ func NewProfileQueryRepository(db *gorm.DB) query_controller.ProfileQueryInterfa
 		db: db,
 	}
 }
+
+func NewOtpQueryRepository(db *gorm.DB) query_controller.OtpQueryInterface {
+	return QueryRepository{
+		db: db,
+	}
+}

@@ -1,0 +1,12 @@
+type Otp{
+    user:User
+    secret:String!
+    createdAt:Time!
+}
+type OtpMutationResponse{
+    data:Boolean
+    error:MutationError
+}
+type ResendOtpMutation{
+    resend:OtpMutationResponse! @goField(forceResolver:true)
+}

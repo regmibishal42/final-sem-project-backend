@@ -101,6 +101,11 @@ func (this NotFoundError) GetCode() int       { return this.Code }
 
 func (NotFoundError) IsMutationError() {}
 
+type OtpMutationResponse struct {
+	Data  *bool         `json:"data,omitempty"`
+	Error MutationError `json:"error,omitempty"`
+}
+
 type ProfileMutation struct {
 	CreateProfile *ProfileMutationResponse `json:"createProfile"`
 	UpdateProfile *ProfileMutationResponse `json:"updateProfile"`
@@ -118,6 +123,10 @@ type ProfileQuery struct {
 type ProfileQueryResponse struct {
 	Data  *Profile      `json:"data,omitempty"`
 	Error MutationError `json:"error,omitempty"`
+}
+
+type ResendOtpMutation struct {
+	Resend *OtpMutationResponse `json:"resend"`
 }
 
 type ServerError struct {
@@ -150,6 +159,8 @@ type UserInput struct {
 type UserMutation struct {
 	CreateUser *AuthMutationResponse `json:"createUser"`
 	LoginUser  *AuthResponse         `json:"loginUser"`
+	Otp        *ResendOtpMutation    `json:"otp"`
+	VerifyUser *AuthMutationResponse `json:"verifyUser"`
 }
 
 type UserQuery struct {
@@ -164,6 +175,52 @@ type ValidationError struct {
 func (ValidationError) IsMutationError()        {}
 func (this ValidationError) GetMessage() string { return this.Message }
 func (this ValidationError) GetCode() int       { return this.Code }
+
+type UserVerificationInput struct {
+	Otp    string `json:"otp"`
+	UserID string `json:"userID"`
+}
+
+type EmailType string
+
+const (
+	EmailTypeOtpVerification EmailType = "OTP_VERIFICATION"
+	EmailTypeStaffCreation   EmailType = "STAFF_CREATION"
+)
+
+var AllEmailType = []EmailType{
+	EmailTypeOtpVerification,
+	EmailTypeStaffCreation,
+}
+
+func (e EmailType) IsValid() bool {
+	switch e {
+	case EmailTypeOtpVerification, EmailTypeStaffCreation:
+		return true
+	}
+	return false
+}
+
+func (e EmailType) String() string {
+	return string(e)
+}
+
+func (e *EmailType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EmailType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EmailType", str)
+	}
+	return nil
+}
+
+func (e EmailType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
 
 type Gender string
 
