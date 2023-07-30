@@ -43,10 +43,17 @@ func (r AuthRepository) CreateUser(ctx context.Context, input model.UserInput) *
 }
 
 func (r AuthRepository) GetUserByID(ctx context.Context, userID *string) (*model.User, error) {
+	return r.TableUser.GetUserByID(ctx, userID)
+}
+
+func (r AuthRepository) GetUserDetailsByID(ctx context.Context, userID *string) *model.AuthQueryResponse {
 	user, err := r.TableUser.GetUserByID(ctx, userID)
 	if err != nil {
-		return nil, err
+		return &model.AuthQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}
 	}
-	return user, nil
-
+	return &model.AuthQueryResponse{
+		Data: []*model.User{user},
+	}
 }

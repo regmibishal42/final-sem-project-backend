@@ -21,8 +21,6 @@ type QueryError interface {
 	GetCode() int
 }
 
-
-
 type AddressInput struct {
 	City     *string `json:"City,omitempty"`
 	District *string `json:"District,omitempty"`
@@ -83,6 +81,10 @@ type GetByIDInput struct {
 	ID string `json:"ID"`
 }
 
+type GetUserInput struct {
+	ID string `json:"id"`
+}
+
 type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -98,8 +100,6 @@ func (this NotFoundError) GetMessage() string { return this.Message }
 func (this NotFoundError) GetCode() int       { return this.Code }
 
 func (NotFoundError) IsMutationError() {}
-
-
 
 type ProfileMutation struct {
 	CreateProfile *ProfileMutationResponse `json:"createProfile"`
@@ -153,7 +153,7 @@ type UserMutation struct {
 }
 
 type UserQuery struct {
-	GetAllUsers *AuthQueryResponse `json:"getAllUsers"`
+	GetUserDetails *AuthQueryResponse `json:"getUserDetails"`
 }
 
 type ValidationError struct {
