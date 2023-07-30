@@ -31,3 +31,11 @@ func (r QueryRepository) GetUserByEmail(ctx context.Context, email string) (*mod
 	}
 	return &user, nil
 }
+
+func (r QueryRepository) UpdateUserDetails(ctx context.Context, user *model.User) error {
+	err := r.db.Model(&model.User{}).Where("deleted_at IS NULL AND id = ?", user.ID).Updates(user).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

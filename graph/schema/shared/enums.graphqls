@@ -14,3 +14,8 @@ enum UserStatus {
     INACTIVE
     ACTIVE
 }
+
+enum EmailType{
+    OTP_VERIFICATION
+    STAFF_CREATION
+}

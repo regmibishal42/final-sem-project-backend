@@ -26,6 +26,11 @@ func (r *userMutationResolver) LoginUser(ctx context.Context, obj *model.UserMut
 	return r.AuthDomain.Login(ctx, &input), nil
 }
 
+// VerifyUser is the resolver for the verifyUser field.
+func (r *userMutationResolver) VerifyUser(ctx context.Context, obj *model.UserMutation, input model.UserVerificationInput) (*model.AuthMutationResponse, error) {
+	return r.AuthDomain.VerifyUser(ctx, &input), nil
+}
+
 // GetUserDetails is the resolver for the getUserDetails field.
 func (r *userQueryResolver) GetUserDetails(ctx context.Context, obj *model.UserQuery, input *model.GetUserInput) (*model.AuthQueryResponse, error) {
 	if input != nil {
