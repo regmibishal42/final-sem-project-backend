@@ -8,7 +8,6 @@ import (
 	"backend/graph/generated"
 	"backend/graph/model"
 	"context"
-	"fmt"
 )
 
 // Resend is the resolver for the resend field.
@@ -18,7 +17,7 @@ func (r *resendOtpMutationResolver) Resend(ctx context.Context, obj *model.Resen
 
 // VerifyOtp is the resolver for the verifyOtp field.
 func (r *resendOtpMutationResolver) VerifyOtp(ctx context.Context, obj *model.ResendOtpMutation, input model.VerifyOtpInput) (*model.OtpMutationResponse, error) {
-	panic(fmt.Errorf("not implemented: VerifyOtp - verifyOtp"))
+	return r.AuthDomain.VerifyOtp(ctx, &input), nil
 }
 
 // ResendOtpMutation returns generated.ResendOtpMutationResolver implementation.
