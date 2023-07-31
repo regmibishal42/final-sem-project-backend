@@ -21,3 +21,11 @@ func (r QueryRepository) GetOtp(ctx context.Context, userID string) (*model.Otp,
 	}
 	return &otp, nil
 }
+
+func (r QueryRepository) UpdateOtp(ctx context.Context, otp *model.Otp) error {
+	err := r.db.Model(&model.Otp{}).Where("user_id = ? ", otp.UserId).Updates(&otp).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

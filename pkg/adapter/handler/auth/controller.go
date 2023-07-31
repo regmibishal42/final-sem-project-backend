@@ -23,4 +23,5 @@ type AuthInterface interface {
 
 	//otp
 	CreateOtp(ctx context.Context, user *model.User) (*model.Otp, error)
+	UpdateOtp(ctx context.Context, userID *string) *model.OtpMutationResponse
 }

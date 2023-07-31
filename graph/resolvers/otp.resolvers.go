@@ -12,8 +12,13 @@ import (
 )
 
 // Resend is the resolver for the resend field.
-func (r *resendOtpMutationResolver) Resend(ctx context.Context, obj *model.ResendOtpMutation) (*model.OtpMutationResponse, error) {
-	panic(fmt.Errorf("not implemented: Resend - resend"))
+func (r *resendOtpMutationResolver) Resend(ctx context.Context, obj *model.ResendOtpMutation, input model.ResendOtpInput) (*model.OtpMutationResponse, error) {
+	return r.AuthDomain.UpdateOtp(ctx, &input.UserID), nil
+}
+
+// VerifyOtp is the resolver for the verifyOtp field.
+func (r *resendOtpMutationResolver) VerifyOtp(ctx context.Context, obj *model.ResendOtpMutation, input model.VerifyOtpInput) (*model.OtpMutationResponse, error) {
+	panic(fmt.Errorf("not implemented: VerifyOtp - verifyOtp"))
 }
 
 // ResendOtpMutation returns generated.ResendOtpMutationResolver implementation.

@@ -11,9 +11,7 @@ type User{
     deletedAt:Time
 }
 
-type AuthToken{
-    accessToken:String!
-}
+# Inputs
 input UserInput {
   email: String!
   firstName: String!
@@ -33,7 +31,25 @@ input userVerificationInput{
     otp:String!
     userID:ID!
 }
+input UpdatePasswordInput{
+    oldPassword:String!
+    newPassword:String!
+}
+input ResetPasswordInput{
+    email:String!
+    newPassword:String!
+}
+input ForgetPasswordInput {
+  email: String!
+  userType: UserType!
+}
 
+#types
+type AuthToken{
+    accessToken:String!
+}
+
+# Response
 type AuthMutationResponse{
     data:User
     error:MutationError
@@ -48,15 +64,24 @@ type AuthResponse{
     data:AuthToken
     error:MutationError
 }
+type RegisterResponse{
+    userID:ID
+    error:MutationError
+}
 
 
+# Mutations
 type UserMutation{
     createUser(input:UserInput!):AuthMutationResponse! @goField(forceResolver:true)
     loginUser(input:LoginInput!):AuthResponse! @goField(forceResolver:true)
     otp:ResendOtpMutation!
     verifyUser(input:userVerificationInput!):AuthMutationResponse! @goField(forceResolver:true)
+    updatePassword(input:ResetPasswordInput!):RegisterResponse! @goField(forceResolver:true)
+    forgetPassword(input:ForgetPasswordInput!):RegisterResponse! @goField(forceResolver:true)
+    resetPassword(input:ResetPasswordInput!):RegisterResponse! @goField(forceResolver:true)
 }
 
+# Queries
 type UserQuery{
     getUserDetails(input:GetUserInput):AuthQueryResponse! @goField(forceResolver:true)
 }
