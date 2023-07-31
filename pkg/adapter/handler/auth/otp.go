@@ -62,3 +62,35 @@ func (r AuthRepository) UpdateOtp(ctx context.Context, userID *string) *model.Ot
 	}
 
 }
+
+//verify the otp
+func (r AuthRepository) VerifyOtp(ctx context.Context, input *model.VerifyOtpInput) *model.OtpMutationResponse {
+	user, err := r.TableUser.GetUserByEmail(ctx, input.Email)
+	if err != nil {
+		return &model.OtpMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.NOT_FOUND, nil),
+		}
+	}
+	if user == nil {
+		return &model.OtpMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, errors.New("user with given email not found"), exception.NOT_FOUND, nil),
+		}
+	}
+	//get otp
+	otp, err := r.TableOtp.GetOtp(ctx, user.ID)
+	if err != nil {
+		return &model.OtpMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.NOT_FOUND, nil),
+		}
+	}
+	if input.Otp != otp.Secret {
+		return &model.OtpMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, errors.New("opt not matched"), exception.BAD_REQUEST, nil),
+		}
+	}
+	return &model.OtpMutationResponse{
+		Data:  util.Ref(true),
+		Error: nil,
+	}
+
+}
