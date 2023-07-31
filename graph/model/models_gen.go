@@ -77,6 +77,11 @@ type CreateProfileInput struct {
 	Address       *AddressInput `json:"Address,omitempty"`
 }
 
+type ForgetPasswordInput struct {
+	Email    string   `json:"email"`
+	UserType UserType `json:"userType"`
+}
+
 type GetByIDInput struct {
 	ID string `json:"ID"`
 }
@@ -125,8 +130,23 @@ type ProfileQueryResponse struct {
 	Error MutationError `json:"error,omitempty"`
 }
 
+type RegisterResponse struct {
+	UserID *string       `json:"userID,omitempty"`
+	Error  MutationError `json:"error,omitempty"`
+}
+
+type ResendOtpInput struct {
+	UserID string `json:"userID"`
+}
+
 type ResendOtpMutation struct {
-	Resend *OtpMutationResponse `json:"resend"`
+	Resend    *OtpMutationResponse `json:"resend"`
+	VerifyOtp *OtpMutationResponse `json:"verifyOtp"`
+}
+
+type ResetPasswordInput struct {
+	Email       string `json:"email"`
+	NewPassword string `json:"newPassword"`
 }
 
 type ServerError struct {
@@ -139,6 +159,11 @@ func (this ServerError) GetMessage() string { return this.Message }
 func (this ServerError) GetCode() int       { return this.Code }
 
 func (ServerError) IsMutationError() {}
+
+type UpdatePasswordInput struct {
+	OldPassword string `json:"oldPassword"`
+	NewPassword string `json:"newPassword"`
+}
 
 type UpdateProfileInput struct {
 	UserID        string        `json:"userID"`
@@ -157,10 +182,13 @@ type UserInput struct {
 }
 
 type UserMutation struct {
-	CreateUser *AuthMutationResponse `json:"createUser"`
-	LoginUser  *AuthResponse         `json:"loginUser"`
-	Otp        *ResendOtpMutation    `json:"otp"`
-	VerifyUser *AuthMutationResponse `json:"verifyUser"`
+	CreateUser     *AuthMutationResponse `json:"createUser"`
+	LoginUser      *AuthResponse         `json:"loginUser"`
+	Otp            *ResendOtpMutation    `json:"otp"`
+	VerifyUser     *AuthMutationResponse `json:"verifyUser"`
+	UpdatePassword *RegisterResponse     `json:"updatePassword"`
+	ForgetPassword *RegisterResponse     `json:"forgetPassword"`
+	ResetPassword  *RegisterResponse     `json:"resetPassword"`
 }
 
 type UserQuery struct {
@@ -175,6 +203,11 @@ type ValidationError struct {
 func (ValidationError) IsMutationError()        {}
 func (this ValidationError) GetMessage() string { return this.Message }
 func (this ValidationError) GetCode() int       { return this.Code }
+
+type VerifyOtpInput struct {
+	Otp   string `json:"otp"`
+	Email string `json:"email"`
+}
 
 type UserVerificationInput struct {
 	Otp    string `json:"otp"`

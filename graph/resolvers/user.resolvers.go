@@ -9,6 +9,7 @@ import (
 	"backend/graph/generated"
 	"backend/graph/model"
 	"context"
+	"fmt"
 )
 
 // Profile is the resolver for the profile field.
@@ -29,6 +30,21 @@ func (r *userMutationResolver) LoginUser(ctx context.Context, obj *model.UserMut
 // VerifyUser is the resolver for the verifyUser field.
 func (r *userMutationResolver) VerifyUser(ctx context.Context, obj *model.UserMutation, input model.UserVerificationInput) (*model.AuthMutationResponse, error) {
 	return r.AuthDomain.VerifyUser(ctx, &input), nil
+}
+
+// UpdatePassword is the resolver for the updatePassword field.
+func (r *userMutationResolver) UpdatePassword(ctx context.Context, obj *model.UserMutation, input model.ResetPasswordInput) (*model.RegisterResponse, error) {
+	panic(fmt.Errorf("not implemented: UpdatePassword - updatePassword"))
+}
+
+// ForgetPassword is the resolver for the forgetPassword field.
+func (r *userMutationResolver) ForgetPassword(ctx context.Context, obj *model.UserMutation, input model.ForgetPasswordInput) (*model.RegisterResponse, error) {
+	panic(fmt.Errorf("not implemented: ForgetPassword - forgetPassword"))
+}
+
+// ResetPassword is the resolver for the resetPassword field.
+func (r *userMutationResolver) ResetPassword(ctx context.Context, obj *model.UserMutation, input model.ResetPasswordInput) (*model.RegisterResponse, error) {
+	panic(fmt.Errorf("not implemented: ResetPassword - resetPassword"))
 }
 
 // GetUserDetails is the resolver for the getUserDetails field.

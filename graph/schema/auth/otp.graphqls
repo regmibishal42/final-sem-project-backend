@@ -3,10 +3,18 @@ type Otp{
     secret:String!
     createdAt:Time!
 }
+input VerifyOtpInput{
+    otp:String!
+    email:String!
+}
+input ResendOtpInput{
+    userID:ID!
+}
 type OtpMutationResponse{
     data:Boolean
     error:MutationError
 }
 type ResendOtpMutation{
-    resend:OtpMutationResponse! @goField(forceResolver:true)
+    resend(input:ResendOtpInput!):OtpMutationResponse! @goField(forceResolver:true)
+    verifyOtp(input:VerifyOtpInput!):OtpMutationResponse! @goField(forceResolver:true)
 }

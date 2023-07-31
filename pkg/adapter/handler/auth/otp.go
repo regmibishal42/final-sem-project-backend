@@ -1,9 +1,11 @@
 package auth_handler
 
 import (
+	"backend/exception"
 	"backend/graph/model"
 	"backend/pkg/util"
 	"context"
+	"errors"
 	"time"
 )
 
@@ -20,5 +22,43 @@ func (r AuthRepository) CreateOtp(ctx context.Context, user *model.User) (*model
 	//send otp email to user
 	go util.SendVerificationEmail(otp.Secret, user.Email)
 	return &otp, nil
+
+}
+
+//update otp for resend functionality
+func (r AuthRepository) UpdateOtp(ctx context.Context, userID *string) *model.OtpMutationResponse {
+	//validate the id from input
+	if !util.IsValidID(*userID) {
+		return &model.OtpMutationResponse{
+			Data:  util.Ref(false),
+			Error: exception.MutationErrorHandler(ctx, errors.New("invalid ID"), exception.BAD_REQUEST, nil),
+		}
+	}
+	//get user from id
+	user, err := r.TableUser.GetUserByID(ctx, userID)
+	if err != nil {
+		return &model.OtpMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.NOT_FOUND, nil),
+		}
+	}
+	//get otp
+	otpSecret := util.OtpGenerator()
+	//update the otp
+	otp := model.Otp{
+		UserId:    *userID,
+		UpdatedAt: util.Ref(time.Now()),
+		Secret:    otpSecret,
+	}
+	err = r.TableOtp.UpdateOtp(ctx, &otp)
+	if err != nil {
+		return &model.OtpMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}
+	}
+	go util.SendVerificationEmail(otp.Secret, user.Email)
+	return &model.OtpMutationResponse{
+		Data:  util.Ref(true),
+		Error: nil,
+	}
 
 }
