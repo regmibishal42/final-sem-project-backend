@@ -25,7 +25,8 @@ func main() {
 	}
 
 	auth := registry.AuthServer(dbClient)
-	resolver := resolvers.NewResolver(auth)
+	organization := registry.OrganizationServer(dbClient)
+	resolver := resolvers.NewResolver(auth, organization)
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 	srv.AddTransport(&transport.Websocket{})

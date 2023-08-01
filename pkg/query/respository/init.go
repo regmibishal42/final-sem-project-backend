@@ -27,3 +27,9 @@ func NewOtpQueryRepository(db *gorm.DB) query_controller.OtpQueryInterface {
 		db: db,
 	}
 }
+
+func NewOrganizationQueryRepository(db *gorm.DB) query_controller.OrganizationQueryInterface {
+	return QueryRepository{
+		db: db,
+	}
+}
