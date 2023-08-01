@@ -69,6 +69,13 @@ func (this BadRequestError) GetCode() int       { return this.Code }
 
 func (BadRequestError) IsMutationError() {}
 
+type CreateOrganizationInput struct {
+	UserID  string  `json:"userID"`
+	Email   *string `json:"email,omitempty"`
+	Contact *string `json:"contact,omitempty"`
+	Address *string `json:"Address,omitempty"`
+}
+
 type CreateProfileInput struct {
 	FirstName     string        `json:"firstName"`
 	LastName      string        `json:"lastName"`
@@ -105,6 +112,40 @@ func (this NotFoundError) GetMessage() string { return this.Message }
 func (this NotFoundError) GetCode() int       { return this.Code }
 
 func (NotFoundError) IsMutationError() {}
+
+
+
+type OrganizationFilterInput struct {
+	VerificationStatus *VerificationStatus `json:"verificationStatus,omitempty"`
+}
+
+type OrganizationInput struct {
+	ID string `json:"id"`
+}
+
+type OrganizationMutation struct {
+	CreateOrganization *OrganizationMutationResponse `json:"createOrganization"`
+}
+
+type OrganizationMutationResponse struct {
+	Data  *Organization `json:"data,omitempty"`
+	Error MutationError `json:"error,omitempty"`
+}
+
+type OrganizationQuery struct {
+	GetOrganizationByID     *OrganizationQueryResponse  `json:"getOrganizationByID"`
+	GetOrganizationByFilter *OrganizationsQueryResponse `json:"getOrganizationByFilter"`
+}
+
+type OrganizationQueryResponse struct {
+	Data  *Organization `json:"data,omitempty"`
+	Error QueryError    `json:"error,omitempty"`
+}
+
+type OrganizationsQueryResponse struct {
+	Data  []*Organization `json:"data,omitempty"`
+	Error QueryError      `json:"error,omitempty"`
+}
 
 type OtpMutationResponse struct {
 	Data  *bool         `json:"data,omitempty"`
@@ -379,5 +420,46 @@ func (e *UserType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e UserType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type VerificationStatus string
+
+const (
+	VerificationStatusVerified    VerificationStatus = "VERIFIED"
+	VerificationStatusNotVerified VerificationStatus = "NOT_VERIFIED"
+)
+
+var AllVerificationStatus = []VerificationStatus{
+	VerificationStatusVerified,
+	VerificationStatusNotVerified,
+}
+
+func (e VerificationStatus) IsValid() bool {
+	switch e {
+	case VerificationStatusVerified, VerificationStatusNotVerified:
+		return true
+	}
+	return false
+}
+
+func (e VerificationStatus) String() string {
+	return string(e)
+}
+
+func (e *VerificationStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VerificationStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VerificationStatus", str)
+	}
+	return nil
+}
+
+func (e VerificationStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
