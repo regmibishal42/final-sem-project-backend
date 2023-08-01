@@ -56,3 +56,15 @@ func (r OrganizationRepository) GetOrganizationByID(ctx context.Context, input *
 		Data: organization,
 	}, nil
 }
+
+func (r OrganizationRepository) GetOrganizationByFilter(ctx context.Context, filters *model.OrganizationFilterInput) (*model.OrganizationsQueryResponse, error) {
+	organizations, err := r.TableOrganization.GetOrganizationsByFilter(ctx, filters)
+	if err != nil {
+		return &model.OrganizationsQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.OrganizationsQueryResponse{
+		Data: organizations,
+	}, nil
+}

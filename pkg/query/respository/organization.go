@@ -21,3 +21,18 @@ func (r QueryRepository) GetOrganizationByID(ctx context.Context, organizationID
 	}
 	return &organization, nil
 }
+
+func (r QueryRepository) GetOrganizationsByFilter(ctx context.Context, filter *model.OrganizationFilterInput) ([]*model.Organization, error) {
+	organizations := []*model.Organization{}
+	db := r.db.Model(&model.Organization{}).Where("deleted_at IS NULL")
+	if filter != nil {
+		if filter.VerificationStatus != nil {
+			db = db.Where("verification_status = ?", filter.VerificationStatus)
+		}
+	}
+	err := db.Find(&organizations).Error
+	if err != nil {
+		return nil, err
+	}
+	return organizations, nil
+}

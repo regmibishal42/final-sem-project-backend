@@ -9,7 +9,6 @@ import (
 	"backend/graph/generated"
 	"backend/graph/model"
 	"context"
-	"fmt"
 )
 
 // CreatedBy is the resolver for the createdBy field.
@@ -46,7 +45,14 @@ func (r *organizationQueryResolver) GetOrganizationByID(ctx context.Context, obj
 
 // GetOrganizationByFilter is the resolver for the getOrganizationByFilter field.
 func (r *organizationQueryResolver) GetOrganizationByFilter(ctx context.Context, obj *model.OrganizationQuery, input *model.OrganizationFilterInput) (*model.OrganizationsQueryResponse, error) {
-	panic(fmt.Errorf("not implemented: GetOrganizationByFilter - getOrganizationByFilter"))
+	// user := UserForContext(ctx)
+	// err := CheckLoggedIn(user)
+	// if err != nil {
+	// 	return &model.OrganizationMutationResponse{
+	// 		Error: exception.MutationErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
+	// 	}, nil
+	// }
+	return r.OrganizationDomain.GetOrganizationByFilter(ctx, input)
 }
 
 // Organization returns generated.OrganizationResolver implementation.
