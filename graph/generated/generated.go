@@ -41,7 +41,6 @@ type ResolverRoot interface {
 	Organization() OrganizationResolver
 	OrganizationMutation() OrganizationMutationResolver
 	OrganizationQuery() OrganizationQueryResolver
-	Profile() ProfileResolver
 	ProfileMutation() ProfileMutationResolver
 	ProfileQuery() ProfileQueryResolver
 	Query() QueryResolver
@@ -110,6 +109,8 @@ type ComplexityRoot struct {
 		DeletedAt          func(childComplexity int) int
 		Email              func(childComplexity int) int
 		ID                 func(childComplexity int) int
+		Name               func(childComplexity int) int
+		PanNumber          func(childComplexity int) int
 		UpdatedAt          func(childComplexity int) int
 		VerificationStatus func(childComplexity int) int
 	}
@@ -245,9 +246,6 @@ type OrganizationMutationResolver interface {
 type OrganizationQueryResolver interface {
 	GetOrganizationByID(ctx context.Context, obj *model.OrganizationQuery, input model.OrganizationInput) (*model.OrganizationQueryResponse, error)
 	GetOrganizationByFilter(ctx context.Context, obj *model.OrganizationQuery, input *model.OrganizationFilterInput) (*model.OrganizationsQueryResponse, error)
-}
-type ProfileResolver interface {
-	Address(ctx context.Context, obj *model.Profile) (*model.Address, error)
 }
 type ProfileMutationResolver interface {
 	CreateProfile(ctx context.Context, obj *model.ProfileMutation, input model.CreateProfileInput) (*model.ProfileMutationResponse, error)
@@ -484,6 +482,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Organization.ID(childComplexity), true
+
+	case "Organization.Name":
+		if e.complexity.Organization.Name == nil {
+			break
+		}
+
+		return e.complexity.Organization.Name(childComplexity), true
+
+	case "Organization.PanNumber":
+		if e.complexity.Organization.PanNumber == nil {
+			break
+		}
+
+		return e.complexity.Organization.PanNumber(childComplexity), true
 
 	case "Organization.updatedAt":
 		if e.complexity.Organization.UpdatedAt == nil {
@@ -985,6 +997,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputOrganizationInput,
 		ec.unmarshalInputResendOtpInput,
 		ec.unmarshalInputResetPasswordInput,
+		ec.unmarshalInputUpdateAddressInput,
+		ec.unmarshalInputUpdateOrganizationInput,
 		ec.unmarshalInputUpdatePasswordInput,
 		ec.unmarshalInputUpdateProfileInput,
 		ec.unmarshalInputUserInput,
@@ -1216,6 +1230,11 @@ input AddressInput{
     District:String!
     State:String!
 }
+input UpdateAddressInput{
+    City:String!
+    District:String!
+    State:String!
+}
 input CreateProfileInput{
     firstName:String!
     lastName:String!
@@ -1270,9 +1289,11 @@ type Query{
 `, BuiltIn: false},
 	{Name: "../schema/organization/organization.graphqls", Input: `type Organization{
     id:ID!
+    Name:String!
     email:String!
     contact:String!
-    Address:String!
+    Address:Address!
+    PanNumber:String
     createdBy:User @goField(forceResolver:true)
     verificationStatus:VerificationStatus
     createdAt:Time!
@@ -1280,16 +1301,27 @@ type Query{
     deletedAt:Time
 }
 
+# Inputs
 input CreateOrganizationInput{
+    Name:String!
     email:String!
     contact:String!
     Address:AddressInput!
+    PanNumber:String
 }
 input OrganizationFilterInput{
     verificationStatus:VerificationStatus
 }
 input OrganizationInput{
     id:ID!
+}
+input UpdateOrganizationInput{
+    organizationID:ID!
+    Name:String
+    email:String
+    contact:String
+    Address:AddressInput
+    PanNumber:String
 }
 
 # Response
@@ -2649,6 +2681,50 @@ func (ec *executionContext) fieldContext_Organization_id(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Organization_Name(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organization_Name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organization_Name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organization",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Organization_email(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Organization_email(ctx, field)
 	if err != nil {
@@ -2763,12 +2839,61 @@ func (ec *executionContext) _Organization_Address(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(model.Address)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNAddress2backendᚋgraphᚋmodelᚐAddress(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Organization_Address(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organization",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "City":
+				return ec.fieldContext_Address_City(ctx, field)
+			case "District":
+				return ec.fieldContext_Address_District(ctx, field)
+			case "State":
+				return ec.fieldContext_Address_State(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Address", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Organization_PanNumber(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organization_PanNumber(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PanNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organization_PanNumber(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Organization",
 		Field:      field,
@@ -3110,12 +3235,16 @@ func (ec *executionContext) fieldContext_OrganizationMutationResponse_data(ctx c
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Organization_id(ctx, field)
+			case "Name":
+				return ec.fieldContext_Organization_Name(ctx, field)
 			case "email":
 				return ec.fieldContext_Organization_email(ctx, field)
 			case "contact":
 				return ec.fieldContext_Organization_contact(ctx, field)
 			case "Address":
 				return ec.fieldContext_Organization_Address(ctx, field)
+			case "PanNumber":
+				return ec.fieldContext_Organization_PanNumber(ctx, field)
 			case "createdBy":
 				return ec.fieldContext_Organization_createdBy(ctx, field)
 			case "verificationStatus":
@@ -3334,12 +3463,16 @@ func (ec *executionContext) fieldContext_OrganizationQueryResponse_data(ctx cont
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Organization_id(ctx, field)
+			case "Name":
+				return ec.fieldContext_Organization_Name(ctx, field)
 			case "email":
 				return ec.fieldContext_Organization_email(ctx, field)
 			case "contact":
 				return ec.fieldContext_Organization_contact(ctx, field)
 			case "Address":
 				return ec.fieldContext_Organization_Address(ctx, field)
+			case "PanNumber":
+				return ec.fieldContext_Organization_PanNumber(ctx, field)
 			case "createdBy":
 				return ec.fieldContext_Organization_createdBy(ctx, field)
 			case "verificationStatus":
@@ -3436,12 +3569,16 @@ func (ec *executionContext) fieldContext_OrganizationsQueryResponse_data(ctx con
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Organization_id(ctx, field)
+			case "Name":
+				return ec.fieldContext_Organization_Name(ctx, field)
 			case "email":
 				return ec.fieldContext_Organization_email(ctx, field)
 			case "contact":
 				return ec.fieldContext_Organization_contact(ctx, field)
 			case "Address":
 				return ec.fieldContext_Organization_Address(ctx, field)
+			case "PanNumber":
+				return ec.fieldContext_Organization_PanNumber(ctx, field)
 			case "createdBy":
 				return ec.fieldContext_Organization_createdBy(ctx, field)
 			case "verificationStatus":
@@ -3964,7 +4101,7 @@ func (ec *executionContext) _Profile_Address(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Profile().Address(rctx, obj)
+		return obj.Address, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3982,8 +4119,8 @@ func (ec *executionContext) fieldContext_Profile_Address(ctx context.Context, fi
 	fc = &graphql.FieldContext{
 		Object:     "Profile",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "City":
@@ -7780,13 +7917,22 @@ func (ec *executionContext) unmarshalInputCreateOrganizationInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"email", "contact", "Address"}
+	fieldsInOrder := [...]string{"Name", "email", "contact", "Address", "PanNumber"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "Name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
 		case "email":
 			var err error
 
@@ -7814,6 +7960,15 @@ func (ec *executionContext) unmarshalInputCreateOrganizationInput(ctx context.Co
 				return it, err
 			}
 			it.Address = data
+		case "PanNumber":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("PanNumber"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PanNumber = data
 		}
 	}
 
@@ -8138,6 +8293,127 @@ func (ec *executionContext) unmarshalInputResetPasswordInput(ctx context.Context
 				return it, err
 			}
 			it.NewPassword = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateAddressInput(ctx context.Context, obj interface{}) (model.UpdateAddressInput, error) {
+	var it model.UpdateAddressInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"City", "District", "State"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "City":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("City"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.City = data
+		case "District":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("District"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.District = data
+		case "State":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("State"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.State = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateOrganizationInput(ctx context.Context, obj interface{}) (model.UpdateOrganizationInput, error) {
+	var it model.UpdateOrganizationInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"organizationID", "Name", "email", "contact", "Address", "PanNumber"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "organizationID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organizationID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.OrganizationID = data
+		case "Name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "contact":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contact"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Contact = data
+		case "Address":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Address"))
+			data, err := ec.unmarshalOAddressInput2ᚖbackendᚋgraphᚋmodelᚐAddressInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Address = data
+		case "PanNumber":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("PanNumber"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PanNumber = data
 		}
 	}
 
@@ -8892,6 +9168,11 @@ func (ec *executionContext) _Organization(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "Name":
+			out.Values[i] = ec._Organization_Name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "email":
 			out.Values[i] = ec._Organization_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -8907,6 +9188,8 @@ func (ec *executionContext) _Organization(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "PanNumber":
+			out.Values[i] = ec._Organization_PanNumber(ctx, field, obj)
 		case "createdBy":
 			field := field
 
@@ -9362,58 +9645,27 @@ func (ec *executionContext) _Profile(ctx context.Context, sel ast.SelectionSet, 
 		case "userID":
 			out.Values[i] = ec._Profile_userID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "firstName":
 			out.Values[i] = ec._Profile_firstName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "lastName":
 			out.Values[i] = ec._Profile_lastName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "contactNumber":
 			out.Values[i] = ec._Profile_contactNumber(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "DateOfBirth":
 			out.Values[i] = ec._Profile_DateOfBirth(ctx, field, obj)
 		case "Address":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Profile_Address(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			out.Values[i] = ec._Profile_Address(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10793,6 +11045,10 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
+
+func (ec *executionContext) marshalNAddress2backendᚋgraphᚋmodelᚐAddress(ctx context.Context, sel ast.SelectionSet, v model.Address) graphql.Marshaler {
+	return ec._Address(ctx, sel, &v)
+}
 
 func (ec *executionContext) unmarshalNAddressInput2ᚖbackendᚋgraphᚋmodelᚐAddressInput(ctx context.Context, v interface{}) (*model.AddressInput, error) {
 	res, err := ec.unmarshalInputAddressInput(ctx, v)

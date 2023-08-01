@@ -8,5 +8,5 @@ type Profile struct {
 	LastName      string     `json:"lastName"`
 	ContactNumber string     `json:"contactNumber"`
 	DateOfBirth   *time.Time `json:"DateOfBirth,omitempty"`
-	Address       *string    `json:"Address,omitempty"`
+	Address       *Address   `json:"Address,omitempty" gorm:"serializer:json"`
 }

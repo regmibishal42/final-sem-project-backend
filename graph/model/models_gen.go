@@ -70,9 +70,11 @@ func (this BadRequestError) GetCode() int       { return this.Code }
 func (BadRequestError) IsMutationError() {}
 
 type CreateOrganizationInput struct {
-	Email   string        `json:"email"`
-	Contact string        `json:"contact"`
-	Address *AddressInput `json:"Address"`
+	Name      string        `json:"Name"`
+	Email     string        `json:"email"`
+	Contact   string        `json:"contact"`
+	Address   *AddressInput `json:"Address"`
+	PanNumber *string       `json:"PanNumber,omitempty"`
 }
 
 type CreateProfileInput struct {
@@ -197,6 +199,21 @@ func (this ServerError) GetMessage() string { return this.Message }
 func (this ServerError) GetCode() int       { return this.Code }
 
 func (ServerError) IsMutationError() {}
+
+type UpdateAddressInput struct {
+	City     string `json:"City"`
+	District string `json:"District"`
+	State    string `json:"State"`
+}
+
+type UpdateOrganizationInput struct {
+	OrganizationID string        `json:"organizationID"`
+	Name           *string       `json:"Name,omitempty"`
+	Email          *string       `json:"email,omitempty"`
+	Contact        *string       `json:"contact,omitempty"`
+	Address        *AddressInput `json:"Address,omitempty"`
+	PanNumber      *string       `json:"PanNumber,omitempty"`
+}
 
 type UpdatePasswordInput struct {
 	OldPassword string `json:"oldPassword"`
