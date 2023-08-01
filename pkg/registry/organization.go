@@ -6,7 +6,7 @@ import (
 	query_repository "backend/pkg/query/respository"
 )
 
-func (r *Registry) NewOrganizationRegistry() query_controller.OrganizationQueryInterface {
+func (r *Registry) NewOrganizationRegistry() organization_handler.OrganizationInterface {
 	db := query_controller.OrganizationQueryController{
 		TableUser:         query_repository.NewUserQueryRepository(r.db),
 		TableProfile:      query_repository.NewProfileQueryRepository(r.db),

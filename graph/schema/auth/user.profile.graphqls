@@ -16,9 +16,9 @@ type Address{
 
 # Inputs
 input AddressInput{
-    City:String
-    District:String
-    State:String
+    City:String!
+    District:String!
+    State:String!
 }
 input CreateProfileInput{
     firstName:String!

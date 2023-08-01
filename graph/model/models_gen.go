@@ -22,9 +22,9 @@ type QueryError interface {
 }
 
 type AddressInput struct {
-	City     *string `json:"City,omitempty"`
-	District *string `json:"District,omitempty"`
-	State    *string `json:"State,omitempty"`
+	City     string `json:"City"`
+	District string `json:"District"`
+	State    string `json:"State"`
 }
 
 type AuthMutationResponse struct {
@@ -70,10 +70,9 @@ func (this BadRequestError) GetCode() int       { return this.Code }
 func (BadRequestError) IsMutationError() {}
 
 type CreateOrganizationInput struct {
-	UserID  string  `json:"userID"`
-	Email   *string `json:"email,omitempty"`
-	Contact *string `json:"contact,omitempty"`
-	Address *string `json:"Address,omitempty"`
+	Email   string        `json:"email"`
+	Contact string        `json:"contact"`
+	Address *AddressInput `json:"Address"`
 }
 
 type CreateProfileInput struct {
