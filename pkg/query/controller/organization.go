@@ -7,4 +7,6 @@ import (
 
 type OrganizationQueryInterface interface {
 	CreateOrganization(ctx context.Context, organization *model.Organization) error
+	GetOrganizationByID(ctx context.Context, organizationID *string) (*model.Organization, error)
+	//GetOrganizationsByFilter(ctx context.Context, organizationID *string) (*model.Organization, error)
 }

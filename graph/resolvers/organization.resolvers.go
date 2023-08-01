@@ -34,7 +34,14 @@ func (r *organizationMutationResolver) CreateOrganization(ctx context.Context, o
 
 // GetOrganizationByID is the resolver for the getOrganizationByID field.
 func (r *organizationQueryResolver) GetOrganizationByID(ctx context.Context, obj *model.OrganizationQuery, input model.OrganizationInput) (*model.OrganizationQueryResponse, error) {
-	panic(fmt.Errorf("not implemented: GetOrganizationByID - getOrganizationByID"))
+	// user := UserForContext(ctx)
+	// err := CheckLoggedIn(user)
+	// if err != nil {
+	// 	return &model.OrganizationMutationResponse{
+	// 		Error: exception.MutationErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
+	// 	}, nil
+	// }
+	return r.OrganizationDomain.GetOrganizationByID(ctx, &input)
 }
 
 // GetOrganizationByFilter is the resolver for the getOrganizationByFilter field.

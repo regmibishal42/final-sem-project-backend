@@ -12,3 +12,12 @@ func (r QueryRepository) CreateOrganization(ctx context.Context, organization *m
 	}
 	return nil
 }
+
+func (r QueryRepository) GetOrganizationByID(ctx context.Context, organizationID *string) (*model.Organization, error) {
+	organization := model.Organization{}
+	err := r.db.Where("deleted_at IS NULL AND id = ?", organizationID).First(&organization).Error
+	if err != nil {
+		return nil, err
+	}
+	return &organization, nil
+}

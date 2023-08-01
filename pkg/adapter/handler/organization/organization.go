@@ -3,6 +3,7 @@ package organization_handler
 import (
 	"backend/exception"
 	"backend/graph/model"
+	"backend/pkg/util"
 	"context"
 	"errors"
 )
@@ -36,5 +37,22 @@ func (r OrganizationRepository) CreateOrganization(ctx context.Context, input *m
 
 	return &model.OrganizationMutationResponse{
 		Data: &organization,
+	}, nil
+}
+func (r OrganizationRepository) GetOrganizationByID(ctx context.Context, input *model.OrganizationInput) (*model.OrganizationQueryResponse, error) {
+	//validate id from the input
+	if !util.IsValidID(input.ID) {
+		return &model.OrganizationQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, errors.New("invalid organization id"), exception.BAD_REQUEST, nil),
+		}, nil
+	}
+	organization, err := r.TableOrganization.GetOrganizationByID(ctx, &input.ID)
+	if err != nil {
+		return &model.OrganizationQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.OrganizationQueryResponse{
+		Data: organization,
 	}, nil
 }
