@@ -11,11 +11,6 @@ import (
 	"fmt"
 )
 
-// Address is the resolver for the Address field.
-func (r *profileResolver) Address(ctx context.Context, obj *model.Profile) (*model.Address, error) {
-	panic(fmt.Errorf("not implemented: Address - Address"))
-}
-
 // CreateProfile is the resolver for the createProfile field.
 func (r *profileMutationResolver) CreateProfile(ctx context.Context, obj *model.ProfileMutation, input model.CreateProfileInput) (*model.ProfileMutationResponse, error) {
 	panic(fmt.Errorf("not implemented: CreateProfile - createProfile"))
@@ -31,9 +26,6 @@ func (r *profileQueryResolver) GetProfile(ctx context.Context, obj *model.Profil
 	panic(fmt.Errorf("not implemented: GetProfile - getProfile"))
 }
 
-// Profile returns generated.ProfileResolver implementation.
-func (r *Resolver) Profile() generated.ProfileResolver { return &profileResolver{r} }
-
 // ProfileMutation returns generated.ProfileMutationResolver implementation.
 func (r *Resolver) ProfileMutation() generated.ProfileMutationResolver {
 	return &profileMutationResolver{r}
@@ -42,6 +34,5 @@ func (r *Resolver) ProfileMutation() generated.ProfileMutationResolver {
 // ProfileQuery returns generated.ProfileQueryResolver implementation.
 func (r *Resolver) ProfileQuery() generated.ProfileQueryResolver { return &profileQueryResolver{r} }
 
-type profileResolver struct{ *Resolver }
 type profileMutationResolver struct{ *Resolver }
 type profileQueryResolver struct{ *Resolver }

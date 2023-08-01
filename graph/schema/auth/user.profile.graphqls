@@ -20,6 +20,11 @@ input AddressInput{
     District:String!
     State:String!
 }
+input UpdateAddressInput{
+    City:String!
+    District:String!
+    State:String!
+}
 input CreateProfileInput{
     firstName:String!
     lastName:String!

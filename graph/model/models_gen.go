@@ -198,6 +198,19 @@ func (this ServerError) GetCode() int       { return this.Code }
 
 func (ServerError) IsMutationError() {}
 
+type UpdateAddressInput struct {
+	City     string `json:"City"`
+	District string `json:"District"`
+	State    string `json:"State"`
+}
+
+type UpdateOrganizationInput struct {
+	OrganizationID string        `json:"organizationID"`
+	Email          *string       `json:"email,omitempty"`
+	Contact        *string       `json:"contact,omitempty"`
+	Address        *AddressInput `json:"Address,omitempty"`
+}
+
 type UpdatePasswordInput struct {
 	OldPassword string `json:"oldPassword"`
 	NewPassword string `json:"newPassword"`

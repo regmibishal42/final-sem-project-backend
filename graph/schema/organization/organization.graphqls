@@ -2,7 +2,7 @@ type Organization{
     id:ID!
     email:String!
     contact:String!
-    Address:String!
+    Address:Address!
     createdBy:User @goField(forceResolver:true)
     verificationStatus:VerificationStatus
     createdAt:Time!
@@ -10,6 +10,7 @@ type Organization{
     deletedAt:Time
 }
 
+# Inputs
 input CreateOrganizationInput{
     email:String!
     contact:String!
@@ -20,6 +21,12 @@ input OrganizationFilterInput{
 }
 input OrganizationInput{
     id:ID!
+}
+input UpdateOrganizationInput{
+    organizationID:ID!
+    email:String
+    contact:String
+    Address:AddressInput
 }
 
 # Response

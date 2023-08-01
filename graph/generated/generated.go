@@ -41,7 +41,6 @@ type ResolverRoot interface {
 	Organization() OrganizationResolver
 	OrganizationMutation() OrganizationMutationResolver
 	OrganizationQuery() OrganizationQueryResolver
-	Profile() ProfileResolver
 	ProfileMutation() ProfileMutationResolver
 	ProfileQuery() ProfileQueryResolver
 	Query() QueryResolver
@@ -245,9 +244,6 @@ type OrganizationMutationResolver interface {
 type OrganizationQueryResolver interface {
 	GetOrganizationByID(ctx context.Context, obj *model.OrganizationQuery, input model.OrganizationInput) (*model.OrganizationQueryResponse, error)
 	GetOrganizationByFilter(ctx context.Context, obj *model.OrganizationQuery, input *model.OrganizationFilterInput) (*model.OrganizationsQueryResponse, error)
-}
-type ProfileResolver interface {
-	Address(ctx context.Context, obj *model.Profile) (*model.Address, error)
 }
 type ProfileMutationResolver interface {
 	CreateProfile(ctx context.Context, obj *model.ProfileMutation, input model.CreateProfileInput) (*model.ProfileMutationResponse, error)
@@ -985,6 +981,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputOrganizationInput,
 		ec.unmarshalInputResendOtpInput,
 		ec.unmarshalInputResetPasswordInput,
+		ec.unmarshalInputUpdateAddressInput,
+		ec.unmarshalInputUpdateOrganizationInput,
 		ec.unmarshalInputUpdatePasswordInput,
 		ec.unmarshalInputUpdateProfileInput,
 		ec.unmarshalInputUserInput,
@@ -1216,6 +1214,11 @@ input AddressInput{
     District:String!
     State:String!
 }
+input UpdateAddressInput{
+    City:String!
+    District:String!
+    State:String!
+}
 input CreateProfileInput{
     firstName:String!
     lastName:String!
@@ -1272,7 +1275,7 @@ type Query{
     id:ID!
     email:String!
     contact:String!
-    Address:String!
+    Address:Address!
     createdBy:User @goField(forceResolver:true)
     verificationStatus:VerificationStatus
     createdAt:Time!
@@ -1280,6 +1283,7 @@ type Query{
     deletedAt:Time
 }
 
+# Inputs
 input CreateOrganizationInput{
     email:String!
     contact:String!
@@ -1290,6 +1294,12 @@ input OrganizationFilterInput{
 }
 input OrganizationInput{
     id:ID!
+}
+input UpdateOrganizationInput{
+    organizationID:ID!
+    email:String
+    contact:String
+    Address:AddressInput
 }
 
 # Response
@@ -2763,9 +2773,9 @@ func (ec *executionContext) _Organization_Address(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(model.Address)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNAddress2backendᚋgraphᚋmodelᚐAddress(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Organization_Address(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2775,7 +2785,15 @@ func (ec *executionContext) fieldContext_Organization_Address(ctx context.Contex
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "City":
+				return ec.fieldContext_Address_City(ctx, field)
+			case "District":
+				return ec.fieldContext_Address_District(ctx, field)
+			case "State":
+				return ec.fieldContext_Address_State(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Address", field.Name)
 		},
 	}
 	return fc, nil
@@ -3964,7 +3982,7 @@ func (ec *executionContext) _Profile_Address(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Profile().Address(rctx, obj)
+		return obj.Address, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3982,8 +4000,8 @@ func (ec *executionContext) fieldContext_Profile_Address(ctx context.Context, fi
 	fc = &graphql.FieldContext{
 		Object:     "Profile",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "City":
@@ -8144,6 +8162,109 @@ func (ec *executionContext) unmarshalInputResetPasswordInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateAddressInput(ctx context.Context, obj interface{}) (model.UpdateAddressInput, error) {
+	var it model.UpdateAddressInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"City", "District", "State"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "City":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("City"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.City = data
+		case "District":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("District"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.District = data
+		case "State":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("State"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.State = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateOrganizationInput(ctx context.Context, obj interface{}) (model.UpdateOrganizationInput, error) {
+	var it model.UpdateOrganizationInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"organizationID", "email", "contact", "Address"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "organizationID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organizationID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.OrganizationID = data
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "contact":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contact"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Contact = data
+		case "Address":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Address"))
+			data, err := ec.unmarshalOAddressInput2ᚖbackendᚋgraphᚋmodelᚐAddressInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Address = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdatePasswordInput(ctx context.Context, obj interface{}) (model.UpdatePasswordInput, error) {
 	var it model.UpdatePasswordInput
 	asMap := map[string]interface{}{}
@@ -9362,58 +9483,27 @@ func (ec *executionContext) _Profile(ctx context.Context, sel ast.SelectionSet, 
 		case "userID":
 			out.Values[i] = ec._Profile_userID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "firstName":
 			out.Values[i] = ec._Profile_firstName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "lastName":
 			out.Values[i] = ec._Profile_lastName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "contactNumber":
 			out.Values[i] = ec._Profile_contactNumber(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "DateOfBirth":
 			out.Values[i] = ec._Profile_DateOfBirth(ctx, field, obj)
 		case "Address":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Profile_Address(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			out.Values[i] = ec._Profile_Address(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10793,6 +10883,10 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
+
+func (ec *executionContext) marshalNAddress2backendᚋgraphᚋmodelᚐAddress(ctx context.Context, sel ast.SelectionSet, v model.Address) graphql.Marshaler {
+	return ec._Address(ctx, sel, &v)
+}
 
 func (ec *executionContext) unmarshalNAddressInput2ᚖbackendᚋgraphᚋmodelᚐAddressInput(ctx context.Context, v interface{}) (*model.AddressInput, error) {
 	res, err := ec.unmarshalInputAddressInput(ctx, v)
