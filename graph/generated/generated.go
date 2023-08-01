@@ -109,6 +109,8 @@ type ComplexityRoot struct {
 		DeletedAt          func(childComplexity int) int
 		Email              func(childComplexity int) int
 		ID                 func(childComplexity int) int
+		Name               func(childComplexity int) int
+		PanNumber          func(childComplexity int) int
 		UpdatedAt          func(childComplexity int) int
 		VerificationStatus func(childComplexity int) int
 	}
@@ -480,6 +482,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Organization.ID(childComplexity), true
+
+	case "Organization.Name":
+		if e.complexity.Organization.Name == nil {
+			break
+		}
+
+		return e.complexity.Organization.Name(childComplexity), true
+
+	case "Organization.PanNumber":
+		if e.complexity.Organization.PanNumber == nil {
+			break
+		}
+
+		return e.complexity.Organization.PanNumber(childComplexity), true
 
 	case "Organization.updatedAt":
 		if e.complexity.Organization.UpdatedAt == nil {
@@ -1273,9 +1289,11 @@ type Query{
 `, BuiltIn: false},
 	{Name: "../schema/organization/organization.graphqls", Input: `type Organization{
     id:ID!
+    Name:String!
     email:String!
     contact:String!
     Address:Address!
+    PanNumber:String
     createdBy:User @goField(forceResolver:true)
     verificationStatus:VerificationStatus
     createdAt:Time!
@@ -1285,9 +1303,11 @@ type Query{
 
 # Inputs
 input CreateOrganizationInput{
+    Name:String!
     email:String!
     contact:String!
     Address:AddressInput!
+    PanNumber:String
 }
 input OrganizationFilterInput{
     verificationStatus:VerificationStatus
@@ -1297,9 +1317,11 @@ input OrganizationInput{
 }
 input UpdateOrganizationInput{
     organizationID:ID!
+    Name:String
     email:String
     contact:String
     Address:AddressInput
+    PanNumber:String
 }
 
 # Response
@@ -2659,6 +2681,50 @@ func (ec *executionContext) fieldContext_Organization_id(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Organization_Name(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organization_Name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organization_Name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organization",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Organization_email(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Organization_email(ctx, field)
 	if err != nil {
@@ -2794,6 +2860,47 @@ func (ec *executionContext) fieldContext_Organization_Address(ctx context.Contex
 				return ec.fieldContext_Address_State(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Address", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Organization_PanNumber(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organization_PanNumber(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PanNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organization_PanNumber(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organization",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3128,12 +3235,16 @@ func (ec *executionContext) fieldContext_OrganizationMutationResponse_data(ctx c
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Organization_id(ctx, field)
+			case "Name":
+				return ec.fieldContext_Organization_Name(ctx, field)
 			case "email":
 				return ec.fieldContext_Organization_email(ctx, field)
 			case "contact":
 				return ec.fieldContext_Organization_contact(ctx, field)
 			case "Address":
 				return ec.fieldContext_Organization_Address(ctx, field)
+			case "PanNumber":
+				return ec.fieldContext_Organization_PanNumber(ctx, field)
 			case "createdBy":
 				return ec.fieldContext_Organization_createdBy(ctx, field)
 			case "verificationStatus":
@@ -3352,12 +3463,16 @@ func (ec *executionContext) fieldContext_OrganizationQueryResponse_data(ctx cont
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Organization_id(ctx, field)
+			case "Name":
+				return ec.fieldContext_Organization_Name(ctx, field)
 			case "email":
 				return ec.fieldContext_Organization_email(ctx, field)
 			case "contact":
 				return ec.fieldContext_Organization_contact(ctx, field)
 			case "Address":
 				return ec.fieldContext_Organization_Address(ctx, field)
+			case "PanNumber":
+				return ec.fieldContext_Organization_PanNumber(ctx, field)
 			case "createdBy":
 				return ec.fieldContext_Organization_createdBy(ctx, field)
 			case "verificationStatus":
@@ -3454,12 +3569,16 @@ func (ec *executionContext) fieldContext_OrganizationsQueryResponse_data(ctx con
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Organization_id(ctx, field)
+			case "Name":
+				return ec.fieldContext_Organization_Name(ctx, field)
 			case "email":
 				return ec.fieldContext_Organization_email(ctx, field)
 			case "contact":
 				return ec.fieldContext_Organization_contact(ctx, field)
 			case "Address":
 				return ec.fieldContext_Organization_Address(ctx, field)
+			case "PanNumber":
+				return ec.fieldContext_Organization_PanNumber(ctx, field)
 			case "createdBy":
 				return ec.fieldContext_Organization_createdBy(ctx, field)
 			case "verificationStatus":
@@ -7798,13 +7917,22 @@ func (ec *executionContext) unmarshalInputCreateOrganizationInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"email", "contact", "Address"}
+	fieldsInOrder := [...]string{"Name", "email", "contact", "Address", "PanNumber"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "Name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
 		case "email":
 			var err error
 
@@ -7832,6 +7960,15 @@ func (ec *executionContext) unmarshalInputCreateOrganizationInput(ctx context.Co
 				return it, err
 			}
 			it.Address = data
+		case "PanNumber":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("PanNumber"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PanNumber = data
 		}
 	}
 
@@ -8216,7 +8353,7 @@ func (ec *executionContext) unmarshalInputUpdateOrganizationInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"organizationID", "email", "contact", "Address"}
+	fieldsInOrder := [...]string{"organizationID", "Name", "email", "contact", "Address", "PanNumber"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8232,6 +8369,15 @@ func (ec *executionContext) unmarshalInputUpdateOrganizationInput(ctx context.Co
 				return it, err
 			}
 			it.OrganizationID = data
+		case "Name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
 		case "email":
 			var err error
 
@@ -8259,6 +8405,15 @@ func (ec *executionContext) unmarshalInputUpdateOrganizationInput(ctx context.Co
 				return it, err
 			}
 			it.Address = data
+		case "PanNumber":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("PanNumber"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PanNumber = data
 		}
 	}
 
@@ -9013,6 +9168,11 @@ func (ec *executionContext) _Organization(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "Name":
+			out.Values[i] = ec._Organization_Name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "email":
 			out.Values[i] = ec._Organization_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -9028,6 +9188,8 @@ func (ec *executionContext) _Organization(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "PanNumber":
+			out.Values[i] = ec._Organization_PanNumber(ctx, field, obj)
 		case "createdBy":
 			field := field
 

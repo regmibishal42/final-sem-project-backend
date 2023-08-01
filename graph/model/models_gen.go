@@ -70,9 +70,11 @@ func (this BadRequestError) GetCode() int       { return this.Code }
 func (BadRequestError) IsMutationError() {}
 
 type CreateOrganizationInput struct {
-	Email   string        `json:"email"`
-	Contact string        `json:"contact"`
-	Address *AddressInput `json:"Address"`
+	Name      string        `json:"Name"`
+	Email     string        `json:"email"`
+	Contact   string        `json:"contact"`
+	Address   *AddressInput `json:"Address"`
+	PanNumber *string       `json:"PanNumber,omitempty"`
 }
 
 type CreateProfileInput struct {
@@ -206,9 +208,11 @@ type UpdateAddressInput struct {
 
 type UpdateOrganizationInput struct {
 	OrganizationID string        `json:"organizationID"`
+	Name           *string       `json:"Name,omitempty"`
 	Email          *string       `json:"email,omitempty"`
 	Contact        *string       `json:"contact,omitempty"`
 	Address        *AddressInput `json:"Address,omitempty"`
+	PanNumber      *string       `json:"PanNumber,omitempty"`
 }
 
 type UpdatePasswordInput struct {
