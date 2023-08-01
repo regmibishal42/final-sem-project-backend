@@ -19,3 +19,8 @@ enum EmailType{
     OTP_VERIFICATION
     STAFF_CREATION
 }
+
+enum VerificationStatus{
+    VERIFIED
+    NOT_VERIFIED
+}

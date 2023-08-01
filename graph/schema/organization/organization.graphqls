@@ -1,0 +1,50 @@
+type Organization{
+    id:ID!
+    email:String
+    contact:String
+    Address:String
+    createdBy:User
+    verificationStatus:VerificationStatus
+    createdAt:Time!
+    updatedAt:Time
+    deletedAt:Time
+}
+
+input CreateOrganizationInput{
+    userID:ID!
+    email:String
+    contact:String
+    Address:String
+}
+input OrganizationFilterInput{
+    verificationStatus:VerificationStatus
+}
+input OrganizationInput{
+    id:ID!
+}
+
+# Response
+type OrganizationMutationResponse{
+    data:Organization
+    error:MutationError
+}
+type OrganizationQueryResponse{
+    data:Organization
+    error:QueryError
+}
+type OrganizationsQueryResponse{
+    data:[Organization]
+    error:QueryError
+}
+
+# Mutation
+type OrganizationMutation{
+    createOrganization(input:CreateOrganizationInput!):OrganizationMutationResponse! @goField(forceResolver:true)
+}
+
+type OrganizationQuery{
+    getOrganizationByID(input:OrganizationInput!):OrganizationQueryResponse! @goField(forceResolver:true)
+    getOrganizationByFilter(input:OrganizationFilterInput):OrganizationsQueryResponse! @goField(forceResolver:true)
+}
+
+
