@@ -25,6 +25,6 @@ func (r Registry) NewAuthController() auth_handler.AuthController {
 
 func (r Registry) NewOrganizationController() organization_handler.OrganizationController {
 	return organization_handler.OrganizationController{
-		OrganizationDomain: r.NewAuthRegistry(),
+		OrganizationDomain: r.NewOrganizationRegistry(),
 	}
 }

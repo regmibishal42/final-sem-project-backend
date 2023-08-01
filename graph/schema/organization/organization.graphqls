@@ -1,9 +1,9 @@
 type Organization{
     id:ID!
-    email:String
-    contact:String
-    Address:String
-    createdBy:User
+    email:String!
+    contact:String!
+    Address:String!
+    createdBy:User @goField(forceResolver:true)
     verificationStatus:VerificationStatus
     createdAt:Time!
     updatedAt:Time
@@ -11,10 +11,9 @@ type Organization{
 }
 
 input CreateOrganizationInput{
-    userID:ID!
-    email:String
-    contact:String
-    Address:String
+    email:String!
+    contact:String!
+    Address:AddressInput!
 }
 input OrganizationFilterInput{
     verificationStatus:VerificationStatus
