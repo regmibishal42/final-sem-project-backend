@@ -2,6 +2,7 @@ package registry
 
 import (
 	auth_handler "backend/pkg/adapter/handler/auth"
+	organization_handler "backend/pkg/adapter/handler/organization"
 
 	"gorm.io/gorm"
 )
@@ -19,5 +20,11 @@ func NewServer(db *gorm.DB) Registry {
 func (r Registry) NewAuthController() auth_handler.AuthController {
 	return auth_handler.AuthController{
 		AuthDomain: r.NewAuthRegistry(),
+	}
+}
+
+func (r Registry) NewOrganizationController() organization_handler.OrganizationController {
+	return organization_handler.OrganizationController{
+		OrganizationDomain: r.NewAuthRegistry(),
 	}
 }

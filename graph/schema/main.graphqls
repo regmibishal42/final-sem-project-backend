@@ -2,10 +2,12 @@
 type Mutation{
     auth:UserMutation!
     profile:ProfileMutation!
+    organization:OrganizationMutation!
 }
 
 type Query{
     auth:UserQuery!
     profile:ProfileQuery!
+    organization:OrganizationQuery!
 }
 

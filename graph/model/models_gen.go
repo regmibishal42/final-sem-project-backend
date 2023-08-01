@@ -113,8 +113,6 @@ func (this NotFoundError) GetCode() int       { return this.Code }
 
 func (NotFoundError) IsMutationError() {}
 
-
-
 type OrganizationFilterInput struct {
 	VerificationStatus *VerificationStatus `json:"verificationStatus,omitempty"`
 }

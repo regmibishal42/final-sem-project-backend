@@ -91,8 +91,9 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		Auth    func(childComplexity int) int
-		Profile func(childComplexity int) int
+		Auth         func(childComplexity int) int
+		Organization func(childComplexity int) int
+		Profile      func(childComplexity int) int
 	}
 
 	NotFoundError struct {
@@ -176,8 +177,9 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Auth    func(childComplexity int) int
-		Profile func(childComplexity int) int
+		Auth         func(childComplexity int) int
+		Organization func(childComplexity int) int
+		Profile      func(childComplexity int) int
 	}
 
 	RegisterResponse struct {
@@ -231,6 +233,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	Auth(ctx context.Context) (*model.UserMutation, error)
 	Profile(ctx context.Context) (*model.ProfileMutation, error)
+	Organization(ctx context.Context) (*model.OrganizationMutation, error)
 }
 type OrganizationMutationResolver interface {
 	CreateOrganization(ctx context.Context, obj *model.OrganizationMutation, input model.CreateOrganizationInput) (*model.OrganizationMutationResponse, error)
@@ -252,6 +255,7 @@ type ProfileQueryResolver interface {
 type QueryResolver interface {
 	Auth(ctx context.Context) (*model.UserQuery, error)
 	Profile(ctx context.Context) (*model.ProfileQuery, error)
+	Organization(ctx context.Context) (*model.OrganizationQuery, error)
 }
 type ResendOtpMutationResolver interface {
 	Resend(ctx context.Context, obj *model.ResendOtpMutation, input model.ResendOtpInput) (*model.OtpMutationResponse, error)
@@ -399,6 +403,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Auth(childComplexity), true
+
+	case "Mutation.organization":
+		if e.complexity.Mutation.Organization == nil {
+			break
+		}
+
+		return e.complexity.Mutation.Organization(childComplexity), true
 
 	case "Mutation.profile":
 		if e.complexity.Mutation.Profile == nil {
@@ -709,6 +720,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Auth(childComplexity), true
+
+	case "Query.organization":
+		if e.complexity.Query.Organization == nil {
+			break
+		}
+
+		return e.complexity.Query.Organization(childComplexity), true
 
 	case "Query.profile":
 		if e.complexity.Query.Profile == nil {
@@ -1236,11 +1254,13 @@ type ProfileQuery{
 type Mutation{
     auth:UserMutation!
     profile:ProfileMutation!
+    organization:OrganizationMutation!
 }
 
 type Query{
     auth:UserQuery!
     profile:ProfileQuery!
+    organization:OrganizationQuery!
 }
 
 `, BuiltIn: false},
@@ -2441,6 +2461,54 @@ func (ec *executionContext) fieldContext_Mutation_profile(ctx context.Context, f
 				return ec.fieldContext_ProfileMutation_updateProfile(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ProfileMutation", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_organization(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_organization(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Organization(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.OrganizationMutation)
+	fc.Result = res
+	return ec.marshalNOrganizationMutation2ᚖbackendᚋgraphᚋmodelᚐOrganizationMutation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_organization(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "createOrganization":
+				return ec.fieldContext_OrganizationMutation_createOrganization(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type OrganizationMutation", field.Name)
 		},
 	}
 	return fc, nil
@@ -4385,6 +4453,56 @@ func (ec *executionContext) fieldContext_Query_profile(ctx context.Context, fiel
 				return ec.fieldContext_ProfileQuery_getProfile(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ProfileQuery", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_organization(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_organization(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Organization(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.OrganizationQuery)
+	fc.Result = res
+	return ec.marshalNOrganizationQuery2ᚖbackendᚋgraphᚋmodelᚐOrganizationQuery(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_organization(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "getOrganizationByID":
+				return ec.fieldContext_OrganizationQuery_getOrganizationByID(ctx, field)
+			case "getOrganizationByFilter":
+				return ec.fieldContext_OrganizationQuery_getOrganizationByFilter(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type OrganizationQuery", field.Name)
 		},
 	}
 	return fc, nil
@@ -8681,6 +8799,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "organization":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_organization(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9572,6 +9697,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_profile(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "organization":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_organization(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -10716,6 +10863,20 @@ func (ec *executionContext) unmarshalNOrganizationInput2backendᚋgraphᚋmodel�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNOrganizationMutation2backendᚋgraphᚋmodelᚐOrganizationMutation(ctx context.Context, sel ast.SelectionSet, v model.OrganizationMutation) graphql.Marshaler {
+	return ec._OrganizationMutation(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNOrganizationMutation2ᚖbackendᚋgraphᚋmodelᚐOrganizationMutation(ctx context.Context, sel ast.SelectionSet, v *model.OrganizationMutation) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._OrganizationMutation(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNOrganizationMutationResponse2backendᚋgraphᚋmodelᚐOrganizationMutationResponse(ctx context.Context, sel ast.SelectionSet, v model.OrganizationMutationResponse) graphql.Marshaler {
 	return ec._OrganizationMutationResponse(ctx, sel, &v)
 }
@@ -10728,6 +10889,20 @@ func (ec *executionContext) marshalNOrganizationMutationResponse2ᚖbackendᚋgr
 		return graphql.Null
 	}
 	return ec._OrganizationMutationResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNOrganizationQuery2backendᚋgraphᚋmodelᚐOrganizationQuery(ctx context.Context, sel ast.SelectionSet, v model.OrganizationQuery) graphql.Marshaler {
+	return ec._OrganizationQuery(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNOrganizationQuery2ᚖbackendᚋgraphᚋmodelᚐOrganizationQuery(ctx context.Context, sel ast.SelectionSet, v *model.OrganizationQuery) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._OrganizationQuery(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNOrganizationQueryResponse2backendᚋgraphᚋmodelᚐOrganizationQueryResponse(ctx context.Context, sel ast.SelectionSet, v model.OrganizationQueryResponse) graphql.Marshaler {
