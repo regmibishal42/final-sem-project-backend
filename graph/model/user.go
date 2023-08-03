@@ -25,3 +25,14 @@ func (input *UserInput) Validator() (*User, *ValidationError) {
 	user.UserType = UserTypeAdmin
 	return &user, nil
 }
+
+func (input *LoginInput) Validator() *ValidationError {
+	if err := util.IsEmailValid(input.Email); err != nil {
+		return &ValidationError{Message: "invalid email", Code: 401}
+	}
+
+	if !util.PasswordValidator(input.Password) {
+		return &ValidationError{Message: "enter a strong password", Code: 401}
+	}
+	return nil
+}

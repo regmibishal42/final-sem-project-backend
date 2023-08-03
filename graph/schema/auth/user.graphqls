@@ -4,7 +4,6 @@ type User{
     userType:UserType!
     isVerified:Boolean!
     status:UserStatus!
-    password:String!
     profile:Profile @goField(forceResolver:true)
     createdAt:Time!
     updatedAt:Time

@@ -7,12 +7,25 @@ import (
 	"context"
 	"errors"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 func (r AuthRepository) Login(ctx context.Context, input *model.LoginInput) *model.AuthResponse {
+	//input validation
+	if validationError := input.Validator(); validationError != nil {
+		return &model.AuthResponse{
+			Error: validationError,
+		}
+	}
 	email := strings.ToLower(input.Email)
 	user, err := r.TableUser.GetUserByEmail(ctx, email)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.AuthResponse{
+				Error: exception.MutationErrorHandler(ctx, errors.New("invalid email or password"), exception.BAD_REQUEST, nil),
+			}
+		}
 		return &model.AuthResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.BAD_REQUEST, nil),
 		}
