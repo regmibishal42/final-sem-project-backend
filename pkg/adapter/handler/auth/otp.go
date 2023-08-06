@@ -20,7 +20,7 @@ func (r AuthRepository) CreateOtp(ctx context.Context, user *model.User) (*model
 		return nil, err
 	}
 	//send otp email to user
-	go util.SendVerificationEmail(otp.Secret, user.Email)
+	go util.SendOtpEmail("User", user.Email, otp.Secret)
 	return &otp, nil
 
 }
@@ -55,7 +55,7 @@ func (r AuthRepository) UpdateOtp(ctx context.Context, userID *string) *model.Ot
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
 		}
 	}
-	go util.SendVerificationEmail(otp.Secret, user.Email)
+	go util.SendOtpEmail("User", user.Email, otp.Secret)
 	return &model.OtpMutationResponse{
 		Data:  util.Ref(true),
 		Error: nil,

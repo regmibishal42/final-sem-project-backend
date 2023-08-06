@@ -34,6 +34,10 @@ func (r OrganizationRepository) CreateStaff(ctx context.Context, user *model.Use
 			},
 		},
 	}
+	if input.IsAuthorized != nil && util.Deref(input.IsAuthorized) {
+		staffName := input.FirstName + " " + input.LastName
+		go util.SendStaffAccountCreationEmail(input.Email, staffName)
+	}
 
 	err := r.TableStaff.CreateStaff(ctx, &staff)
 	if err != nil {
