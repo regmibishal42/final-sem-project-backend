@@ -11,6 +11,7 @@ func (r *Registry) NewOrganizationRegistry() organization_handler.OrganizationIn
 		TableUser:         query_repository.NewUserQueryRepository(r.db),
 		TableProfile:      query_repository.NewProfileQueryRepository(r.db),
 		TableOrganization: query_repository.NewOrganizationQueryRepository(r.db),
+		TableStaff:        query_repository.NewStaffQueryRepository(r.db),
 	}
 
 	return organization_handler.NewOrganizationRepository(db)

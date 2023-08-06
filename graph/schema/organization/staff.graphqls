@@ -17,6 +17,7 @@ input CreateStaffInput{
     firstName:String!
     lastName:String!
     post:String!
+    joinedOn:Time!
     salary:Float
     isAuthorized:Boolean
     address:AddressInput

@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"backend/pkg/util"
+	"time"
+)
 
 type Staff struct {
 	StaffID        string        `json:"staffID"`
@@ -12,4 +15,29 @@ type Staff struct {
 	Salary         *float64      `json:"salary,omitempty"`
 	IsAuthorized   *bool         `json:"isAuthorized,omitempty" gorm:"default:FALSE"`
 	IsActive       *bool         `json:"isActive,omitempty" gorm:"default:TRUE"`
+}
+
+func (input *CreateStaffInput) Validator() *ValidationError {
+	if !util.IsValidID(input.OrganizationID) {
+		return &ValidationError{
+			Message: "invalid OrganizationID",
+		}
+	}
+	if len(input.ContactNumber) < 10 {
+		return &ValidationError{
+			Message: "invalid ContactNumber",
+		}
+	}
+	if err := util.IsEmailValid(input.Email); err != nil {
+		return &ValidationError{
+			Message: "invalid email",
+		}
+	}
+	if input.JoinedOn.Unix() > time.Now().Unix() {
+		return &ValidationError{
+			Message: "Join Date Cannot be greater then current date",
+		}
+	}
+	return nil
+
 }

@@ -68,3 +68,8 @@ func (r OrganizationRepository) GetOrganizationByFilter(ctx context.Context, fil
 		Data: organizations,
 	}, nil
 }
+
+//get organization only
+func (r OrganizationRepository) GetOrganizationDetailsByID(ctx context.Context, organizationID string) (*model.Organization, error) {
+	return r.TableOrganization.GetOrganizationByID(ctx, &organizationID)
+}

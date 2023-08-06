@@ -2,6 +2,7 @@ package util
 
 import (
 	"errors"
+	"log"
 	"regexp"
 	"unicode"
 
@@ -60,4 +61,13 @@ func PasswordValidator(pass string) bool {
 	}
 
 	return true
+}
+
+func GetDefaultStaffPassword() string {
+	defaultPassword := "Staff@123"
+	hash, err := HashPassword(defaultPassword)
+	if err != nil {
+		log.Println("Error Hashing Staff Password", err.Error())
+	}
+	return hash
 }

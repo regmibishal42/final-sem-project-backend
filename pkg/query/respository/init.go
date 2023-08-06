@@ -33,3 +33,9 @@ func NewOrganizationQueryRepository(db *gorm.DB) query_controller.OrganizationQu
 		db: db,
 	}
 }
+
+func NewStaffQueryRepository(db *gorm.DB) query_controller.StaffQueryInterface {
+	return QueryRepository{
+		db: db,
+	}
+}

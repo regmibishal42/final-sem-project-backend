@@ -10,4 +10,5 @@ type OrganizationQueryController struct {
 	TableUser         UserQueryInterface
 	TableProfile      ProfileQueryInterface
 	TableOrganization OrganizationQueryInterface
+	TableStaff        StaffQueryInterface
 }

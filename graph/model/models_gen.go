@@ -92,6 +92,7 @@ type CreateStaffInput struct {
 	FirstName      string        `json:"firstName"`
 	LastName       string        `json:"lastName"`
 	Post           string        `json:"post"`
+	JoinedOn       time.Time     `json:"joinedOn"`
 	Salary         *float64      `json:"salary,omitempty"`
 	IsAuthorized   *bool         `json:"isAuthorized,omitempty"`
 	Address        *AddressInput `json:"address,omitempty"`
