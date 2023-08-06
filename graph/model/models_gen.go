@@ -85,6 +85,18 @@ type CreateProfileInput struct {
 	Address       *AddressInput `json:"Address,omitempty"`
 }
 
+type CreateStaffInput struct {
+	OrganizationID string        `json:"organizationID"`
+	ContactNumber  string        `json:"contactNumber"`
+	Email          string        `json:"email"`
+	FirstName      string        `json:"firstName"`
+	LastName       string        `json:"lastName"`
+	Post           string        `json:"post"`
+	Salary         *float64      `json:"salary,omitempty"`
+	IsAuthorized   *bool         `json:"isAuthorized,omitempty"`
+	Address        *AddressInput `json:"address,omitempty"`
+}
+
 type ForgetPasswordInput struct {
 	Email    string   `json:"email"`
 	UserType UserType `json:"userType"`
@@ -92,6 +104,14 @@ type ForgetPasswordInput struct {
 
 type GetByIDInput struct {
 	ID string `json:"ID"`
+}
+
+type GetOrganizationStaffsInput struct {
+	OrganizationID string `json:"organizationID"`
+}
+
+type GetStaffInput struct {
+	StaffID string `json:"staffID"`
 }
 
 type GetUserInput struct {
@@ -200,6 +220,31 @@ func (this ServerError) GetCode() int       { return this.Code }
 
 func (ServerError) IsMutationError() {}
 
+type StaffMutation struct {
+	CreateStaff *StaffMutationResponse `json:"createStaff"`
+	UpdateStaff *StaffMutationResponse `json:"updateStaff"`
+}
+
+type StaffMutationResponse struct {
+	Data  *Staff        `json:"data,omitempty"`
+	Error MutationError `json:"error,omitempty"`
+}
+
+type StaffQuery struct {
+	GetStaffByOrganization *StaffsQueryResponse `json:"getStaffByOrganization"`
+	GetStaffByID           *StaffQueryResponse  `json:"getStaffByID"`
+}
+
+type StaffQueryResponse struct {
+	Data  *Staff     `json:"data,omitempty"`
+	Error QueryError `json:"error,omitempty"`
+}
+
+type StaffsQueryResponse struct {
+	Data  []*Staff   `json:"data,omitempty"`
+	Error QueryError `json:"error,omitempty"`
+}
+
 type UpdateAddressInput struct {
 	City     string `json:"City"`
 	District string `json:"District"`
@@ -227,6 +272,14 @@ type UpdateProfileInput struct {
 	ContactNumber *string       `json:"contactNumber,omitempty"`
 	DateOfBirth   *time.Time    `json:"DateOfBirth,omitempty"`
 	Address       *AddressInput `json:"Address,omitempty"`
+}
+
+type UpdateStaffInput struct {
+	StaffID      string   `json:"staffID"`
+	Post         *string  `json:"post,omitempty"`
+	Salary       *float64 `json:"salary,omitempty"`
+	IsAuthorized *bool    `json:"isAuthorized,omitempty"`
+	IsActive     *bool    `json:"isActive,omitempty"`
 }
 
 type UserInput struct {

@@ -1,0 +1,62 @@
+type Staff{
+    staffID:ID!
+    staff:User! @goField(forceResolver:true)
+    Organization:Organization! @goField(forceResolver:true)
+    joinedOn:Time!
+    post:String!
+    salary:Float
+    isAuthorized:Boolean
+    isActive:Boolean
+}
+
+# Inputs
+input CreateStaffInput{
+    organizationID:ID!
+    contactNumber:String!
+    email:String!
+    firstName:String!
+    lastName:String!
+    post:String!
+    salary:Float
+    isAuthorized:Boolean
+    address:AddressInput
+}
+input GetOrganizationStaffsInput{
+    organizationID:ID!
+}
+input GetStaffInput{
+    staffID:ID!
+}
+input UpdateStaffInput{
+    staffID:ID!
+    post:String
+    salary:Float
+    isAuthorized:Boolean
+    isActive:Boolean
+}
+
+
+# Response
+type StaffMutationResponse{
+    data:Staff
+    error:MutationError
+}
+type StaffQueryResponse{
+    data:Staff
+    error:QueryError
+}
+type StaffsQueryResponse{
+    data:[Staff]
+    error:QueryError
+}
+
+# Mutation
+type StaffMutation{
+    createStaff(input:CreateStaffInput!):StaffMutationResponse! @goField(forceResolver:true)
+    updateStaff(input:UpdateStaffInput!):StaffMutationResponse! @goField(forceResolver:true)
+}
+
+type StaffQuery{
+    getStaffByOrganization(input:GetOrganizationStaffsInput!):StaffsQueryResponse! @goField(forceResolver:true)
+    getStaffByID(input:GetStaffInput!):StaffQueryResponse! @goField(forceResolver:true)
+}
