@@ -12,6 +12,7 @@ func Migrate(db *gorm.DB) {
 		&model.Profile{},
 		&model.Otp{},
 		&model.Organization{},
+		&model.Staff{},
 	//migration models
 	)
 	DbExceptionHandle(err)

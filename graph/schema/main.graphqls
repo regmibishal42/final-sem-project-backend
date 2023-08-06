@@ -3,11 +3,13 @@ type Mutation{
     auth:UserMutation!
     profile:ProfileMutation!
     organization:OrganizationMutation!
+    staff:StaffMutation!
 }
 
 type Query{
     auth:UserQuery!
     profile:ProfileQuery!
     organization:OrganizationQuery!
+    staff:StaffQuery!
 }
 
