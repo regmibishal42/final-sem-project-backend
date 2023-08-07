@@ -1,0 +1,7 @@
+type DeletedProducts{
+    id:ID!
+    product:Product
+    createdAt:Time!
+    updatedAt:Time
+    deletedAt:Time
+}

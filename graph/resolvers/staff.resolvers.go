@@ -9,7 +9,6 @@ import (
 	"backend/graph/generated"
 	"backend/graph/model"
 	"context"
-	"fmt"
 )
 
 // Staff is the resolver for the staff field.
@@ -36,17 +35,38 @@ func (r *staffMutationResolver) CreateStaff(ctx context.Context, obj *model.Staf
 
 // UpdateStaff is the resolver for the updateStaff field.
 func (r *staffMutationResolver) UpdateStaff(ctx context.Context, obj *model.StaffMutation, input model.UpdateStaffInput) (*model.StaffMutationResponse, error) {
-	panic(fmt.Errorf("not implemented: UpdateStaff - updateStaff"))
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.StaffMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	return r.OrganizationDomain.UpdateStaffDetails(ctx, user, &input)
 }
 
 // GetStaffByOrganization is the resolver for the getStaffByOrganization field.
 func (r *staffQueryResolver) GetStaffByOrganization(ctx context.Context, obj *model.StaffQuery, input model.GetOrganizationStaffsInput) (*model.StaffsQueryResponse, error) {
-	panic(fmt.Errorf("not implemented: GetStaffByOrganization - getStaffByOrganization"))
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.StaffsQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	return r.OrganizationDomain.GetStaffsByOrganization(ctx, user, &input)
 }
 
 // GetStaffByID is the resolver for the getStaffByID field.
 func (r *staffQueryResolver) GetStaffByID(ctx context.Context, obj *model.StaffQuery, input model.GetStaffInput) (*model.StaffQueryResponse, error) {
-	panic(fmt.Errorf("not implemented: GetStaffByID - getStaffByID"))
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.StaffQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	return r.OrganizationDomain.GetStaffByID(ctx, user, &input)
 }
 
 // Staff returns generated.StaffResolver implementation.

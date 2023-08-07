@@ -41,3 +41,27 @@ func (input *CreateStaffInput) Validator() *ValidationError {
 	return nil
 
 }
+
+func (input *UpdateStaffInput) Validator() (*Staff, *ValidationError) {
+	staff := &Staff{}
+	if !util.IsValidID(input.StaffID) {
+		return nil, &ValidationError{
+			Message: "invalid StaffID",
+			Code:    401,
+		}
+	}
+	staff.StaffID = input.StaffID
+	if input.Post != nil {
+		staff.Post = *input.Post
+	}
+	if input.IsAuthorized != nil {
+		staff.IsAuthorized = input.IsAuthorized
+	}
+	if input.IsActive != nil {
+		staff.IsActive = input.IsActive
+	}
+	if input.Salary != nil {
+		staff.Salary = input.Salary
+	}
+	return staff, nil
+}

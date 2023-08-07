@@ -69,12 +69,44 @@ func (this BadRequestError) GetCode() int       { return this.Code }
 
 func (BadRequestError) IsMutationError() {}
 
+
+
+type CategoryMutation struct {
+	CreateCategory *CategoryMutationResponse `json:"createCategory"`
+	DeleteCategory *CategoryMutationResponse `json:"deleteCategory"`
+}
+
+type CategoryMutationResponse struct {
+	Data  []*Category   `json:"data,omitempty"`
+	Error MutationError `json:"error,omitempty"`
+}
+
+type CategoryQuery struct {
+	GetAllCategory *CategoryQueryResponse `json:"getAllCategory"`
+}
+
+type CategoryQueryResponse struct {
+	Data  []*Category `json:"data,omitempty"`
+	Error QueryError  `json:"error,omitempty"`
+}
+
+type CreateCategoryInput struct {
+	Names []string `json:"names"`
+}
+
 type CreateOrganizationInput struct {
 	Name      string        `json:"Name"`
 	Email     string        `json:"email"`
 	Contact   string        `json:"contact"`
 	Address   *AddressInput `json:"Address"`
 	PanNumber *string       `json:"PanNumber,omitempty"`
+}
+
+type CreateProductInput struct {
+	Name       string    `json:"name"`
+	BoughtOn   time.Time `json:"boughtOn"`
+	Units      int       `json:"units"`
+	CategoryID string    `json:"categoryID"`
 }
 
 type CreateProfileInput struct {
@@ -98,6 +130,15 @@ type CreateStaffInput struct {
 	Address        *AddressInput `json:"address,omitempty"`
 }
 
+type DeleteCategoryInput struct {
+	CategoryID string `json:"categoryID"`
+}
+
+type DeleteProductInput struct {
+	ProductID string `json:"productID"`
+}
+
+
 type ForgetPasswordInput struct {
 	Email    string   `json:"email"`
 	UserType UserType `json:"userType"`
@@ -107,8 +148,20 @@ type GetByIDInput struct {
 	ID string `json:"ID"`
 }
 
+type GetCategoriesInput struct {
+	OrganizationID string `json:"organizationID"`
+}
+
 type GetOrganizationStaffsInput struct {
 	OrganizationID string `json:"organizationID"`
+}
+
+type GetProductByIDInput struct {
+	ProductID string `json:"productID"`
+}
+
+type GetProductsByFilterInput struct {
+	CategoryID *string `json:"categoryID,omitempty"`
 }
 
 type GetStaffInput struct {
@@ -170,6 +223,34 @@ type OrganizationsQueryResponse struct {
 type OtpMutationResponse struct {
 	Data  *bool         `json:"data,omitempty"`
 	Error MutationError `json:"error,omitempty"`
+}
+
+
+
+type ProductMutation struct {
+	CreateProduct *ProductMutationResponse `json:"createProduct"`
+	UpdateProduct *ProductMutationResponse `json:"updateProduct"`
+	DeleteProduct *ProductMutationResponse `json:"deleteProduct"`
+}
+
+type ProductMutationResponse struct {
+	Data  *Product      `json:"data,omitempty"`
+	Error MutationError `json:"error,omitempty"`
+}
+
+type ProductQuery struct {
+	GetProductsByFilter *ProductsQueryResponse `json:"getProductsByFilter"`
+	GetProductByID      *ProductQueryResponse  `json:"getProductByID"`
+}
+
+type ProductQueryResponse struct {
+	Data  *Product   `json:"data,omitempty"`
+	Error QueryError `json:"error,omitempty"`
+}
+
+type ProductsQueryResponse struct {
+	Data  []*Product `json:"data,omitempty"`
+	Error QueryError `json:"error,omitempty"`
 }
 
 type ProfileMutation struct {
@@ -264,6 +345,14 @@ type UpdateOrganizationInput struct {
 type UpdatePasswordInput struct {
 	OldPassword string `json:"oldPassword"`
 	NewPassword string `json:"newPassword"`
+}
+
+type UpdateProductInput struct {
+	ProductID  string     `json:"productID"`
+	Name       *string    `json:"name,omitempty"`
+	BoughtOn   *time.Time `json:"boughtOn,omitempty"`
+	Units      *int       `json:"units,omitempty"`
+	CategoryID *string    `json:"categoryID,omitempty"`
 }
 
 type UpdateProfileInput struct {

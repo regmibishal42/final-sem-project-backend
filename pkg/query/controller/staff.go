@@ -7,4 +7,7 @@ import (
 
 type StaffQueryInterface interface {
 	CreateStaff(ctx context.Context, staff *model.Staff) error
+	UpdateStaff(ctx context.Context, staff *model.Staff) error
+	GetStaffByID(ctx context.Context, staffID *string) (*model.Staff, error)
+	GetStaffsByOrganization(ctx context.Context, organizationID *string) ([]*model.Staff, error)
 }
