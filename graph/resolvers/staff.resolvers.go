@@ -36,7 +36,14 @@ func (r *staffMutationResolver) CreateStaff(ctx context.Context, obj *model.Staf
 
 // UpdateStaff is the resolver for the updateStaff field.
 func (r *staffMutationResolver) UpdateStaff(ctx context.Context, obj *model.StaffMutation, input model.UpdateStaffInput) (*model.StaffMutationResponse, error) {
-	panic(fmt.Errorf("not implemented: UpdateStaff - updateStaff"))
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.StaffMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	return r.OrganizationDomain.UpdateStaffDetails(ctx, user, &input)
 }
 
 // GetStaffByOrganization is the resolver for the getStaffByOrganization field.

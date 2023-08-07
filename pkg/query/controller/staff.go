@@ -7,4 +7,5 @@ import (
 
 type StaffQueryInterface interface {
 	CreateStaff(ctx context.Context, staff *model.Staff) error
+	UpdateStaff(ctx context.Context, staff *model.Staff) error
 }

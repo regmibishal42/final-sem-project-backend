@@ -5,6 +5,7 @@ import (
 	"backend/graph/model"
 	"backend/pkg/util"
 	"context"
+	"errors"
 )
 
 func (r OrganizationRepository) CreateStaff(ctx context.Context, user *model.User, input *model.CreateStaffInput) (*model.StaffMutationResponse, error) {
@@ -47,5 +48,28 @@ func (r OrganizationRepository) CreateStaff(ctx context.Context, user *model.Use
 	}
 	return &model.StaffMutationResponse{
 		Data: &staff,
+	}, nil
+}
+
+func (r OrganizationRepository) UpdateStaffDetails(ctx context.Context, user *model.User, input *model.UpdateStaffInput) (*model.StaffMutationResponse, error) {
+	staff, validationError := input.Validator()
+	if validationError != nil {
+		return &model.StaffMutationResponse{
+			Error: validationError,
+		}, nil
+	}
+	if user.UserType != model.UserTypeAdmin {
+		return &model.StaffMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	err := r.TableStaff.UpdateStaff(ctx, staff)
+	if err != nil {
+		return &model.StaffMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.StaffMutationResponse{
+		Data: staff,
 	}, nil
 }

@@ -18,4 +18,5 @@ type OrganizationInterface interface {
 
 	// Staff
 	CreateStaff(ctx context.Context, user *model.User, input *model.CreateStaffInput) (*model.StaffMutationResponse, error)
+	UpdateStaffDetails(ctx context.Context, user *model.User, input *model.UpdateStaffInput) (*model.StaffMutationResponse, error)
 }
