@@ -39,3 +39,21 @@ func NewStaffQueryRepository(db *gorm.DB) query_controller.StaffQueryInterface {
 		db: db,
 	}
 }
+
+func NewProductQueryRepository(db *gorm.DB) query_controller.ProductQueryInterface {
+	return QueryRepository{
+		db: db,
+	}
+}
+
+func NewProductCategoryQueryRepository(db *gorm.DB) query_controller.ProductCategoryQueryInterface {
+	return QueryRepository{
+		db: db,
+	}
+}
+
+func NewDeletedProductsQueryRepository(db *gorm.DB) query_controller.DeletedProductsQueryInterface {
+	return QueryRepository{
+		db: db,
+	}
+}

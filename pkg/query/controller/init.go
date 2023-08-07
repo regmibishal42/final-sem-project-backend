@@ -11,4 +11,13 @@ type OrganizationQueryController struct {
 	TableProfile      ProfileQueryInterface
 	TableOrganization OrganizationQueryInterface
 	TableStaff        StaffQueryInterface
+	TableProduct      ProductQueryInterface
+}
+
+type ProductQueryController struct {
+	TableProduct         ProductQueryInterface
+	TableOrganization    OrganizationQueryInterface
+	TableUser            UserQueryInterface
+	TableCategory        ProductCategoryQueryInterface
+	TableDeletedProducts DeletedProductsQueryInterface
 }

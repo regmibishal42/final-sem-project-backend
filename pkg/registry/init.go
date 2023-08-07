@@ -3,6 +3,7 @@ package registry
 import (
 	auth_handler "backend/pkg/adapter/handler/auth"
 	organization_handler "backend/pkg/adapter/handler/organization"
+	products_handler "backend/pkg/adapter/handler/products"
 
 	"gorm.io/gorm"
 )
@@ -26,5 +27,11 @@ func (r Registry) NewAuthController() auth_handler.AuthController {
 func (r Registry) NewOrganizationController() organization_handler.OrganizationController {
 	return organization_handler.OrganizationController{
 		OrganizationDomain: r.NewOrganizationRegistry(),
+	}
+}
+
+func (r Registry) NewProductsController() products_handler.ProductController {
+	return products_handler.ProductController{
+		ProductDomain: r.NewProductRegistry(),
 	}
 }
