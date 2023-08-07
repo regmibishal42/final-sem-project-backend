@@ -1,0 +1,39 @@
+type Category{
+    id:ID!
+    name:String!
+    organization:Organization!
+    createdAt:Time!
+    updatedAt:Time
+    deletedAt:Time
+}
+
+input CreateCategoryInput{
+    names:[String!]!
+}
+input GetCategoriesInput{
+    organizationID:ID!
+}
+input DeleteCategoryInput{
+    categoryID:ID!
+}
+
+type CategoryMutationResponse{
+    data:[Category]
+    error:MutationError
+}
+
+type CategoryQueryResponse{
+    data:[Category]
+    error:QueryError
+}
+
+# Mutation
+type CategoryMutation{
+    createCategory(input:CreateCategoryInput!):CategoryMutationResponse! @goField(forceResolver:true)
+    deleteCategory(input:DeleteCategoryInput!):CategoryMutationResponse! @goField(forceResolver:true)
+}
+
+# Query
+type CategoryQuery{
+    getAllCategory(input:GetCategoriesInput!):CategoryQueryResponse! @goField(forceResolver:true)
+}

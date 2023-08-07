@@ -1,0 +1,65 @@
+type Product{
+    id:ID!
+    name:String!
+    boughtOn:Time!
+    units:Int!
+    category:Category!
+    organization:Organization!
+    createdAt:Time!
+    updatedAt:Time
+    deletedAt:Time
+}
+
+# inputs
+input CreateProductInput{
+    name:String!
+    boughtOn:Time!
+    units:Int!
+    categoryID:ID!
+}
+
+input UpdateProductInput{
+    productID:ID!
+    name:String
+    boughtOn:Time
+    units:Int
+    categoryID:ID
+}
+
+input GetProductsByFilterInput{
+    categoryID:ID
+}
+input GetProductByIDInput{
+    productID:ID!
+}
+input DeleteProductInput{
+    productID:ID!
+}
+
+# Response
+type ProductMutationResponse{
+    data:Product
+    error:MutationError
+}
+
+type ProductQueryResponse{
+    data:Product
+    error:QueryError
+}
+type ProductsQueryResponse{
+    data:[Product]
+    error:QueryError
+}
+
+# Mutation
+type ProductMutation{
+    createProduct(input:CreateProductInput!):ProductMutationResponse! @goField(forceResolver:true)
+    updateProduct(input:UpdateProductInput!):ProductMutationResponse! @goField(forceResolver:true)
+    deleteProduct(input:DeleteProductInput!):ProductMutationResponse! @goField(forceResolver:true)
+}
+
+# Query
+type ProductQuery{
+    getProductsByFilter(input:GetProductsByFilterInput!):ProductsQueryResponse! @goField(forceResolver:true)
+    getProductByID(input:GetProductByIDInput!):ProductQueryResponse! @goField(forceResolver:true)
+}
