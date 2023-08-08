@@ -30,6 +30,11 @@ func (r *mutationResolver) Staff(ctx context.Context) (*model.StaffMutation, err
 	return &model.StaffMutation{}, nil
 }
 
+// Product is the resolver for the product field.
+func (r *mutationResolver) Product(ctx context.Context) (*model.ProductMutation, error) {
+	return &model.ProductMutation{}, nil
+}
+
 // Auth is the resolver for the auth field.
 func (r *queryResolver) Auth(ctx context.Context) (*model.UserQuery, error) {
 	return &model.UserQuery{}, nil
@@ -48,6 +53,11 @@ func (r *queryResolver) Organization(ctx context.Context) (*model.OrganizationQu
 // Staff is the resolver for the staff field.
 func (r *queryResolver) Staff(ctx context.Context) (*model.StaffQuery, error) {
 	return &model.StaffQuery{}, nil
+}
+
+// Product is the resolver for the product field.
+func (r *queryResolver) Product(ctx context.Context) (*model.ProductQuery, error) {
+	return &model.ProductQuery{}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

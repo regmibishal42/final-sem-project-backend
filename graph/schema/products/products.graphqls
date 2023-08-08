@@ -3,8 +3,8 @@ type Product{
     name:String!
     boughtOn:Time!
     units:Int!
-    category:Category!
-    organization:Organization!
+    category:Category! @goField(forceResolver:true)
+    organization:Organization! @goField(forceResolver:true)
     createdAt:Time!
     updatedAt:Time
     deletedAt:Time
@@ -53,6 +53,7 @@ type ProductsQueryResponse{
 
 # Mutation
 type ProductMutation{
+    category:CategoryMutation!  @goField(forceResolver:true)
     createProduct(input:CreateProductInput!):ProductMutationResponse! @goField(forceResolver:true)
     updateProduct(input:UpdateProductInput!):ProductMutationResponse! @goField(forceResolver:true)
     deleteProduct(input:DeleteProductInput!):ProductMutationResponse! @goField(forceResolver:true)
@@ -60,6 +61,7 @@ type ProductMutation{
 
 # Query
 type ProductQuery{
+    category:CategoryQuery!  @goField(forceResolver:true)
     getProductsByFilter(input:GetProductsByFilterInput!):ProductsQueryResponse! @goField(forceResolver:true)
     getProductByID(input:GetProductByIDInput!):ProductQueryResponse! @goField(forceResolver:true)
 }

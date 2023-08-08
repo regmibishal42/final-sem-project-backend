@@ -11,6 +11,21 @@ import (
 	"fmt"
 )
 
+// Category is the resolver for the category field.
+func (r *productResolver) Category(ctx context.Context, obj *model.Product) (*model.Category, error) {
+	return &model.Category{}, nil
+}
+
+// Organization is the resolver for the organization field.
+func (r *productResolver) Organization(ctx context.Context, obj *model.Product) (*model.Organization, error) {
+	return &model.Organization{}, nil
+}
+
+// Category is the resolver for the category field.
+func (r *productMutationResolver) Category(ctx context.Context, obj *model.ProductMutation) (*model.CategoryMutation, error) {
+	return &model.CategoryMutation{}, nil
+}
+
 // CreateProduct is the resolver for the createProduct field.
 func (r *productMutationResolver) CreateProduct(ctx context.Context, obj *model.ProductMutation, input model.CreateProductInput) (*model.ProductMutationResponse, error) {
 	panic(fmt.Errorf("not implemented: CreateProduct - createProduct"))
@@ -26,6 +41,11 @@ func (r *productMutationResolver) DeleteProduct(ctx context.Context, obj *model.
 	panic(fmt.Errorf("not implemented: DeleteProduct - deleteProduct"))
 }
 
+// Category is the resolver for the category field.
+func (r *productQueryResolver) Category(ctx context.Context, obj *model.ProductQuery) (*model.CategoryQuery, error) {
+	return &model.CategoryQuery{}, nil
+}
+
 // GetProductsByFilter is the resolver for the getProductsByFilter field.
 func (r *productQueryResolver) GetProductsByFilter(ctx context.Context, obj *model.ProductQuery, input model.GetProductsByFilterInput) (*model.ProductsQueryResponse, error) {
 	panic(fmt.Errorf("not implemented: GetProductsByFilter - getProductsByFilter"))
@@ -36,6 +56,9 @@ func (r *productQueryResolver) GetProductByID(ctx context.Context, obj *model.Pr
 	panic(fmt.Errorf("not implemented: GetProductByID - getProductByID"))
 }
 
+// Product returns generated.ProductResolver implementation.
+func (r *Resolver) Product() generated.ProductResolver { return &productResolver{r} }
+
 // ProductMutation returns generated.ProductMutationResolver implementation.
 func (r *Resolver) ProductMutation() generated.ProductMutationResolver {
 	return &productMutationResolver{r}
@@ -44,5 +67,6 @@ func (r *Resolver) ProductMutation() generated.ProductMutationResolver {
 // ProductQuery returns generated.ProductQueryResolver implementation.
 func (r *Resolver) ProductQuery() generated.ProductQueryResolver { return &productQueryResolver{r} }
 
+type productResolver struct{ *Resolver }
 type productMutationResolver struct{ *Resolver }
 type productQueryResolver struct{ *Resolver }

@@ -3,6 +3,7 @@ package query_repository
 import (
 	"backend/graph/model"
 	"context"
+	"fmt"
 )
 
 func (r QueryRepository) CreateOrganization(ctx context.Context, organization *model.Organization) error {
@@ -35,4 +36,23 @@ func (r QueryRepository) GetOrganizationsByFilter(ctx context.Context, filter *m
 		return nil, err
 	}
 	return organizations, nil
+}
+
+func (r QueryRepository) GetOrganizationIDByUser(ctx context.Context, user *model.User) (*string, error) {
+	var id string
+	db := r.db.Model(&model.Organization{}).Select("id")
+	if user.UserType == model.UserTypeAdmin {
+		err := db.Where("created_by_id = ?", user.ID).Find(&id).Error
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println("Organization ID of Admin is", id)
+		return &id, nil
+	}
+	err := db.Joins("left join staffs on staffs.organization_id = organizations.id").Select("organization.id").Find(&id).Error
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("Organization ID of Admin is", id)
+	return &id, nil
 }

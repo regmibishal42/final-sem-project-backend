@@ -4,6 +4,7 @@ type Mutation{
     profile:ProfileMutation!
     organization:OrganizationMutation!
     staff:StaffMutation!
+    product:ProductMutation!
 }
 
 type Query{
@@ -11,5 +12,6 @@ type Query{
     profile:ProfileQuery!
     organization:OrganizationQuery!
     staff:StaffQuery!
+    product:ProductQuery!
 }
 

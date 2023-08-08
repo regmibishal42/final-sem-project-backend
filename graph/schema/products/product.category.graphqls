@@ -1,14 +1,13 @@
 type Category{
     id:ID!
     name:String!
-    organization:Organization!
     createdAt:Time!
     updatedAt:Time
     deletedAt:Time
 }
 
 input CreateCategoryInput{
-    names:[String!]!
+    name:String!
 }
 input GetCategoriesInput{
     organizationID:ID!
@@ -18,7 +17,7 @@ input DeleteCategoryInput{
 }
 
 type CategoryMutationResponse{
-    data:[Category]
+    data:Category
     error:MutationError
 }
 

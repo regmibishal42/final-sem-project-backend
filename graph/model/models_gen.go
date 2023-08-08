@@ -69,15 +69,13 @@ func (this BadRequestError) GetCode() int       { return this.Code }
 
 func (BadRequestError) IsMutationError() {}
 
-
-
 type CategoryMutation struct {
 	CreateCategory *CategoryMutationResponse `json:"createCategory"`
 	DeleteCategory *CategoryMutationResponse `json:"deleteCategory"`
 }
 
 type CategoryMutationResponse struct {
-	Data  []*Category   `json:"data,omitempty"`
+	Data  *Category     `json:"data,omitempty"`
 	Error MutationError `json:"error,omitempty"`
 }
 
@@ -91,7 +89,7 @@ type CategoryQueryResponse struct {
 }
 
 type CreateCategoryInput struct {
-	Names []string `json:"names"`
+	Name string `json:"name"`
 }
 
 type CreateOrganizationInput struct {
@@ -137,7 +135,6 @@ type DeleteCategoryInput struct {
 type DeleteProductInput struct {
 	ProductID string `json:"productID"`
 }
-
 
 type ForgetPasswordInput struct {
 	Email    string   `json:"email"`
@@ -225,9 +222,8 @@ type OtpMutationResponse struct {
 	Error MutationError `json:"error,omitempty"`
 }
 
-
-
 type ProductMutation struct {
+	Category      *CategoryMutation        `json:"category"`
 	CreateProduct *ProductMutationResponse `json:"createProduct"`
 	UpdateProduct *ProductMutationResponse `json:"updateProduct"`
 	DeleteProduct *ProductMutationResponse `json:"deleteProduct"`
@@ -239,6 +235,7 @@ type ProductMutationResponse struct {
 }
 
 type ProductQuery struct {
+	Category            *CategoryQuery         `json:"category"`
 	GetProductsByFilter *ProductsQueryResponse `json:"getProductsByFilter"`
 	GetProductByID      *ProductQueryResponse  `json:"getProductByID"`
 }

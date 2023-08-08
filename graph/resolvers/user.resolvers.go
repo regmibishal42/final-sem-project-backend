@@ -27,6 +27,11 @@ func (r *userMutationResolver) LoginUser(ctx context.Context, obj *model.UserMut
 	return r.AuthDomain.Login(ctx, &input), nil
 }
 
+// Otp is the resolver for the otp field.
+func (r *userMutationResolver) Otp(ctx context.Context, obj *model.UserMutation) (*model.ResendOtpMutation, error) {
+	return &model.ResendOtpMutation{}, nil
+}
+
 // VerifyUser is the resolver for the verifyUser field.
 func (r *userMutationResolver) VerifyUser(ctx context.Context, obj *model.UserMutation, input model.UserVerificationInput) (*model.AuthMutationResponse, error) {
 	return r.AuthDomain.VerifyUser(ctx, &input), nil

@@ -43,6 +43,7 @@ type ResolverRoot interface {
 	Organization() OrganizationResolver
 	OrganizationMutation() OrganizationMutationResolver
 	OrganizationQuery() OrganizationQueryResolver
+	Product() ProductResolver
 	ProductMutation() ProductMutationResolver
 	ProductQuery() ProductQueryResolver
 	ProfileMutation() ProfileMutationResolver
@@ -98,12 +99,11 @@ type ComplexityRoot struct {
 	}
 
 	Category struct {
-		CreatedAt    func(childComplexity int) int
-		DeletedAt    func(childComplexity int) int
-		ID           func(childComplexity int) int
-		Name         func(childComplexity int) int
-		Organization func(childComplexity int) int
-		UpdatedAt    func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		DeletedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
 	}
 
 	CategoryMutation struct {
@@ -136,6 +136,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		Auth         func(childComplexity int) int
 		Organization func(childComplexity int) int
+		Product      func(childComplexity int) int
 		Profile      func(childComplexity int) int
 		Staff        func(childComplexity int) int
 	}
@@ -207,6 +208,7 @@ type ComplexityRoot struct {
 	}
 
 	ProductMutation struct {
+		Category      func(childComplexity int) int
 		CreateProduct func(childComplexity int, input model.CreateProductInput) int
 		DeleteProduct func(childComplexity int, input model.DeleteProductInput) int
 		UpdateProduct func(childComplexity int, input model.UpdateProductInput) int
@@ -218,6 +220,7 @@ type ComplexityRoot struct {
 	}
 
 	ProductQuery struct {
+		Category            func(childComplexity int) int
 		GetProductByID      func(childComplexity int, input model.GetProductByIDInput) int
 		GetProductsByFilter func(childComplexity int, input model.GetProductsByFilterInput) int
 	}
@@ -263,6 +266,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Auth         func(childComplexity int) int
 		Organization func(childComplexity int) int
+		Product      func(childComplexity int) int
 		Profile      func(childComplexity int) int
 		Staff        func(childComplexity int) int
 	}
@@ -362,6 +366,7 @@ type MutationResolver interface {
 	Profile(ctx context.Context) (*model.ProfileMutation, error)
 	Organization(ctx context.Context) (*model.OrganizationMutation, error)
 	Staff(ctx context.Context) (*model.StaffMutation, error)
+	Product(ctx context.Context) (*model.ProductMutation, error)
 }
 type OrganizationResolver interface {
 	CreatedBy(ctx context.Context, obj *model.Organization) (*model.User, error)
@@ -373,12 +378,18 @@ type OrganizationQueryResolver interface {
 	GetOrganizationByID(ctx context.Context, obj *model.OrganizationQuery, input model.OrganizationInput) (*model.OrganizationQueryResponse, error)
 	GetOrganizationByFilter(ctx context.Context, obj *model.OrganizationQuery, input *model.OrganizationFilterInput) (*model.OrganizationsQueryResponse, error)
 }
+type ProductResolver interface {
+	Category(ctx context.Context, obj *model.Product) (*model.Category, error)
+	Organization(ctx context.Context, obj *model.Product) (*model.Organization, error)
+}
 type ProductMutationResolver interface {
+	Category(ctx context.Context, obj *model.ProductMutation) (*model.CategoryMutation, error)
 	CreateProduct(ctx context.Context, obj *model.ProductMutation, input model.CreateProductInput) (*model.ProductMutationResponse, error)
 	UpdateProduct(ctx context.Context, obj *model.ProductMutation, input model.UpdateProductInput) (*model.ProductMutationResponse, error)
 	DeleteProduct(ctx context.Context, obj *model.ProductMutation, input model.DeleteProductInput) (*model.ProductMutationResponse, error)
 }
 type ProductQueryResolver interface {
+	Category(ctx context.Context, obj *model.ProductQuery) (*model.CategoryQuery, error)
 	GetProductsByFilter(ctx context.Context, obj *model.ProductQuery, input model.GetProductsByFilterInput) (*model.ProductsQueryResponse, error)
 	GetProductByID(ctx context.Context, obj *model.ProductQuery, input model.GetProductByIDInput) (*model.ProductQueryResponse, error)
 }
@@ -394,6 +405,7 @@ type QueryResolver interface {
 	Profile(ctx context.Context) (*model.ProfileQuery, error)
 	Organization(ctx context.Context) (*model.OrganizationQuery, error)
 	Staff(ctx context.Context) (*model.StaffQuery, error)
+	Product(ctx context.Context) (*model.ProductQuery, error)
 }
 type ResendOtpMutationResolver interface {
 	Resend(ctx context.Context, obj *model.ResendOtpMutation, input model.ResendOtpInput) (*model.OtpMutationResponse, error)
@@ -417,7 +429,7 @@ type UserResolver interface {
 type UserMutationResolver interface {
 	CreateUser(ctx context.Context, obj *model.UserMutation, input model.UserInput) (*model.AuthMutationResponse, error)
 	LoginUser(ctx context.Context, obj *model.UserMutation, input model.LoginInput) (*model.AuthResponse, error)
-
+	Otp(ctx context.Context, obj *model.UserMutation) (*model.ResendOtpMutation, error)
 	VerifyUser(ctx context.Context, obj *model.UserMutation, input model.UserVerificationInput) (*model.AuthMutationResponse, error)
 	UpdatePassword(ctx context.Context, obj *model.UserMutation, input model.ResetPasswordInput) (*model.RegisterResponse, error)
 	ForgetPassword(ctx context.Context, obj *model.UserMutation, input model.ForgetPasswordInput) (*model.RegisterResponse, error)
@@ -575,13 +587,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Category.Name(childComplexity), true
 
-	case "Category.organization":
-		if e.complexity.Category.Organization == nil {
-			break
-		}
-
-		return e.complexity.Category.Organization(childComplexity), true
-
 	case "Category.updatedAt":
 		if e.complexity.Category.UpdatedAt == nil {
 			break
@@ -701,6 +706,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Organization(childComplexity), true
+
+	case "Mutation.product":
+		if e.complexity.Mutation.Product == nil {
+			break
+		}
+
+		return e.complexity.Mutation.Product(childComplexity), true
 
 	case "Mutation.profile":
 		if e.complexity.Mutation.Profile == nil {
@@ -983,6 +995,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Product.UpdatedAt(childComplexity), true
 
+	case "ProductMutation.category":
+		if e.complexity.ProductMutation.Category == nil {
+			break
+		}
+
+		return e.complexity.ProductMutation.Category(childComplexity), true
+
 	case "ProductMutation.createProduct":
 		if e.complexity.ProductMutation.CreateProduct == nil {
 			break
@@ -1032,6 +1051,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ProductMutationResponse.Error(childComplexity), true
+
+	case "ProductQuery.category":
+		if e.complexity.ProductQuery.Category == nil {
+			break
+		}
+
+		return e.complexity.ProductQuery.Category(childComplexity), true
 
 	case "ProductQuery.getProductByID":
 		if e.complexity.ProductQuery.GetProductByID == nil {
@@ -1204,6 +1230,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Organization(childComplexity), true
+
+	case "Query.product":
+		if e.complexity.Query.Product == nil {
+			break
+		}
+
+		return e.complexity.Query.Product(childComplexity), true
 
 	case "Query.profile":
 		if e.complexity.Query.Profile == nil {
@@ -1815,7 +1848,7 @@ type RegisterResponse{
 type UserMutation{
     createUser(input:UserInput!):AuthMutationResponse! @goField(forceResolver:true)
     loginUser(input:LoginInput!):AuthResponse! @goField(forceResolver:true)
-    otp:ResendOtpMutation!
+    otp:ResendOtpMutation!  @goField(forceResolver:true)
     verifyUser(input:userVerificationInput!):AuthMutationResponse! @goField(forceResolver:true)
     updatePassword(input:ResetPasswordInput!):RegisterResponse! @goField(forceResolver:true)
     forgetPassword(input:ForgetPasswordInput!):RegisterResponse! @goField(forceResolver:true)
@@ -1897,6 +1930,7 @@ type Mutation{
     profile:ProfileMutation!
     organization:OrganizationMutation!
     staff:StaffMutation!
+    product:ProductMutation!
 }
 
 type Query{
@@ -1904,6 +1938,7 @@ type Query{
     profile:ProfileQuery!
     organization:OrganizationQuery!
     staff:StaffQuery!
+    product:ProductQuery!
 }
 
 `, BuiltIn: false},
@@ -2043,14 +2078,13 @@ type StaffQuery{
 	{Name: "../schema/products/product.category.graphqls", Input: `type Category{
     id:ID!
     name:String!
-    organization:Organization!
     createdAt:Time!
     updatedAt:Time
     deletedAt:Time
 }
 
 input CreateCategoryInput{
-    names:[String!]!
+    name:String!
 }
 input GetCategoriesInput{
     organizationID:ID!
@@ -2060,7 +2094,7 @@ input DeleteCategoryInput{
 }
 
 type CategoryMutationResponse{
-    data:[Category]
+    data:Category
     error:MutationError
 }
 
@@ -2084,8 +2118,8 @@ type CategoryQuery{
     name:String!
     boughtOn:Time!
     units:Int!
-    category:Category!
-    organization:Organization!
+    category:Category! @goField(forceResolver:true)
+    organization:Organization! @goField(forceResolver:true)
     createdAt:Time!
     updatedAt:Time
     deletedAt:Time
@@ -2134,6 +2168,7 @@ type ProductsQueryResponse{
 
 # Mutation
 type ProductMutation{
+    category:CategoryMutation!  @goField(forceResolver:true)
     createProduct(input:CreateProductInput!):ProductMutationResponse! @goField(forceResolver:true)
     updateProduct(input:UpdateProductInput!):ProductMutationResponse! @goField(forceResolver:true)
     deleteProduct(input:DeleteProductInput!):ProductMutationResponse! @goField(forceResolver:true)
@@ -2141,6 +2176,7 @@ type ProductMutation{
 
 # Query
 type ProductQuery{
+    category:CategoryQuery!  @goField(forceResolver:true)
     getProductsByFilter(input:GetProductsByFilterInput!):ProductsQueryResponse! @goField(forceResolver:true)
     getProductByID(input:GetProductByIDInput!):ProductQueryResponse! @goField(forceResolver:true)
 }
@@ -3450,74 +3486,6 @@ func (ec *executionContext) fieldContext_Category_name(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Category_organization(ctx context.Context, field graphql.CollectedField, obj *model.Category) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Category_organization(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Organization, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Organization)
-	fc.Result = res
-	return ec.marshalNOrganization2ᚖbackendᚋgraphᚋmodelᚐOrganization(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Category_organization(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Category",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Organization_id(ctx, field)
-			case "Name":
-				return ec.fieldContext_Organization_Name(ctx, field)
-			case "email":
-				return ec.fieldContext_Organization_email(ctx, field)
-			case "contact":
-				return ec.fieldContext_Organization_contact(ctx, field)
-			case "Address":
-				return ec.fieldContext_Organization_Address(ctx, field)
-			case "PanNumber":
-				return ec.fieldContext_Organization_PanNumber(ctx, field)
-			case "createdBy":
-				return ec.fieldContext_Organization_createdBy(ctx, field)
-			case "verificationStatus":
-				return ec.fieldContext_Organization_verificationStatus(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Organization_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Organization_updatedAt(ctx, field)
-			case "deletedAt":
-				return ec.fieldContext_Organization_deletedAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Organization", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Category_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Category) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Category_createdAt(ctx, field)
 	if err != nil {
@@ -3789,9 +3757,9 @@ func (ec *executionContext) _CategoryMutationResponse_data(ctx context.Context, 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Category)
+	res := resTmp.(*model.Category)
 	fc.Result = res
-	return ec.marshalOCategory2ᚕᚖbackendᚋgraphᚋmodelᚐCategory(ctx, field.Selections, res)
+	return ec.marshalOCategory2ᚖbackendᚋgraphᚋmodelᚐCategory(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CategoryMutationResponse_data(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3806,8 +3774,6 @@ func (ec *executionContext) fieldContext_CategoryMutationResponse_data(ctx conte
 				return ec.fieldContext_Category_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Category_name(ctx, field)
-			case "organization":
-				return ec.fieldContext_Category_organization(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Category_createdAt(ctx, field)
 			case "updatedAt":
@@ -3963,8 +3929,6 @@ func (ec *executionContext) fieldContext_CategoryQueryResponse_data(ctx context.
 				return ec.fieldContext_Category_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Category_name(ctx, field)
-			case "organization":
-				return ec.fieldContext_Category_organization(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Category_createdAt(ctx, field)
 			case "updatedAt":
@@ -4453,6 +4417,60 @@ func (ec *executionContext) fieldContext_Mutation_staff(ctx context.Context, fie
 				return ec.fieldContext_StaffMutation_updateStaff(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type StaffMutation", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_product(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_product(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Product(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ProductMutation)
+	fc.Result = res
+	return ec.marshalNProductMutation2ᚖbackendᚋgraphᚋmodelᚐProductMutation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_product(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "category":
+				return ec.fieldContext_ProductMutation_category(ctx, field)
+			case "createProduct":
+				return ec.fieldContext_ProductMutation_createProduct(ctx, field)
+			case "updateProduct":
+				return ec.fieldContext_ProductMutation_updateProduct(ctx, field)
+			case "deleteProduct":
+				return ec.fieldContext_ProductMutation_deleteProduct(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProductMutation", field.Name)
 		},
 	}
 	return fc, nil
@@ -5965,7 +5983,7 @@ func (ec *executionContext) _Product_category(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Category, nil
+		return ec.resolvers.Product().Category(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5986,16 +6004,14 @@ func (ec *executionContext) fieldContext_Product_category(ctx context.Context, f
 	fc = &graphql.FieldContext{
 		Object:     "Product",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Category_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Category_name(ctx, field)
-			case "organization":
-				return ec.fieldContext_Category_organization(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Category_createdAt(ctx, field)
 			case "updatedAt":
@@ -6023,7 +6039,7 @@ func (ec *executionContext) _Product_organization(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Organization, nil
+		return ec.resolvers.Product().Organization(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6044,8 +6060,8 @@ func (ec *executionContext) fieldContext_Product_organization(ctx context.Contex
 	fc = &graphql.FieldContext{
 		Object:     "Product",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -6198,6 +6214,56 @@ func (ec *executionContext) fieldContext_Product_deletedAt(ctx context.Context, 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductMutation_category(ctx context.Context, field graphql.CollectedField, obj *model.ProductMutation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductMutation_category(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ProductMutation().Category(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.CategoryMutation)
+	fc.Result = res
+	return ec.marshalNCategoryMutation2ᚖbackendᚋgraphᚋmodelᚐCategoryMutation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductMutation_category(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductMutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "createCategory":
+				return ec.fieldContext_CategoryMutation_createCategory(ctx, field)
+			case "deleteCategory":
+				return ec.fieldContext_CategoryMutation_deleteCategory(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CategoryMutation", field.Name)
 		},
 	}
 	return fc, nil
@@ -6483,6 +6549,54 @@ func (ec *executionContext) fieldContext_ProductMutationResponse_error(ctx conte
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductQuery_category(ctx context.Context, field graphql.CollectedField, obj *model.ProductQuery) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductQuery_category(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ProductQuery().Category(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.CategoryQuery)
+	fc.Result = res
+	return ec.marshalNCategoryQuery2ᚖbackendᚋgraphᚋmodelᚐCategoryQuery(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductQuery_category(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductQuery",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "getAllCategory":
+				return ec.fieldContext_CategoryQuery_getAllCategory(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CategoryQuery", field.Name)
 		},
 	}
 	return fc, nil
@@ -7646,6 +7760,58 @@ func (ec *executionContext) fieldContext_Query_staff(ctx context.Context, field 
 				return ec.fieldContext_StaffQuery_getStaffByID(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type StaffQuery", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_product(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_product(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Product(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ProductQuery)
+	fc.Result = res
+	return ec.marshalNProductQuery2ᚖbackendᚋgraphᚋmodelᚐProductQuery(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_product(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "category":
+				return ec.fieldContext_ProductQuery_category(ctx, field)
+			case "getProductsByFilter":
+				return ec.fieldContext_ProductQuery_getProductsByFilter(ctx, field)
+			case "getProductByID":
+				return ec.fieldContext_ProductQuery_getProductByID(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProductQuery", field.Name)
 		},
 	}
 	return fc, nil
@@ -9542,7 +9708,7 @@ func (ec *executionContext) _UserMutation_otp(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Otp, nil
+		return ec.resolvers.UserMutation().Otp(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9563,8 +9729,8 @@ func (ec *executionContext) fieldContext_UserMutation_otp(ctx context.Context, f
 	fc = &graphql.FieldContext{
 		Object:     "UserMutation",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "resend":
@@ -11798,22 +11964,22 @@ func (ec *executionContext) unmarshalInputCreateCategoryInput(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"names"}
+	fieldsInOrder := [...]string{"name"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "names":
+		case "name":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("names"))
-			data, err := ec.unmarshalNString2ᚕstringᚄ(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Names = data
+			it.Name = data
 		}
 	}
 
@@ -13475,11 +13641,6 @@ func (ec *executionContext) _Category(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "organization":
-			out.Values[i] = ec._Category_organization(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "createdAt":
 			out.Values[i] = ec._Category_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -13857,6 +14018,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "staff":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_staff(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "product":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_product(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -14421,37 +14589,99 @@ func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, 
 		case "id":
 			out.Values[i] = ec._Product_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._Product_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "boughtOn":
 			out.Values[i] = ec._Product_boughtOn(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "units":
 			out.Values[i] = ec._Product_units(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "category":
-			out.Values[i] = ec._Product_category(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Product_category(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "organization":
-			out.Values[i] = ec._Product_organization(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Product_organization(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "createdAt":
 			out.Values[i] = ec._Product_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "updatedAt":
 			out.Values[i] = ec._Product_updatedAt(ctx, field, obj)
@@ -14491,6 +14721,42 @@ func (ec *executionContext) _ProductMutation(ctx context.Context, sel ast.Select
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ProductMutation")
+		case "category":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ProductMutation_category(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "createProduct":
 			field := field
 
@@ -14671,6 +14937,42 @@ func (ec *executionContext) _ProductQuery(ctx context.Context, sel ast.Selection
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ProductQuery")
+		case "category":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ProductQuery_category(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "getProductsByFilter":
 			field := field
 
@@ -15247,6 +15549,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_staff(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "product":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_product(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -16116,10 +16440,41 @@ func (ec *executionContext) _UserMutation(ctx context.Context, sel ast.Selection
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "otp":
-			out.Values[i] = ec._UserMutation_otp(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserMutation_otp(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "verifyUser":
 			field := field
 
@@ -16793,6 +17148,10 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNCategory2backendᚋgraphᚋmodelᚐCategory(ctx context.Context, sel ast.SelectionSet, v model.Category) graphql.Marshaler {
+	return ec._Category(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNCategory2ᚖbackendᚋgraphᚋmodelᚐCategory(ctx context.Context, sel ast.SelectionSet, v *model.Category) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -16801,6 +17160,20 @@ func (ec *executionContext) marshalNCategory2ᚖbackendᚋgraphᚋmodelᚐCatego
 		return graphql.Null
 	}
 	return ec._Category(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNCategoryMutation2backendᚋgraphᚋmodelᚐCategoryMutation(ctx context.Context, sel ast.SelectionSet, v model.CategoryMutation) graphql.Marshaler {
+	return ec._CategoryMutation(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCategoryMutation2ᚖbackendᚋgraphᚋmodelᚐCategoryMutation(ctx context.Context, sel ast.SelectionSet, v *model.CategoryMutation) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CategoryMutation(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNCategoryMutationResponse2backendᚋgraphᚋmodelᚐCategoryMutationResponse(ctx context.Context, sel ast.SelectionSet, v model.CategoryMutationResponse) graphql.Marshaler {
@@ -16815,6 +17188,20 @@ func (ec *executionContext) marshalNCategoryMutationResponse2ᚖbackendᚋgraph�
 		return graphql.Null
 	}
 	return ec._CategoryMutationResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNCategoryQuery2backendᚋgraphᚋmodelᚐCategoryQuery(ctx context.Context, sel ast.SelectionSet, v model.CategoryQuery) graphql.Marshaler {
+	return ec._CategoryQuery(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCategoryQuery2ᚖbackendᚋgraphᚋmodelᚐCategoryQuery(ctx context.Context, sel ast.SelectionSet, v *model.CategoryQuery) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CategoryQuery(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNCategoryQueryResponse2backendᚋgraphᚋmodelᚐCategoryQueryResponse(ctx context.Context, sel ast.SelectionSet, v model.CategoryQueryResponse) graphql.Marshaler {
@@ -17034,6 +17421,20 @@ func (ec *executionContext) marshalNOtpMutationResponse2ᚖbackendᚋgraphᚋmod
 	return ec._OtpMutationResponse(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNProductMutation2backendᚋgraphᚋmodelᚐProductMutation(ctx context.Context, sel ast.SelectionSet, v model.ProductMutation) graphql.Marshaler {
+	return ec._ProductMutation(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNProductMutation2ᚖbackendᚋgraphᚋmodelᚐProductMutation(ctx context.Context, sel ast.SelectionSet, v *model.ProductMutation) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ProductMutation(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNProductMutationResponse2backendᚋgraphᚋmodelᚐProductMutationResponse(ctx context.Context, sel ast.SelectionSet, v model.ProductMutationResponse) graphql.Marshaler {
 	return ec._ProductMutationResponse(ctx, sel, &v)
 }
@@ -17046,6 +17447,20 @@ func (ec *executionContext) marshalNProductMutationResponse2ᚖbackendᚋgraph�
 		return graphql.Null
 	}
 	return ec._ProductMutationResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNProductQuery2backendᚋgraphᚋmodelᚐProductQuery(ctx context.Context, sel ast.SelectionSet, v model.ProductQuery) graphql.Marshaler {
+	return ec._ProductQuery(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNProductQuery2ᚖbackendᚋgraphᚋmodelᚐProductQuery(ctx context.Context, sel ast.SelectionSet, v *model.ProductQuery) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ProductQuery(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNProductQueryResponse2backendᚋgraphᚋmodelᚐProductQueryResponse(ctx context.Context, sel ast.SelectionSet, v model.ProductQueryResponse) graphql.Marshaler {
@@ -17151,6 +17566,10 @@ func (ec *executionContext) unmarshalNResendOtpInput2backendᚋgraphᚋmodelᚐR
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNResendOtpMutation2backendᚋgraphᚋmodelᚐResendOtpMutation(ctx context.Context, sel ast.SelectionSet, v model.ResendOtpMutation) graphql.Marshaler {
+	return ec._ResendOtpMutation(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNResendOtpMutation2ᚖbackendᚋgraphᚋmodelᚐResendOtpMutation(ctx context.Context, sel ast.SelectionSet, v *model.ResendOtpMutation) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -17249,38 +17668,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]string, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
-	}
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {

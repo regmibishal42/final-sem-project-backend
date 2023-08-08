@@ -3,6 +3,7 @@ package resolvers
 import (
 	auth_handler "backend/pkg/adapter/handler/auth"
 	organization_handler "backend/pkg/adapter/handler/organization"
+	products_handler "backend/pkg/adapter/handler/products"
 )
 
 // This file will not be regenerated automatically.
@@ -12,12 +13,16 @@ import (
 type Resolver struct {
 	auth_handler.AuthController
 	organization_handler.OrganizationController
+	products_handler.ProductController
 }
 
-func NewResolver(authController auth_handler.AuthController, organizationController organization_handler.OrganizationController) *Resolver {
+func NewResolver(authController auth_handler.AuthController,
+	organizationController organization_handler.OrganizationController,
+	productController products_handler.ProductController) *Resolver {
 	resolver := &Resolver{
 		authController,
 		organizationController,
+		productController,
 	}
 	return resolver
 }
