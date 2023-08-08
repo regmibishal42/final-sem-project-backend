@@ -73,7 +73,7 @@ type RegisterResponse{
 type UserMutation{
     createUser(input:UserInput!):AuthMutationResponse! @goField(forceResolver:true)
     loginUser(input:LoginInput!):AuthResponse! @goField(forceResolver:true)
-    otp:ResendOtpMutation!
+    otp:ResendOtpMutation!  @goField(forceResolver:true)
     verifyUser(input:userVerificationInput!):AuthMutationResponse! @goField(forceResolver:true)
     updatePassword(input:ResetPasswordInput!):RegisterResponse! @goField(forceResolver:true)
     forgetPassword(input:ForgetPasswordInput!):RegisterResponse! @goField(forceResolver:true)

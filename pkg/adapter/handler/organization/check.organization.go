@@ -1,8 +1,11 @@
 package organization_handler
 
-import "context"
+import (
+	"backend/graph/model"
+	"context"
+)
 
-func (r OrganizationRepository) GetOrganizationIDFromUserID(ctx context.Context, userID string) (*string, error) {
+func (r OrganizationRepository) GetOrganizationIDFromUserID(ctx context.Context, user *model.User) (*string, error) {
 
 	return nil, nil
 }
