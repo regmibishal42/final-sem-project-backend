@@ -75,6 +75,7 @@ type CategoryMutation struct {
 }
 
 type CategoryMutationResponse struct {
+	ID    *string       `json:"id,omitempty"`
 	Data  *Category     `json:"data,omitempty"`
 	Error MutationError `json:"error,omitempty"`
 }
@@ -143,10 +144,6 @@ type ForgetPasswordInput struct {
 
 type GetByIDInput struct {
 	ID string `json:"ID"`
-}
-
-type GetCategoriesInput struct {
-	OrganizationID string `json:"organizationID"`
 }
 
 type GetOrganizationStaffsInput struct {
@@ -230,6 +227,7 @@ type ProductMutation struct {
 }
 
 type ProductMutationResponse struct {
+	ID    *string       `json:"id,omitempty"`
 	Data  *Product      `json:"data,omitempty"`
 	Error MutationError `json:"error,omitempty"`
 }

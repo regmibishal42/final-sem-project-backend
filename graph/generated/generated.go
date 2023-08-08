@@ -114,10 +114,11 @@ type ComplexityRoot struct {
 	CategoryMutationResponse struct {
 		Data  func(childComplexity int) int
 		Error func(childComplexity int) int
+		ID    func(childComplexity int) int
 	}
 
 	CategoryQuery struct {
-		GetAllCategory func(childComplexity int, input model.GetCategoriesInput) int
+		GetAllCategory func(childComplexity int) int
 	}
 
 	CategoryQueryResponse struct {
@@ -217,6 +218,7 @@ type ComplexityRoot struct {
 	ProductMutationResponse struct {
 		Data  func(childComplexity int) int
 		Error func(childComplexity int) int
+		ID    func(childComplexity int) int
 	}
 
 	ProductQuery struct {
@@ -359,7 +361,7 @@ type CategoryMutationResolver interface {
 	DeleteCategory(ctx context.Context, obj *model.CategoryMutation, input model.DeleteCategoryInput) (*model.CategoryMutationResponse, error)
 }
 type CategoryQueryResolver interface {
-	GetAllCategory(ctx context.Context, obj *model.CategoryQuery, input model.GetCategoriesInput) (*model.CategoryQueryResponse, error)
+	GetAllCategory(ctx context.Context, obj *model.CategoryQuery) (*model.CategoryQueryResponse, error)
 }
 type MutationResolver interface {
 	Auth(ctx context.Context) (*model.UserMutation, error)
@@ -632,17 +634,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CategoryMutationResponse.Error(childComplexity), true
 
+	case "CategoryMutationResponse.id":
+		if e.complexity.CategoryMutationResponse.ID == nil {
+			break
+		}
+
+		return e.complexity.CategoryMutationResponse.ID(childComplexity), true
+
 	case "CategoryQuery.getAllCategory":
 		if e.complexity.CategoryQuery.GetAllCategory == nil {
 			break
 		}
 
-		args, err := ec.field_CategoryQuery_getAllCategory_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.CategoryQuery.GetAllCategory(childComplexity, args["input"].(model.GetCategoriesInput)), true
+		return e.complexity.CategoryQuery.GetAllCategory(childComplexity), true
 
 	case "CategoryQueryResponse.data":
 		if e.complexity.CategoryQueryResponse.Data == nil {
@@ -1051,6 +1055,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ProductMutationResponse.Error(childComplexity), true
+
+	case "ProductMutationResponse.id":
+		if e.complexity.ProductMutationResponse.ID == nil {
+			break
+		}
+
+		return e.complexity.ProductMutationResponse.ID(childComplexity), true
 
 	case "ProductQuery.category":
 		if e.complexity.ProductQuery.Category == nil {
@@ -1636,7 +1647,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDeleteProductInput,
 		ec.unmarshalInputForgetPasswordInput,
 		ec.unmarshalInputGetByIDInput,
-		ec.unmarshalInputGetCategoriesInput,
 		ec.unmarshalInputGetOrganizationStaffsInput,
 		ec.unmarshalInputGetProductByIDInput,
 		ec.unmarshalInputGetProductsByFilterInput,
@@ -2086,14 +2096,13 @@ type StaffQuery{
 input CreateCategoryInput{
     name:String!
 }
-input GetCategoriesInput{
-    organizationID:ID!
-}
+
 input DeleteCategoryInput{
     categoryID:ID!
 }
 
 type CategoryMutationResponse{
+    id:ID
     data:Category
     error:MutationError
 }
@@ -2111,7 +2120,7 @@ type CategoryMutation{
 
 # Query
 type CategoryQuery{
-    getAllCategory(input:GetCategoriesInput!):CategoryQueryResponse! @goField(forceResolver:true)
+    getAllCategory:CategoryQueryResponse! @goField(forceResolver:true)
 }`, BuiltIn: false},
 	{Name: "../schema/products/products.graphqls", Input: `type Product{
     id:ID!
@@ -2153,6 +2162,7 @@ input DeleteProductInput{
 
 # Response
 type ProductMutationResponse{
+    id:ID
     data:Product
     error:MutationError
 }
@@ -2279,21 +2289,6 @@ func (ec *executionContext) field_CategoryMutation_deleteCategory_args(ctx conte
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNDeleteCategoryInput2backendᚋgraphᚋmodelᚐDeleteCategoryInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_CategoryQuery_getAllCategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.GetCategoriesInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGetCategoriesInput2backendᚋgraphᚋmodelᚐGetCategoriesInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3651,6 +3646,8 @@ func (ec *executionContext) fieldContext_CategoryMutation_createCategory(ctx con
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CategoryMutationResponse_id(ctx, field)
 			case "data":
 				return ec.fieldContext_CategoryMutationResponse_data(ctx, field)
 			case "error":
@@ -3712,6 +3709,8 @@ func (ec *executionContext) fieldContext_CategoryMutation_deleteCategory(ctx con
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CategoryMutationResponse_id(ctx, field)
 			case "data":
 				return ec.fieldContext_CategoryMutationResponse_data(ctx, field)
 			case "error":
@@ -3730,6 +3729,47 @@ func (ec *executionContext) fieldContext_CategoryMutation_deleteCategory(ctx con
 	if fc.Args, err = ec.field_CategoryMutation_deleteCategory_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CategoryMutationResponse_id(ctx context.Context, field graphql.CollectedField, obj *model.CategoryMutationResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CategoryMutationResponse_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CategoryMutationResponse_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CategoryMutationResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -3842,7 +3882,7 @@ func (ec *executionContext) _CategoryQuery_getAllCategory(ctx context.Context, f
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.CategoryQuery().GetAllCategory(rctx, obj, fc.Args["input"].(model.GetCategoriesInput))
+		return ec.resolvers.CategoryQuery().GetAllCategory(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3874,17 +3914,6 @@ func (ec *executionContext) fieldContext_CategoryQuery_getAllCategory(ctx contex
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CategoryQueryResponse", field.Name)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_CategoryQuery_getAllCategory_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -6308,6 +6337,8 @@ func (ec *executionContext) fieldContext_ProductMutation_createProduct(ctx conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_ProductMutationResponse_id(ctx, field)
 			case "data":
 				return ec.fieldContext_ProductMutationResponse_data(ctx, field)
 			case "error":
@@ -6369,6 +6400,8 @@ func (ec *executionContext) fieldContext_ProductMutation_updateProduct(ctx conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_ProductMutationResponse_id(ctx, field)
 			case "data":
 				return ec.fieldContext_ProductMutationResponse_data(ctx, field)
 			case "error":
@@ -6430,6 +6463,8 @@ func (ec *executionContext) fieldContext_ProductMutation_deleteProduct(ctx conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_ProductMutationResponse_id(ctx, field)
 			case "data":
 				return ec.fieldContext_ProductMutationResponse_data(ctx, field)
 			case "error":
@@ -6448,6 +6483,47 @@ func (ec *executionContext) fieldContext_ProductMutation_deleteProduct(ctx conte
 	if fc.Args, err = ec.field_ProductMutation_deleteProduct_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductMutationResponse_id(ctx context.Context, field graphql.CollectedField, obj *model.ProductMutationResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductMutationResponse_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductMutationResponse_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductMutationResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -12407,35 +12483,6 @@ func (ec *executionContext) unmarshalInputGetByIDInput(ctx context.Context, obj 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputGetCategoriesInput(ctx context.Context, obj interface{}) (model.GetCategoriesInput, error) {
-	var it model.GetCategoriesInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"organizationID"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "organizationID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organizationID"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.OrganizationID = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputGetOrganizationStaffsInput(ctx context.Context, obj interface{}) (model.GetOrganizationStaffsInput, error) {
 	var it model.GetOrganizationStaffsInput
 	asMap := map[string]interface{}{}
@@ -13790,6 +13837,8 @@ func (ec *executionContext) _CategoryMutationResponse(ctx context.Context, sel a
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("CategoryMutationResponse")
+		case "id":
+			out.Values[i] = ec._CategoryMutationResponse_id(ctx, field, obj)
 		case "data":
 			out.Values[i] = ec._CategoryMutationResponse_data(ctx, field, obj)
 		case "error":
@@ -14899,6 +14948,8 @@ func (ec *executionContext) _ProductMutationResponse(ctx context.Context, sel as
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ProductMutationResponse")
+		case "id":
+			out.Values[i] = ec._ProductMutationResponse_id(ctx, field, obj)
 		case "data":
 			out.Values[i] = ec._ProductMutationResponse_data(ctx, field, obj)
 		case "error":
@@ -17255,11 +17306,6 @@ func (ec *executionContext) unmarshalNDeleteProductInput2backendᚋgraphᚋmodel
 
 func (ec *executionContext) unmarshalNForgetPasswordInput2backendᚋgraphᚋmodelᚐForgetPasswordInput(ctx context.Context, v interface{}) (model.ForgetPasswordInput, error) {
 	res, err := ec.unmarshalInputForgetPasswordInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNGetCategoriesInput2backendᚋgraphᚋmodelᚐGetCategoriesInput(ctx context.Context, v interface{}) (model.GetCategoriesInput, error) {
-	res, err := ec.unmarshalInputGetCategoriesInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
