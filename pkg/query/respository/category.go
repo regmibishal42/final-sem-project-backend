@@ -6,6 +6,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"gorm.io/gorm/clause"
 )
 
 func (r QueryRepository) CreateCategory(ctx context.Context, category *model.Category) error {
@@ -43,4 +45,13 @@ func (r QueryRepository) DeleteCategory(ctx context.Context, categoryID *string)
 		return err
 	}
 	return nil
+}
+
+func (r QueryRepository) GetCategoryByID(ctx context.Context, categoryID *string) (*model.Category, error) {
+	category := model.Category{}
+	err := r.db.Model(&model.Category{}).Clauses(clause.Returning{}).Where("deleted_at IS NULL AND id = ?", categoryID).First(&category).Error
+	if err != nil {
+		return nil, err
+	}
+	return &category, nil
 }
