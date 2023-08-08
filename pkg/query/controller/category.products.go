@@ -7,4 +7,6 @@ import (
 
 type ProductCategoryQueryInterface interface {
 	CreateCategory(ctx context.Context, category *model.Category) error
+	DeleteCategory(ctx context.Context, category *model.Category) error
+	GetCategoryByOrganization(ctx context.Context, organizationID *string) ([]*model.Category, error)
 }
