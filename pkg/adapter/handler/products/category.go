@@ -6,6 +6,7 @@ import (
 	"backend/pkg/util"
 	"context"
 	"errors"
+	"fmt"
 )
 
 func (r ProductRepository) CreateProductCategory(ctx context.Context, user *model.User, input model.CreateCategoryInput) (*model.CategoryMutationResponse, error) {
@@ -99,5 +100,6 @@ func (r ProductRepository) GetCategoryByOrganization(ctx context.Context, user *
 }
 
 func (r ProductRepository) GetCategoryByID(ctx context.Context, categoryID *string) (*model.Category, error) {
+	fmt.Println("Category ID is", *categoryID)
 	return r.TableCategory.GetCategoryByID(ctx, categoryID)
 }

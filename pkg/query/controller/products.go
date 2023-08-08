@@ -7,4 +7,5 @@ import (
 
 type ProductQueryInterface interface {
 	CreateProduct(ctx context.Context, product *model.Product) error
+	UpdateProduct(ctx context.Context, product *model.Product) (*model.Product, error)
 }

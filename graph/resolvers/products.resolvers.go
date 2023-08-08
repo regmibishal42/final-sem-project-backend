@@ -14,11 +14,17 @@ import (
 
 // Category is the resolver for the category field.
 func (r *productResolver) Category(ctx context.Context, obj *model.Product) (*model.Category, error) {
+	if obj.Category != nil {
+		return obj.Category, nil
+	}
 	return r.ProductDomain.GetCategoryByID(ctx, &obj.CategoryID)
 }
 
 // Organization is the resolver for the organization field.
 func (r *productResolver) Organization(ctx context.Context, obj *model.Product) (*model.Organization, error) {
+	if obj.Organization != nil {
+		return obj.Organization, nil
+	}
 	return r.OrganizationDomain.GetOrganizationDetailsByID(ctx, obj.OrganizationID)
 }
 
@@ -41,7 +47,14 @@ func (r *productMutationResolver) CreateProduct(ctx context.Context, obj *model.
 
 // UpdateProduct is the resolver for the updateProduct field.
 func (r *productMutationResolver) UpdateProduct(ctx context.Context, obj *model.ProductMutation, input model.UpdateProductInput) (*model.ProductMutationResponse, error) {
-	panic(fmt.Errorf("not implemented: UpdateProduct - updateProduct"))
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.ProductMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	return r.ProductDomain.UpdateProduct(ctx, user, &input)
 }
 
 // DeleteProduct is the resolver for the deleteProduct field.

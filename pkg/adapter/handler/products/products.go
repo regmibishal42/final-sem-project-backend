@@ -41,3 +41,25 @@ func (r ProductRepository) CreateProduct(ctx context.Context, user *model.User, 
 		Data: product,
 	}, nil
 }
+
+//update products details --Add User Verification Later
+func (r ProductRepository) UpdateProduct(ctx context.Context, user *model.User, input *model.UpdateProductInput) (*model.ProductMutationResponse, error) {
+	product, validationError := input.Validator()
+	if validationError != nil {
+		return &model.ProductMutationResponse{
+			Error: validationError,
+		}, nil
+	}
+
+	//update the product
+	updatedProduct, err := r.TableProduct.UpdateProduct(ctx, product)
+	if err != nil {
+		return &model.ProductMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.ProductMutationResponse{
+		ID:   &product.ID,
+		Data: updatedProduct,
+	}, nil
+}
