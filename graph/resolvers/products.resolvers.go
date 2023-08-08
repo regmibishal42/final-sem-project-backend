@@ -9,7 +9,6 @@ import (
 	"backend/graph/generated"
 	"backend/graph/model"
 	"context"
-	"fmt"
 )
 
 // Category is the resolver for the category field.
@@ -76,7 +75,14 @@ func (r *productQueryResolver) Category(ctx context.Context, obj *model.ProductQ
 
 // GetProductsByFilter is the resolver for the getProductsByFilter field.
 func (r *productQueryResolver) GetProductsByFilter(ctx context.Context, obj *model.ProductQuery, input model.GetProductsByFilterInput) (*model.ProductsQueryResponse, error) {
-	panic(fmt.Errorf("not implemented: GetProductsByFilter - getProductsByFilter"))
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.ProductsQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	return r.ProductDomain.GetProductsByFilter(ctx, user, &input)
 }
 
 // GetProductByID is the resolver for the getProductByID field.

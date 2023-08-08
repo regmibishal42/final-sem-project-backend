@@ -12,4 +12,5 @@ type ProductQueryInterface interface {
 
 	// Query
 	GetProductByID(ctx context.Context, productID *string) (*model.Product, error)
+	GetProductsByFilter(ctx context.Context, filter *model.GetProductsByFilterInput, organizationID *string) ([]*model.Product, error)
 }

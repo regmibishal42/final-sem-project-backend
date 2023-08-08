@@ -117,3 +117,35 @@ func (r ProductRepository) GetProductByID(ctx context.Context, user *model.User,
 		Data: product,
 	}, nil
 }
+
+func (r ProductRepository) GetProductsByFilter(ctx context.Context, user *model.User, filter *model.GetProductsByFilterInput) (*model.ProductsQueryResponse, error) {
+	//validate category id, if exist
+	if filter != nil && filter.CategoryID != nil && !util.IsValidID(*filter.CategoryID) {
+		return &model.ProductsQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, errors.New("invalid categoryID"), exception.BAD_REQUEST, nil),
+		}, nil
+	}
+
+	//validate the user -> permission
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		return &model.ProductsQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	if organizationID == nil {
+		return &model.ProductsQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, errors.New("not authorized for this task"), exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	// get the products
+	products, err := r.TableProduct.GetProductsByFilter(ctx, filter, organizationID)
+	if err != nil {
+		return &model.ProductsQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.ProductsQueryResponse{
+		Data: products,
+	}, nil
+}

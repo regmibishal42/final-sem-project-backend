@@ -50,3 +50,18 @@ func (r QueryRepository) GetProductByID(ctx context.Context, productID *string) 
 	}
 	return &product, nil
 }
+
+func (r QueryRepository) GetProductsByFilter(ctx context.Context, filter *model.GetProductsByFilterInput, organizationID *string) ([]*model.Product, error) {
+	products := []*model.Product{}
+	db := r.db.Model(&model.Product{}).Where("deleted_at IS NULL AND organization_ID = ?", organizationID)
+	if filter != nil {
+		if filter.CategoryID != nil {
+			db = db.Where("category_id = ?", filter.CategoryID)
+		}
+	}
+	err := db.Find(&products).Error
+	if err != nil {
+		return nil, err
+	}
+	return products, nil
+}
