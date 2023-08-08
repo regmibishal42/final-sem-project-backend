@@ -72,3 +72,28 @@ func (r ProductRepository) DeleteCategory(ctx context.Context, user *model.User,
 		ID: &input.CategoryID,
 	}, nil
 }
+
+func (r ProductRepository) GetCategoryByOrganization(ctx context.Context, user *model.User) (*model.CategoryQueryResponse, error) {
+	//Get OrganizationID from userID
+	id, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		return &model.CategoryQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	if id == nil {
+		return &model.CategoryQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, errors.New("not authorized for this task"), exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	//get category
+	categories, err := r.TableCategory.GetCategoryByOrganization(ctx, id)
+	if err != nil {
+		return &model.CategoryQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.CategoryQueryResponse{
+		Data: categories,
+	}, nil
+}

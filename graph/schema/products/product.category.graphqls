@@ -9,9 +9,7 @@ type Category{
 input CreateCategoryInput{
     name:String!
 }
-input GetCategoriesInput{
-    organizationID:ID!
-}
+
 input DeleteCategoryInput{
     categoryID:ID!
 }
@@ -35,5 +33,5 @@ type CategoryMutation{
 
 # Query
 type CategoryQuery{
-    getAllCategory(input:GetCategoriesInput!):CategoryQueryResponse! @goField(forceResolver:true)
+    getAllCategory:CategoryQueryResponse! @goField(forceResolver:true)
 }

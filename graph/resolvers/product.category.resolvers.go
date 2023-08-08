@@ -9,7 +9,6 @@ import (
 	"backend/graph/generated"
 	"backend/graph/model"
 	"context"
-	"fmt"
 )
 
 // CreateCategory is the resolver for the createCategory field.
@@ -37,7 +36,7 @@ func (r *categoryMutationResolver) DeleteCategory(ctx context.Context, obj *mode
 }
 
 // GetAllCategory is the resolver for the getAllCategory field.
-func (r *categoryQueryResolver) GetAllCategory(ctx context.Context, obj *model.CategoryQuery, input model.GetCategoriesInput) (*model.CategoryQueryResponse, error) {
+func (r *categoryQueryResolver) GetAllCategory(ctx context.Context, obj *model.CategoryQuery) (*model.CategoryQueryResponse, error) {
 	user := UserForContext(ctx)
 	err := CheckLoggedIn(user)
 	if err != nil {
@@ -45,7 +44,7 @@ func (r *categoryQueryResolver) GetAllCategory(ctx context.Context, obj *model.C
 			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
 		}, nil
 	}
-	panic(fmt.Errorf("not implemented: GetAllCategory - getAllCategory"))
+	return r.ProductDomain.GetCategoryByOrganization(ctx, user)
 }
 
 // CategoryMutation returns generated.CategoryMutationResolver implementation.

@@ -146,10 +146,6 @@ type GetByIDInput struct {
 	ID string `json:"ID"`
 }
 
-type GetCategoriesInput struct {
-	OrganizationID string `json:"organizationID"`
-}
-
 type GetOrganizationStaffsInput struct {
 	OrganizationID string `json:"organizationID"`
 }

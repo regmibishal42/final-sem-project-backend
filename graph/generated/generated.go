@@ -118,7 +118,7 @@ type ComplexityRoot struct {
 	}
 
 	CategoryQuery struct {
-		GetAllCategory func(childComplexity int, input model.GetCategoriesInput) int
+		GetAllCategory func(childComplexity int) int
 	}
 
 	CategoryQueryResponse struct {
@@ -361,7 +361,7 @@ type CategoryMutationResolver interface {
 	DeleteCategory(ctx context.Context, obj *model.CategoryMutation, input model.DeleteCategoryInput) (*model.CategoryMutationResponse, error)
 }
 type CategoryQueryResolver interface {
-	GetAllCategory(ctx context.Context, obj *model.CategoryQuery, input model.GetCategoriesInput) (*model.CategoryQueryResponse, error)
+	GetAllCategory(ctx context.Context, obj *model.CategoryQuery) (*model.CategoryQueryResponse, error)
 }
 type MutationResolver interface {
 	Auth(ctx context.Context) (*model.UserMutation, error)
@@ -646,12 +646,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_CategoryQuery_getAllCategory_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.CategoryQuery.GetAllCategory(childComplexity, args["input"].(model.GetCategoriesInput)), true
+		return e.complexity.CategoryQuery.GetAllCategory(childComplexity), true
 
 	case "CategoryQueryResponse.data":
 		if e.complexity.CategoryQueryResponse.Data == nil {
@@ -1652,7 +1647,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDeleteProductInput,
 		ec.unmarshalInputForgetPasswordInput,
 		ec.unmarshalInputGetByIDInput,
-		ec.unmarshalInputGetCategoriesInput,
 		ec.unmarshalInputGetOrganizationStaffsInput,
 		ec.unmarshalInputGetProductByIDInput,
 		ec.unmarshalInputGetProductsByFilterInput,
@@ -2102,9 +2096,7 @@ type StaffQuery{
 input CreateCategoryInput{
     name:String!
 }
-input GetCategoriesInput{
-    organizationID:ID!
-}
+
 input DeleteCategoryInput{
     categoryID:ID!
 }
@@ -2128,7 +2120,7 @@ type CategoryMutation{
 
 # Query
 type CategoryQuery{
-    getAllCategory(input:GetCategoriesInput!):CategoryQueryResponse! @goField(forceResolver:true)
+    getAllCategory:CategoryQueryResponse! @goField(forceResolver:true)
 }`, BuiltIn: false},
 	{Name: "../schema/products/products.graphqls", Input: `type Product{
     id:ID!
@@ -2297,21 +2289,6 @@ func (ec *executionContext) field_CategoryMutation_deleteCategory_args(ctx conte
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNDeleteCategoryInput2backendᚋgraphᚋmodelᚐDeleteCategoryInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_CategoryQuery_getAllCategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.GetCategoriesInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGetCategoriesInput2backendᚋgraphᚋmodelᚐGetCategoriesInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3905,7 +3882,7 @@ func (ec *executionContext) _CategoryQuery_getAllCategory(ctx context.Context, f
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.CategoryQuery().GetAllCategory(rctx, obj, fc.Args["input"].(model.GetCategoriesInput))
+		return ec.resolvers.CategoryQuery().GetAllCategory(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3937,17 +3914,6 @@ func (ec *executionContext) fieldContext_CategoryQuery_getAllCategory(ctx contex
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CategoryQueryResponse", field.Name)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_CategoryQuery_getAllCategory_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -12517,35 +12483,6 @@ func (ec *executionContext) unmarshalInputGetByIDInput(ctx context.Context, obj 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputGetCategoriesInput(ctx context.Context, obj interface{}) (model.GetCategoriesInput, error) {
-	var it model.GetCategoriesInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"organizationID"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "organizationID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organizationID"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.OrganizationID = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputGetOrganizationStaffsInput(ctx context.Context, obj interface{}) (model.GetOrganizationStaffsInput, error) {
 	var it model.GetOrganizationStaffsInput
 	asMap := map[string]interface{}{}
@@ -17369,11 +17306,6 @@ func (ec *executionContext) unmarshalNDeleteProductInput2backendᚋgraphᚋmodel
 
 func (ec *executionContext) unmarshalNForgetPasswordInput2backendᚋgraphᚋmodelᚐForgetPasswordInput(ctx context.Context, v interface{}) (model.ForgetPasswordInput, error) {
 	res, err := ec.unmarshalInputForgetPasswordInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNGetCategoriesInput2backendᚋgraphᚋmodelᚐGetCategoriesInput(ctx context.Context, v interface{}) (model.GetCategoriesInput, error) {
-	res, err := ec.unmarshalInputGetCategoriesInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
