@@ -97,3 +97,7 @@ func (r ProductRepository) GetCategoryByOrganization(ctx context.Context, user *
 		Data: categories,
 	}, nil
 }
+
+func (r ProductRepository) GetCategoryByID(ctx context.Context, categoryID *string) (*model.Category, error) {
+	return r.TableCategory.GetCategoryByID(ctx, categoryID)
+}
