@@ -3,6 +3,7 @@ package products_handler
 import (
 	"backend/exception"
 	"backend/graph/model"
+	"backend/pkg/util"
 	"context"
 	"errors"
 )
@@ -61,5 +62,26 @@ func (r ProductRepository) UpdateProduct(ctx context.Context, user *model.User, 
 	return &model.ProductMutationResponse{
 		ID:   &product.ID,
 		Data: updatedProduct,
+	}, nil
+}
+
+//delete product
+func (r ProductRepository) DeleteProduct(ctx context.Context, user *model.User, productID *string) (*model.ProductMutationResponse, error) {
+	//validate the productID
+	if !util.IsValidID(*productID) {
+		return &model.ProductMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, errors.New("invalid productID"), exception.BAD_REQUEST, nil),
+		}, nil
+	}
+	//Delete the product
+	err := r.TableProduct.DeleteProduct(ctx, productID)
+	if err != nil {
+		return &model.ProductMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+
+	return &model.ProductMutationResponse{
+		ID: productID,
 	}, nil
 }

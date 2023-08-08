@@ -21,3 +21,23 @@ func (r QueryRepository) UpdateProduct(ctx context.Context, product *model.Produ
 	}
 	return &updatedProduct, nil
 }
+
+func (r QueryRepository) DeleteProduct(ctx context.Context, productID *string) error {
+	product := model.Product{}
+	deletedProduct := model.DeletedProducts{}
+	tx := r.db.Begin()
+	if err := tx.Where("deleted_at IS NULL AND id = ?", productID).Find(&product).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	deletedProduct.Product = &product
+	if err := tx.Delete(&product).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Create(&deletedProduct).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit().Error
+}

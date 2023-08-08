@@ -59,7 +59,14 @@ func (r *productMutationResolver) UpdateProduct(ctx context.Context, obj *model.
 
 // DeleteProduct is the resolver for the deleteProduct field.
 func (r *productMutationResolver) DeleteProduct(ctx context.Context, obj *model.ProductMutation, input model.DeleteProductInput) (*model.ProductMutationResponse, error) {
-	panic(fmt.Errorf("not implemented: DeleteProduct - deleteProduct"))
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.ProductMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	return r.ProductDomain.DeleteProduct(ctx, user, &input.ProductID)
 }
 
 // Category is the resolver for the category field.

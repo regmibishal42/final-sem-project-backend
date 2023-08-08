@@ -19,4 +19,5 @@ type ProductInterface interface {
 	// Products
 	CreateProduct(ctx context.Context, user *model.User, input *model.CreateProductInput) (*model.ProductMutationResponse, error)
 	UpdateProduct(ctx context.Context, user *model.User, input *model.UpdateProductInput) (*model.ProductMutationResponse, error)
+	DeleteProduct(ctx context.Context, user *model.User, productID *string) (*model.ProductMutationResponse, error)
 }
