@@ -75,6 +75,7 @@ type CategoryMutation struct {
 }
 
 type CategoryMutationResponse struct {
+	ID    *string       `json:"id,omitempty"`
 	Data  *Category     `json:"data,omitempty"`
 	Error MutationError `json:"error,omitempty"`
 }
@@ -230,6 +231,7 @@ type ProductMutation struct {
 }
 
 type ProductMutationResponse struct {
+	ID    *string       `json:"id,omitempty"`
 	Data  *Product      `json:"data,omitempty"`
 	Error MutationError `json:"error,omitempty"`
 }

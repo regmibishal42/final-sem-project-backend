@@ -38,6 +38,7 @@ input DeleteProductInput{
 
 # Response
 type ProductMutationResponse{
+    id:ID
     data:Product
     error:MutationError
 }

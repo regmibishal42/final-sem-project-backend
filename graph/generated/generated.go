@@ -114,6 +114,7 @@ type ComplexityRoot struct {
 	CategoryMutationResponse struct {
 		Data  func(childComplexity int) int
 		Error func(childComplexity int) int
+		ID    func(childComplexity int) int
 	}
 
 	CategoryQuery struct {
@@ -217,6 +218,7 @@ type ComplexityRoot struct {
 	ProductMutationResponse struct {
 		Data  func(childComplexity int) int
 		Error func(childComplexity int) int
+		ID    func(childComplexity int) int
 	}
 
 	ProductQuery struct {
@@ -631,6 +633,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CategoryMutationResponse.Error(childComplexity), true
+
+	case "CategoryMutationResponse.id":
+		if e.complexity.CategoryMutationResponse.ID == nil {
+			break
+		}
+
+		return e.complexity.CategoryMutationResponse.ID(childComplexity), true
 
 	case "CategoryQuery.getAllCategory":
 		if e.complexity.CategoryQuery.GetAllCategory == nil {
@@ -1051,6 +1060,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ProductMutationResponse.Error(childComplexity), true
+
+	case "ProductMutationResponse.id":
+		if e.complexity.ProductMutationResponse.ID == nil {
+			break
+		}
+
+		return e.complexity.ProductMutationResponse.ID(childComplexity), true
 
 	case "ProductQuery.category":
 		if e.complexity.ProductQuery.Category == nil {
@@ -2094,6 +2110,7 @@ input DeleteCategoryInput{
 }
 
 type CategoryMutationResponse{
+    id:ID
     data:Category
     error:MutationError
 }
@@ -2153,6 +2170,7 @@ input DeleteProductInput{
 
 # Response
 type ProductMutationResponse{
+    id:ID
     data:Product
     error:MutationError
 }
@@ -3651,6 +3669,8 @@ func (ec *executionContext) fieldContext_CategoryMutation_createCategory(ctx con
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CategoryMutationResponse_id(ctx, field)
 			case "data":
 				return ec.fieldContext_CategoryMutationResponse_data(ctx, field)
 			case "error":
@@ -3712,6 +3732,8 @@ func (ec *executionContext) fieldContext_CategoryMutation_deleteCategory(ctx con
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CategoryMutationResponse_id(ctx, field)
 			case "data":
 				return ec.fieldContext_CategoryMutationResponse_data(ctx, field)
 			case "error":
@@ -3730,6 +3752,47 @@ func (ec *executionContext) fieldContext_CategoryMutation_deleteCategory(ctx con
 	if fc.Args, err = ec.field_CategoryMutation_deleteCategory_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CategoryMutationResponse_id(ctx context.Context, field graphql.CollectedField, obj *model.CategoryMutationResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CategoryMutationResponse_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CategoryMutationResponse_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CategoryMutationResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -6308,6 +6371,8 @@ func (ec *executionContext) fieldContext_ProductMutation_createProduct(ctx conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_ProductMutationResponse_id(ctx, field)
 			case "data":
 				return ec.fieldContext_ProductMutationResponse_data(ctx, field)
 			case "error":
@@ -6369,6 +6434,8 @@ func (ec *executionContext) fieldContext_ProductMutation_updateProduct(ctx conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_ProductMutationResponse_id(ctx, field)
 			case "data":
 				return ec.fieldContext_ProductMutationResponse_data(ctx, field)
 			case "error":
@@ -6430,6 +6497,8 @@ func (ec *executionContext) fieldContext_ProductMutation_deleteProduct(ctx conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_ProductMutationResponse_id(ctx, field)
 			case "data":
 				return ec.fieldContext_ProductMutationResponse_data(ctx, field)
 			case "error":
@@ -6448,6 +6517,47 @@ func (ec *executionContext) fieldContext_ProductMutation_deleteProduct(ctx conte
 	if fc.Args, err = ec.field_ProductMutation_deleteProduct_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductMutationResponse_id(ctx context.Context, field graphql.CollectedField, obj *model.ProductMutationResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductMutationResponse_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductMutationResponse_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductMutationResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -13790,6 +13900,8 @@ func (ec *executionContext) _CategoryMutationResponse(ctx context.Context, sel a
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("CategoryMutationResponse")
+		case "id":
+			out.Values[i] = ec._CategoryMutationResponse_id(ctx, field, obj)
 		case "data":
 			out.Values[i] = ec._CategoryMutationResponse_data(ctx, field, obj)
 		case "error":
@@ -14899,6 +15011,8 @@ func (ec *executionContext) _ProductMutationResponse(ctx context.Context, sel as
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ProductMutationResponse")
+		case "id":
+			out.Values[i] = ec._ProductMutationResponse_id(ctx, field, obj)
 		case "data":
 			out.Values[i] = ec._ProductMutationResponse_data(ctx, field, obj)
 		case "error":

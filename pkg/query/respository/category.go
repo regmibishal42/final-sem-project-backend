@@ -37,8 +37,8 @@ func (r QueryRepository) GetCategoryByOrganization(ctx context.Context, organiza
 	return categories, nil
 }
 
-func (r QueryRepository) DeleteCategory(ctx context.Context, category *model.Category) error {
-	err := r.db.Model(&model.Category{}).Where("id = ?", category.ID).Update("deleted_at = ", time.Now()).Error
+func (r QueryRepository) DeleteCategory(ctx context.Context, categoryID *string) error {
+	err := r.db.Model(&model.Category{}).Where("id = ?", categoryID).Update("deleted_at", time.Now()).Error
 	if err != nil {
 		return err
 	}

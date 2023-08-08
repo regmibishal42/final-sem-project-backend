@@ -17,6 +17,7 @@ input DeleteCategoryInput{
 }
 
 type CategoryMutationResponse{
+    id:ID
     data:Category
     error:MutationError
 }

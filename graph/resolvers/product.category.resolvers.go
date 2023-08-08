@@ -33,7 +33,7 @@ func (r *categoryMutationResolver) DeleteCategory(ctx context.Context, obj *mode
 			Error: exception.MutationErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
 		}, nil
 	}
-	panic(fmt.Errorf("not implemented: DeleteCategory - deleteCategory"))
+	return r.ProductDomain.DeleteCategory(ctx, user, input)
 }
 
 // GetAllCategory is the resolver for the getAllCategory field.

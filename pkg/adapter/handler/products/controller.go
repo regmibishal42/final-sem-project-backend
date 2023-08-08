@@ -12,4 +12,5 @@ type ProductController struct {
 type ProductInterface interface {
 	// Category
 	CreateProductCategory(ctx context.Context, user *model.User, input model.CreateCategoryInput) (*model.CategoryMutationResponse, error)
+	DeleteCategory(ctx context.Context, user *model.User, input model.DeleteCategoryInput) (*model.CategoryMutationResponse, error)
 }
