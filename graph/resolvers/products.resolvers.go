@@ -81,7 +81,14 @@ func (r *productQueryResolver) GetProductsByFilter(ctx context.Context, obj *mod
 
 // GetProductByID is the resolver for the getProductByID field.
 func (r *productQueryResolver) GetProductByID(ctx context.Context, obj *model.ProductQuery, input model.GetProductByIDInput) (*model.ProductQueryResponse, error) {
-	panic(fmt.Errorf("not implemented: GetProductByID - getProductByID"))
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.ProductQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	return r.ProductDomain.GetProductByID(ctx, user, &input.ProductID)
 }
 
 // Product returns generated.ProductResolver implementation.

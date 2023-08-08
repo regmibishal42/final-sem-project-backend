@@ -85,3 +85,35 @@ func (r ProductRepository) DeleteProduct(ctx context.Context, user *model.User, 
 		ID: productID,
 	}, nil
 }
+
+//get product by id
+func (r ProductRepository) GetProductByID(ctx context.Context, user *model.User, productID *string) (*model.ProductQueryResponse, error) {
+	//validate productID
+	if !util.IsValidID(*productID) {
+		return &model.ProductQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, errors.New("invalid productID"), exception.BAD_REQUEST, nil),
+		}, nil
+	}
+	//validate the user -> permission
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		return &model.ProductQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	if organizationID == nil {
+		return &model.ProductQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, errors.New("not authorized for this task"), exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	//get the product
+	product, err := r.TableProduct.GetProductByID(ctx, productID)
+	if err != nil {
+		return &model.ProductQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.ProductQueryResponse{
+		Data: product,
+	}, nil
+}

@@ -41,3 +41,12 @@ func (r QueryRepository) DeleteProduct(ctx context.Context, productID *string) e
 	}
 	return tx.Commit().Error
 }
+
+func (r QueryRepository) GetProductByID(ctx context.Context, productID *string) (*model.Product, error) {
+	product := model.Product{}
+	err := r.db.Model(&model.Product{}).Where("deleted_at IS NULL AND id = ?", productID).First(&product).Error
+	if err != nil {
+		return nil, err
+	}
+	return &product, nil
+}
