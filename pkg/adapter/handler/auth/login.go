@@ -91,6 +91,21 @@ func (r AuthRepository) ForgetUserPassword(ctx context.Context, input *model.For
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
 		}, nil
 	}
+	//create opt and send email
+	otpSecret := util.OtpGenerator()
+	otp := model.Otp{
+		UserId: user.ID,
+		Secret: otpSecret,
+	}
+	err = r.TableOtp.UpdateOtp(ctx, &otp)
+	if err != nil {
+		return &model.RegisterResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+
+	go util.SendResetPasswordOtpEmail("User", user.Email, otp.Secret)
+
 	return &model.RegisterResponse{
 		UserID: &user.ID,
 	}, nil
@@ -109,6 +124,18 @@ func (r AuthRepository) ResetPassword(ctx context.Context, input *model.ResetPas
 	if err != nil {
 		return &model.RegisterResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	//verify otp
+	otp, err := r.TableOtp.GetOtp(ctx, user.ID)
+	if err != nil {
+		return &model.RegisterResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	if input.Opt != otp.Secret {
+		return &model.RegisterResponse{
+			Error: exception.MutationErrorHandler(ctx, errors.New("invalid otp"), exception.SERVER_ERROR, nil),
 		}, nil
 	}
 	//update the password
