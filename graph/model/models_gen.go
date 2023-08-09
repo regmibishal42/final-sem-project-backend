@@ -138,8 +138,7 @@ type DeleteProductInput struct {
 }
 
 type ForgetPasswordInput struct {
-	Email    string   `json:"email"`
-	UserType UserType `json:"userType"`
+	Email string `json:"email"`
 }
 
 type GetByIDInput struct {
@@ -379,7 +378,7 @@ type UserMutation struct {
 	LoginUser      *AuthResponse         `json:"loginUser"`
 	Otp            *ResendOtpMutation    `json:"otp"`
 	VerifyUser     *AuthMutationResponse `json:"verifyUser"`
-	UpdatePassword *RegisterResponse     `json:"updatePassword"`
+	UpdatePassword *AuthMutationResponse `json:"updatePassword"`
 	ForgetPassword *RegisterResponse     `json:"forgetPassword"`
 	ResetPassword  *RegisterResponse     `json:"resetPassword"`
 }

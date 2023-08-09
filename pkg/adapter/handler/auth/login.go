@@ -46,3 +46,86 @@ func (r AuthRepository) Login(ctx context.Context, input *model.LoginInput) *mod
 		Data: token,
 	}
 }
+
+func (r AuthRepository) UpdateUserPassword(ctx context.Context, user *model.User, input *model.UpdatePasswordInput) (*model.AuthMutationResponse, error) {
+	if validationError := input.Validator(); validationError != nil {
+		return &model.AuthMutationResponse{
+			Error: validationError,
+		}, nil
+	}
+	//compare old password
+	isValidOldPassword := util.CheckPasswordHash(input.OldPassword, user.Password)
+	if !isValidOldPassword {
+		return &model.AuthMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, errors.New("invalid old password"), exception.BAD_REQUEST, nil),
+		}, nil
+	}
+	//update password
+	hashedNewPassword, err := util.HashPassword(input.NewPassword)
+	if err != nil {
+		return &model.AuthMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	user.Password = hashedNewPassword
+	err = r.TableUser.UpdateUserDetails(ctx, user)
+	if err != nil {
+		return &model.AuthMutationResponse{}, nil
+	}
+	return &model.AuthMutationResponse{
+		Data: user,
+	}, nil
+}
+
+func (r AuthRepository) ForgetUserPassword(ctx context.Context, input *model.ForgetPasswordInput) (*model.RegisterResponse, error) {
+	//validate input
+	if validationError := input.ValidationError(); validationError != nil {
+		return &model.RegisterResponse{
+			Error: validationError,
+		}, nil
+	}
+	//get user from email
+	user, err := r.TableUser.GetUserByEmail(ctx, input.Email)
+	if err != nil {
+		return &model.RegisterResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.RegisterResponse{
+		UserID: &user.ID,
+	}, nil
+
+}
+
+//reset password -> after user email is verified via forget password
+func (r AuthRepository) ResetPassword(ctx context.Context, input *model.ResetPasswordInput) (*model.RegisterResponse, error) {
+	if validationError := input.Validator(); validationError != nil {
+		return &model.RegisterResponse{
+			Error: validationError,
+		}, nil
+	}
+	//get user from email
+	user, err := r.TableUser.GetUserByEmail(ctx, input.Email)
+	if err != nil {
+		return &model.RegisterResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	//update the password
+	hashedPassword, err := util.HashPassword(input.NewPassword)
+	if err != nil {
+		return &model.RegisterResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	user.Password = hashedPassword
+	err = r.TableUser.UpdateUserDetails(ctx, user)
+	if err != nil {
+		return &model.RegisterResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.RegisterResponse{
+		UserID: &user.ID,
+	}, nil
+}
