@@ -90,3 +90,23 @@ Your App Team`, userName, otp)
 	sendVerificationEmail(userEmail, emailTemplate)
 
 }
+
+func SendResetPasswordOtpEmail(userName string, userEmail string, otp string) {
+	emailTemplate := fmt.Sprintf(`Subject: Reset Account Password - OTP Verification
+
+Dear %s,
+
+You have requested to reset your account's password as you might have forgotten the old one.! To complete the process, please use the following OTP code:
+
+OTP Code: %s
+
+This OTP code is valid for a single use and will expire after a certain period of time. Please enter it on the app's verification screen.
+
+If you did not request for this otp. You can ignore this email.
+
+Welcome to LogiCloud!
+
+Best regards,
+LogiCloud Team`, userName, otp)
+	sendVerificationEmail(userEmail, emailTemplate)
+}
