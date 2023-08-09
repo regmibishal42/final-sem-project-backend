@@ -138,8 +138,7 @@ type DeleteProductInput struct {
 }
 
 type ForgetPasswordInput struct {
-	Email    string   `json:"email"`
-	UserType UserType `json:"userType"`
+	Email string `json:"email"`
 }
 
 type GetByIDInput struct {

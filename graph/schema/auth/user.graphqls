@@ -40,7 +40,6 @@ input ResetPasswordInput{
 }
 input ForgetPasswordInput {
   email: String!
-  userType: UserType!
 }
 
 #types

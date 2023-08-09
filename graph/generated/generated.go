@@ -1825,7 +1825,6 @@ input ResetPasswordInput{
 }
 input ForgetPasswordInput {
   email: String!
-  userType: UserType!
 }
 
 #types
@@ -12423,7 +12422,7 @@ func (ec *executionContext) unmarshalInputForgetPasswordInput(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"email", "userType"}
+	fieldsInOrder := [...]string{"email"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -12439,15 +12438,6 @@ func (ec *executionContext) unmarshalInputForgetPasswordInput(ctx context.Contex
 				return it, err
 			}
 			it.Email = data
-		case "userType":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userType"))
-			data, err := ec.unmarshalNUserType2backendᚋgraphᚋmodelᚐUserType(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserType = data
 		}
 	}
 

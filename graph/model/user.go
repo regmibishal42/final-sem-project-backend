@@ -53,3 +53,28 @@ func (input *UpdatePasswordInput) Validator() *ValidationError {
 	}
 	return nil
 }
+
+//forget password input validator
+func (input *ForgetPasswordInput) ValidationError() *ValidationError {
+	if invalidEmailError := util.IsEmailValid(input.Email); invalidEmailError != nil {
+		return &ValidationError{
+			Message: "invalid email address",
+			Code:    401,
+		}
+	}
+	return nil
+}
+
+//reset password input validator
+func (input *ResetPasswordInput) Validator() *ValidationError {
+	if invalidEmailError := util.IsEmailValid(input.Email); invalidEmailError != nil {
+		return &ValidationError{
+			Message: "invalid email address",
+			Code:    401,
+		}
+	}
+	if !util.PasswordValidator(input.NewPassword) {
+		return &ValidationError{Message: "enter a strong new password", Code: 401}
+	}
+	return nil
+}
