@@ -379,7 +379,7 @@ type UserMutation struct {
 	LoginUser      *AuthResponse         `json:"loginUser"`
 	Otp            *ResendOtpMutation    `json:"otp"`
 	VerifyUser     *AuthMutationResponse `json:"verifyUser"`
-	UpdatePassword *RegisterResponse     `json:"updatePassword"`
+	UpdatePassword *AuthMutationResponse `json:"updatePassword"`
 	ForgetPassword *RegisterResponse     `json:"forgetPassword"`
 	ResetPassword  *RegisterResponse     `json:"resetPassword"`
 }

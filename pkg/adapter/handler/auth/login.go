@@ -46,3 +46,33 @@ func (r AuthRepository) Login(ctx context.Context, input *model.LoginInput) *mod
 		Data: token,
 	}
 }
+
+func (r AuthRepository) UpdateUserPassword(ctx context.Context, user *model.User, input *model.UpdatePasswordInput) (*model.AuthMutationResponse, error) {
+	if validationError := input.Validator(); validationError != nil {
+		return &model.AuthMutationResponse{
+			Error: validationError,
+		}, nil
+	}
+	//compare old password
+	isValidOldPassword := util.CheckPasswordHash(input.OldPassword, user.Password)
+	if !isValidOldPassword {
+		return &model.AuthMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, errors.New("invalid old password"), exception.BAD_REQUEST, nil),
+		}, nil
+	}
+	//update password
+	hashedNewPassword, err := util.HashPassword(input.NewPassword)
+	if err != nil {
+		return &model.AuthMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	user.Password = hashedNewPassword
+	err = r.TableUser.UpdateUserDetails(ctx, user)
+	if err != nil {
+		return &model.AuthMutationResponse{}, nil
+	}
+	return &model.AuthMutationResponse{
+		Data: user,
+	}, nil
+}
