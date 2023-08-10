@@ -1822,7 +1822,7 @@ input UpdatePasswordInput{
 input ResetPasswordInput{
     email:String!
     newPassword:String!
-    opt:String!
+    otp:String!
 }
 input ForgetPasswordInput {
   email: String!
@@ -12751,7 +12751,7 @@ func (ec *executionContext) unmarshalInputResetPasswordInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"email", "newPassword", "opt"}
+	fieldsInOrder := [...]string{"email", "newPassword", "otp"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -12776,15 +12776,15 @@ func (ec *executionContext) unmarshalInputResetPasswordInput(ctx context.Context
 				return it, err
 			}
 			it.NewPassword = data
-		case "opt":
+		case "otp":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("opt"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otp"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Opt = data
+			it.Otp = data
 		}
 	}
 

@@ -37,7 +37,7 @@ input UpdatePasswordInput{
 input ResetPasswordInput{
     email:String!
     newPassword:String!
-    opt:String!
+    otp:String!
 }
 input ForgetPasswordInput {
   email: String!
