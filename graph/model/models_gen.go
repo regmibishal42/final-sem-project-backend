@@ -283,7 +283,7 @@ type ResendOtpMutation struct {
 type ResetPasswordInput struct {
 	Email       string `json:"email"`
 	NewPassword string `json:"newPassword"`
-	Opt         string `json:"opt"`
+	Otp         string `json:"otp"`
 }
 
 type ServerError struct {

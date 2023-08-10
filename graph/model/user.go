@@ -73,6 +73,12 @@ func (input *ResetPasswordInput) Validator() *ValidationError {
 			Code:    401,
 		}
 	}
+	if len(input.Otp) < 6 || len(input.Otp) > 6 {
+		return &ValidationError{
+			Message: "invalid otp",
+			Code:    401,
+		}
+	}
 	if !util.PasswordValidator(input.NewPassword) {
 		return &ValidationError{Message: "enter a strong new password", Code: 401}
 	}
