@@ -154,7 +154,8 @@ type GetProductByIDInput struct {
 }
 
 type GetProductsByFilterInput struct {
-	CategoryID *string `json:"categoryID,omitempty"`
+	Params *ProductParamsFilter    `json:"params,omitempty"`
+	Page   *OffsetPaginationFilter `json:"page,omitempty"`
 }
 
 type GetStaffInput struct {
@@ -180,6 +181,21 @@ func (this NotFoundError) GetMessage() string { return this.Message }
 func (this NotFoundError) GetCode() int       { return this.Code }
 
 func (NotFoundError) IsMutationError() {}
+
+type OffsetPageInfo struct {
+	Page       int `json:"page"`
+	Count      int `json:"count"`
+	TotalRows  int `json:"totalRows"`
+	TotalPages int `json:"totalPages"`
+}
+
+type OffsetPaginationFilter struct {
+	Page   *int      `json:"page,omitempty"`
+	Limit  *int      `json:"limit,omitempty"`
+	Column *string   `json:"column,omitempty"`
+	Sort   *SortType `json:"sort,omitempty"`
+	All    *bool     `json:"all,omitempty"`
+}
 
 type OrganizationFilterInput struct {
 	VerificationStatus *VerificationStatus `json:"verificationStatus,omitempty"`
@@ -231,6 +247,10 @@ type ProductMutationResponse struct {
 	Error MutationError `json:"error,omitempty"`
 }
 
+type ProductParamsFilter struct {
+	CategoryID *string `json:"categoryID,omitempty"`
+}
+
 type ProductQuery struct {
 	Category            *CategoryQuery         `json:"category"`
 	GetProductsByFilter *ProductsQueryResponse `json:"getProductsByFilter"`
@@ -243,8 +263,9 @@ type ProductQueryResponse struct {
 }
 
 type ProductsQueryResponse struct {
-	Data  []*Product `json:"data,omitempty"`
-	Error QueryError `json:"error,omitempty"`
+	Data     []*Product      `json:"data,omitempty"`
+	Error    QueryError      `json:"error,omitempty"`
+	PageInfo *OffsetPageInfo `json:"pageInfo,omitempty"`
 }
 
 type ProfileMutation struct {
@@ -488,6 +509,47 @@ func (e *Gender) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Gender) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SortType string
+
+const (
+	SortTypeAsc  SortType = "ASC"
+	SortTypeDesc SortType = "DESC"
+)
+
+var AllSortType = []SortType{
+	SortTypeAsc,
+	SortTypeDesc,
+}
+
+func (e SortType) IsValid() bool {
+	switch e {
+	case SortTypeAsc, SortTypeDesc:
+		return true
+	}
+	return false
+}
+
+func (e SortType) String() string {
+	return string(e)
+}
+
+func (e *SortType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SortType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SortType", str)
+	}
+	return nil
+}
+
+func (e SortType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

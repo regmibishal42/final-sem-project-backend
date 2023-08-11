@@ -24,3 +24,8 @@ enum VerificationStatus{
     VERIFIED
     NOT_VERIFIED
 }
+
+enum SortType {
+    ASC
+    DESC
+}

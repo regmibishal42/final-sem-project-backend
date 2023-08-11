@@ -1,0 +1,14 @@
+input OffsetPaginationFilter{
+    page:Int
+    limit:Int
+    column: String
+    sort: SortType
+    all: Boolean
+}
+
+type OffsetPageInfo {
+    page: Int!
+    count: Int!
+    totalRows: Int!
+    totalPages: Int!
+}
