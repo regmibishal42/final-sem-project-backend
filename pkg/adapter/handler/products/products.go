@@ -120,10 +120,21 @@ func (r ProductRepository) GetProductByID(ctx context.Context, user *model.User,
 
 func (r ProductRepository) GetProductsByFilter(ctx context.Context, user *model.User, filter *model.GetProductsByFilterInput) (*model.ProductsQueryResponse, error) {
 	//validate category id, if exist
-	if filter != nil && filter.CategoryID != nil && !util.IsValidID(*filter.CategoryID) {
+	if filter != nil && filter.Params != nil && filter.Params.CategoryID != nil && !util.IsValidID(*filter.Params.CategoryID) {
 		return &model.ProductsQueryResponse{
 			Error: exception.QueryErrorHandler(ctx, errors.New("invalid categoryID"), exception.BAD_REQUEST, nil),
 		}, nil
+	}
+	//pagination
+	var pageInfo model.OffsetPageInfo
+	if filter == nil {
+		filter = &model.GetProductsByFilterInput{
+			Page: &model.OffsetPaginationFilter{},
+		}
+	} else {
+		if filter.Page == nil {
+			filter.Page = &model.OffsetPaginationFilter{}
+		}
 	}
 
 	//validate the user -> permission
@@ -139,13 +150,14 @@ func (r ProductRepository) GetProductsByFilter(ctx context.Context, user *model.
 		}, nil
 	}
 	// get the products
-	products, err := r.TableProduct.GetProductsByFilter(ctx, filter, organizationID)
+	products, err := r.TableProduct.GetProductsByFilter(ctx, &pageInfo, filter, organizationID)
 	if err != nil {
 		return &model.ProductsQueryResponse{
 			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
 		}, nil
 	}
 	return &model.ProductsQueryResponse{
-		Data: products,
+		Data:     products,
+		PageInfo: &pageInfo,
 	}, nil
 }

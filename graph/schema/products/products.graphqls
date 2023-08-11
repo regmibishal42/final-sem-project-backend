@@ -26,8 +26,13 @@ input UpdateProductInput{
     categoryID:ID
 }
 
-input GetProductsByFilterInput{
+input ProductParamsFilter{
     categoryID:ID
+}
+
+input GetProductsByFilterInput{
+    params:ProductParamsFilter
+    page:OffsetPaginationFilter
 }
 input GetProductByIDInput{
     productID:ID!
@@ -50,6 +55,7 @@ type ProductQueryResponse{
 type ProductsQueryResponse{
     data:[Product]
     error:QueryError
+    pageInfo: OffsetPageInfo
 }
 
 # Mutation

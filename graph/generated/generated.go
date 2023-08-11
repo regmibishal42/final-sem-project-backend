@@ -147,6 +147,13 @@ type ComplexityRoot struct {
 		Message func(childComplexity int) int
 	}
 
+	OffsetPageInfo struct {
+		Count      func(childComplexity int) int
+		Page       func(childComplexity int) int
+		TotalPages func(childComplexity int) int
+		TotalRows  func(childComplexity int) int
+	}
+
 	Organization struct {
 		Address            func(childComplexity int) int
 		Contact            func(childComplexity int) int
@@ -233,8 +240,9 @@ type ComplexityRoot struct {
 	}
 
 	ProductsQueryResponse struct {
-		Data  func(childComplexity int) int
-		Error func(childComplexity int) int
+		Data     func(childComplexity int) int
+		Error    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
 	}
 
 	Profile struct {
@@ -746,6 +754,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.NotFoundError.Message(childComplexity), true
 
+	case "OffsetPageInfo.count":
+		if e.complexity.OffsetPageInfo.Count == nil {
+			break
+		}
+
+		return e.complexity.OffsetPageInfo.Count(childComplexity), true
+
+	case "OffsetPageInfo.page":
+		if e.complexity.OffsetPageInfo.Page == nil {
+			break
+		}
+
+		return e.complexity.OffsetPageInfo.Page(childComplexity), true
+
+	case "OffsetPageInfo.totalPages":
+		if e.complexity.OffsetPageInfo.TotalPages == nil {
+			break
+		}
+
+		return e.complexity.OffsetPageInfo.TotalPages(childComplexity), true
+
+	case "OffsetPageInfo.totalRows":
+		if e.complexity.OffsetPageInfo.TotalRows == nil {
+			break
+		}
+
+		return e.complexity.OffsetPageInfo.TotalRows(childComplexity), true
+
 	case "Organization.Address":
 		if e.complexity.Organization.Address == nil {
 			break
@@ -1121,6 +1157,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ProductsQueryResponse.Error(childComplexity), true
+
+	case "ProductsQueryResponse.pageInfo":
+		if e.complexity.ProductsQueryResponse.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.ProductsQueryResponse.PageInfo(childComplexity), true
 
 	case "Profile.Address":
 		if e.complexity.Profile.Address == nil {
@@ -1653,8 +1696,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputGetStaffInput,
 		ec.unmarshalInputGetUserInput,
 		ec.unmarshalInputLoginInput,
+		ec.unmarshalInputOffsetPaginationFilter,
 		ec.unmarshalInputOrganizationFilterInput,
 		ec.unmarshalInputOrganizationInput,
+		ec.unmarshalInputProductParamsFilter,
 		ec.unmarshalInputResendOtpInput,
 		ec.unmarshalInputResetPasswordInput,
 		ec.unmarshalInputUpdateAddressInput,
@@ -2078,6 +2123,20 @@ type StaffQuery{
     getStaffByOrganization(input:GetOrganizationStaffsInput!):StaffsQueryResponse! @goField(forceResolver:true)
     getStaffByID(input:GetStaffInput!):StaffQueryResponse! @goField(forceResolver:true)
 }`, BuiltIn: false},
+	{Name: "../schema/pagination.graphqls", Input: `input OffsetPaginationFilter{
+    page:Int
+    limit:Int
+    column: String
+    sort: SortType
+    all: Boolean
+}
+
+type OffsetPageInfo {
+    page: Int!
+    count: Int!
+    totalRows: Int!
+    totalPages: Int!
+}`, BuiltIn: false},
 	{Name: "../schema/products/deleted.products.graphqls", Input: `type DeletedProducts{
     id:ID!
     product:Product
@@ -2150,8 +2209,13 @@ input UpdateProductInput{
     categoryID:ID
 }
 
-input GetProductsByFilterInput{
+input ProductParamsFilter{
     categoryID:ID
+}
+
+input GetProductsByFilterInput{
+    params:ProductParamsFilter
+    page:OffsetPaginationFilter
 }
 input GetProductByIDInput{
     productID:ID!
@@ -2174,6 +2238,7 @@ type ProductQueryResponse{
 type ProductsQueryResponse{
     data:[Product]
     error:QueryError
+    pageInfo: OffsetPageInfo
 }
 
 # Mutation
@@ -2224,6 +2289,11 @@ enum EmailType{
 enum VerificationStatus{
     VERIFIED
     NOT_VERIFIED
+}
+
+enum SortType {
+    ASC
+    DESC
 }`, BuiltIn: false},
 	{Name: "../schema/shared/errors.graphqls", Input: `interface MutationError{
     message:String!
@@ -4593,6 +4663,182 @@ func (ec *executionContext) fieldContext_NotFoundError_code(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _OffsetPageInfo_page(ctx context.Context, field graphql.CollectedField, obj *model.OffsetPageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OffsetPageInfo_page(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Page, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_OffsetPageInfo_page(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "OffsetPageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _OffsetPageInfo_count(ctx context.Context, field graphql.CollectedField, obj *model.OffsetPageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OffsetPageInfo_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_OffsetPageInfo_count(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "OffsetPageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _OffsetPageInfo_totalRows(ctx context.Context, field graphql.CollectedField, obj *model.OffsetPageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OffsetPageInfo_totalRows(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalRows, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_OffsetPageInfo_totalRows(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "OffsetPageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _OffsetPageInfo_totalPages(ctx context.Context, field graphql.CollectedField, obj *model.OffsetPageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OffsetPageInfo_totalPages(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalPages, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_OffsetPageInfo_totalPages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "OffsetPageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Organization_id(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Organization_id(ctx, field)
 	if err != nil {
@@ -6721,6 +6967,8 @@ func (ec *executionContext) fieldContext_ProductQuery_getProductsByFilter(ctx co
 				return ec.fieldContext_ProductsQueryResponse_data(ctx, field)
 			case "error":
 				return ec.fieldContext_ProductsQueryResponse_error(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_ProductsQueryResponse_pageInfo(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ProductsQueryResponse", field.Name)
 		},
@@ -6999,6 +7247,57 @@ func (ec *executionContext) fieldContext_ProductsQueryResponse_error(ctx context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductsQueryResponse_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.ProductsQueryResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductsQueryResponse_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.OffsetPageInfo)
+	fc.Result = res
+	return ec.marshalOOffsetPageInfo2ᚖbackendᚋgraphᚋmodelᚐOffsetPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductsQueryResponse_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductsQueryResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "page":
+				return ec.fieldContext_OffsetPageInfo_page(ctx, field)
+			case "count":
+				return ec.fieldContext_OffsetPageInfo_count(ctx, field)
+			case "totalRows":
+				return ec.fieldContext_OffsetPageInfo_totalRows(ctx, field)
+			case "totalPages":
+				return ec.fieldContext_OffsetPageInfo_totalPages(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type OffsetPageInfo", field.Name)
 		},
 	}
 	return fc, nil
@@ -12539,22 +12838,31 @@ func (ec *executionContext) unmarshalInputGetProductsByFilterInput(ctx context.C
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"categoryID"}
+	fieldsInOrder := [...]string{"params", "page"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "categoryID":
+		case "params":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("categoryID"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("params"))
+			data, err := ec.unmarshalOProductParamsFilter2ᚖbackendᚋgraphᚋmodelᚐProductParamsFilter(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.CategoryID = data
+			it.Params = data
+		case "page":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("page"))
+			data, err := ec.unmarshalOOffsetPaginationFilter2ᚖbackendᚋgraphᚋmodelᚐOffsetPaginationFilter(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Page = data
 		}
 	}
 
@@ -12657,6 +12965,71 @@ func (ec *executionContext) unmarshalInputLoginInput(ctx context.Context, obj in
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputOffsetPaginationFilter(ctx context.Context, obj interface{}) (model.OffsetPaginationFilter, error) {
+	var it model.OffsetPaginationFilter
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"page", "limit", "column", "sort", "all"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "page":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("page"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Page = data
+		case "limit":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Limit = data
+		case "column":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("column"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Column = data
+		case "sort":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sort"))
+			data, err := ec.unmarshalOSortType2ᚖbackendᚋgraphᚋmodelᚐSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Sort = data
+		case "all":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("all"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.All = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputOrganizationFilterInput(ctx context.Context, obj interface{}) (model.OrganizationFilterInput, error) {
 	var it model.OrganizationFilterInput
 	asMap := map[string]interface{}{}
@@ -12709,6 +13082,35 @@ func (ec *executionContext) unmarshalInputOrganizationInput(ctx context.Context,
 				return it, err
 			}
 			it.ID = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputProductParamsFilter(ctx context.Context, obj interface{}) (model.ProductParamsFilter, error) {
+	var it model.ProductParamsFilter
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"categoryID"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "categoryID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("categoryID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CategoryID = data
 		}
 	}
 
@@ -14145,6 +14547,60 @@ func (ec *executionContext) _NotFoundError(ctx context.Context, sel ast.Selectio
 	return out
 }
 
+var offsetPageInfoImplementors = []string{"OffsetPageInfo"}
+
+func (ec *executionContext) _OffsetPageInfo(ctx context.Context, sel ast.SelectionSet, obj *model.OffsetPageInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, offsetPageInfoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OffsetPageInfo")
+		case "page":
+			out.Values[i] = ec._OffsetPageInfo_page(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "count":
+			out.Values[i] = ec._OffsetPageInfo_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalRows":
+			out.Values[i] = ec._OffsetPageInfo_totalRows(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalPages":
+			out.Values[i] = ec._OffsetPageInfo_totalPages(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var organizationImplementors = []string{"Organization"}
 
 func (ec *executionContext) _Organization(ctx context.Context, sel ast.SelectionSet, obj *model.Organization) graphql.Marshaler {
@@ -15172,6 +15628,8 @@ func (ec *executionContext) _ProductsQueryResponse(ctx context.Context, sel ast.
 			out.Values[i] = ec._ProductsQueryResponse_data(ctx, field, obj)
 		case "error":
 			out.Values[i] = ec._ProductsQueryResponse_error(ctx, field, obj)
+		case "pageInfo":
+			out.Values[i] = ec._ProductsQueryResponse_pageInfo(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -18248,6 +18706,21 @@ func (ec *executionContext) marshalOMutationError2backendᚋgraphᚋmodelᚐMuta
 	return ec._MutationError(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOOffsetPageInfo2ᚖbackendᚋgraphᚋmodelᚐOffsetPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.OffsetPageInfo) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._OffsetPageInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOOffsetPaginationFilter2ᚖbackendᚋgraphᚋmodelᚐOffsetPaginationFilter(ctx context.Context, v interface{}) (*model.OffsetPaginationFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputOffsetPaginationFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalOOrganization2ᚕᚖbackendᚋgraphᚋmodelᚐOrganization(ctx context.Context, sel ast.SelectionSet, v []*model.Organization) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -18352,6 +18825,14 @@ func (ec *executionContext) marshalOProduct2ᚖbackendᚋgraphᚋmodelᚐProduct
 	return ec._Product(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOProductParamsFilter2ᚖbackendᚋgraphᚋmodelᚐProductParamsFilter(ctx context.Context, v interface{}) (*model.ProductParamsFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputProductParamsFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalOProfile2ᚖbackendᚋgraphᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v *model.Profile) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -18364,6 +18845,22 @@ func (ec *executionContext) marshalOQueryError2backendᚋgraphᚋmodelᚐQueryEr
 		return graphql.Null
 	}
 	return ec._QueryError(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOSortType2ᚖbackendᚋgraphᚋmodelᚐSortType(ctx context.Context, v interface{}) (*model.SortType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.SortType)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOSortType2ᚖbackendᚋgraphᚋmodelᚐSortType(ctx context.Context, sel ast.SelectionSet, v *model.SortType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) marshalOStaff2ᚕᚖbackendᚋgraphᚋmodelᚐStaff(ctx context.Context, sel ast.SelectionSet, v []*model.Staff) graphql.Marshaler {
