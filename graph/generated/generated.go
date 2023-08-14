@@ -206,11 +206,13 @@ type ComplexityRoot struct {
 	Product struct {
 		BoughtOn     func(childComplexity int) int
 		Category     func(childComplexity int) int
+		CostPrice    func(childComplexity int) int
 		CreatedAt    func(childComplexity int) int
 		DeletedAt    func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Name         func(childComplexity int) int
 		Organization func(childComplexity int) int
+		SellingPrice func(childComplexity int) int
 		Units        func(childComplexity int) int
 		UpdatedAt    func(childComplexity int) int
 	}
@@ -986,6 +988,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Product.Category(childComplexity), true
 
+	case "Product.costPrice":
+		if e.complexity.Product.CostPrice == nil {
+			break
+		}
+
+		return e.complexity.Product.CostPrice(childComplexity), true
+
 	case "Product.createdAt":
 		if e.complexity.Product.CreatedAt == nil {
 			break
@@ -1020,6 +1029,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Product.Organization(childComplexity), true
+
+	case "Product.sellingPrice":
+		if e.complexity.Product.SellingPrice == nil {
+			break
+		}
+
+		return e.complexity.Product.SellingPrice(childComplexity), true
 
 	case "Product.units":
 		if e.complexity.Product.Units == nil {
@@ -2188,6 +2204,8 @@ type CategoryQuery{
     units:Int!
     category:Category! @goField(forceResolver:true)
     organization:Organization! @goField(forceResolver:true)
+    costPrice:Float
+    sellingPrice:Float
     createdAt:Time!
     updatedAt:Time
     deletedAt:Time
@@ -2199,6 +2217,8 @@ input CreateProductInput{
     boughtOn:Time!
     units:Int!
     categoryID:ID!
+    costPrice:Float!
+    sellingPrice:Float
 }
 
 input UpdateProductInput{
@@ -4174,6 +4194,10 @@ func (ec *executionContext) fieldContext_DeletedProducts_product(ctx context.Con
 				return ec.fieldContext_Product_category(ctx, field)
 			case "organization":
 				return ec.fieldContext_Product_organization(ctx, field)
+			case "costPrice":
+				return ec.fieldContext_Product_costPrice(ctx, field)
+			case "sellingPrice":
+				return ec.fieldContext_Product_sellingPrice(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Product_createdAt(ctx, field)
 			case "updatedAt":
@@ -6368,6 +6392,88 @@ func (ec *executionContext) fieldContext_Product_organization(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Product_costPrice(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Product_costPrice(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CostPrice, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalOFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Product_costPrice(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Product",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Product_sellingPrice(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Product_sellingPrice(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SellingPrice, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalOFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Product_sellingPrice(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Product",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Product_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Product_createdAt(ctx, field)
 	if err != nil {
@@ -6822,6 +6928,10 @@ func (ec *executionContext) fieldContext_ProductMutationResponse_data(ctx contex
 				return ec.fieldContext_Product_category(ctx, field)
 			case "organization":
 				return ec.fieldContext_Product_organization(ctx, field)
+			case "costPrice":
+				return ec.fieldContext_Product_costPrice(ctx, field)
+			case "sellingPrice":
+				return ec.fieldContext_Product_sellingPrice(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Product_createdAt(ctx, field)
 			case "updatedAt":
@@ -7096,6 +7206,10 @@ func (ec *executionContext) fieldContext_ProductQueryResponse_data(ctx context.C
 				return ec.fieldContext_Product_category(ctx, field)
 			case "organization":
 				return ec.fieldContext_Product_organization(ctx, field)
+			case "costPrice":
+				return ec.fieldContext_Product_costPrice(ctx, field)
+			case "sellingPrice":
+				return ec.fieldContext_Product_sellingPrice(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Product_createdAt(ctx, field)
 			case "updatedAt":
@@ -7198,6 +7312,10 @@ func (ec *executionContext) fieldContext_ProductsQueryResponse_data(ctx context.
 				return ec.fieldContext_Product_category(ctx, field)
 			case "organization":
 				return ec.fieldContext_Product_organization(ctx, field)
+			case "costPrice":
+				return ec.fieldContext_Product_costPrice(ctx, field)
+			case "sellingPrice":
+				return ec.fieldContext_Product_sellingPrice(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Product_createdAt(ctx, field)
 			case "updatedAt":
@@ -12433,7 +12551,7 @@ func (ec *executionContext) unmarshalInputCreateProductInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "boughtOn", "units", "categoryID"}
+	fieldsInOrder := [...]string{"name", "boughtOn", "units", "categoryID", "costPrice", "sellingPrice"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -12476,6 +12594,24 @@ func (ec *executionContext) unmarshalInputCreateProductInput(ctx context.Context
 				return it, err
 			}
 			it.CategoryID = data
+		case "costPrice":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("costPrice"))
+			data, err := ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CostPrice = data
+		case "sellingPrice":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sellingPrice"))
+			data, err := ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SellingPrice = data
 		}
 	}
 
@@ -15183,6 +15319,10 @@ func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, 
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "costPrice":
+			out.Values[i] = ec._Product_costPrice(ctx, field, obj)
+		case "sellingPrice":
+			out.Values[i] = ec._Product_sellingPrice(ctx, field, obj)
 		case "createdAt":
 			out.Values[i] = ec._Product_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -17762,6 +17902,21 @@ func (ec *executionContext) unmarshalNDeleteProductInput2backendᚋgraphᚋmodel
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloatContext(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
 func (ec *executionContext) unmarshalNForgetPasswordInput2backendᚋgraphᚋmodelᚐForgetPasswordInput(ctx context.Context, v interface{}) (model.ForgetPasswordInput, error) {
 	res, err := ec.unmarshalInputForgetPasswordInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -18633,6 +18788,16 @@ func (ec *executionContext) marshalOCategory2ᚖbackendᚋgraphᚋmodelᚐCatego
 		return graphql.Null
 	}
 	return ec._Category(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloatContext(v)
+	return graphql.WrapContextMarshaler(ctx, res)
 }
 
 func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {

@@ -102,10 +102,12 @@ type CreateOrganizationInput struct {
 }
 
 type CreateProductInput struct {
-	Name       string    `json:"name"`
-	BoughtOn   time.Time `json:"boughtOn"`
-	Units      int       `json:"units"`
-	CategoryID string    `json:"categoryID"`
+	Name         string    `json:"name"`
+	BoughtOn     time.Time `json:"boughtOn"`
+	Units        int       `json:"units"`
+	CategoryID   string    `json:"categoryID"`
+	CostPrice    float64   `json:"costPrice"`
+	SellingPrice *float64  `json:"sellingPrice,omitempty"`
 }
 
 type CreateProfileInput struct {
