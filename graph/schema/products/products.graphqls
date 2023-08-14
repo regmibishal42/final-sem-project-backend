@@ -5,6 +5,8 @@ type Product{
     units:Int!
     category:Category! @goField(forceResolver:true)
     organization:Organization! @goField(forceResolver:true)
+    costPrice:Float
+    sellingPrice:Float
     createdAt:Time!
     updatedAt:Time
     deletedAt:Time
@@ -16,6 +18,8 @@ input CreateProductInput{
     boughtOn:Time!
     units:Int!
     categoryID:ID!
+    costPrice:Float!
+    sellingPrice:Float
 }
 
 input UpdateProductInput{

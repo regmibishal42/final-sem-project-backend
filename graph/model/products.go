@@ -11,6 +11,8 @@ type Product struct {
 	BoughtOn       time.Time     `json:"boughtOn"`
 	Units          int           `json:"units"`
 	CategoryID     string        `json:"categoryID"`
+	CostPrice      float64       `json:"costPrice"`
+	SellingPrice   float64       `json:"sellingPrice"`
 	Category       *Category     `json:"category" gorm:"foreignKey:CategoryID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	OrganizationID string        `json:"organizationID"`
 	Organization   *Organization `json:"organization" gorm:"foreignKey:OrganizationID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
