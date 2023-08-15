@@ -16,6 +16,7 @@ func Migrate(db *gorm.DB) {
 		&model.DeletedProducts{},
 		&model.Product{},
 		&model.Category{},
+		&model.Sales{},
 	//migration models
 	)
 	DbExceptionHandle(err)

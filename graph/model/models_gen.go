@@ -309,6 +309,8 @@ type ResetPasswordInput struct {
 	Otp         string `json:"otp"`
 }
 
+
+
 type ServerError struct {
 	Message string `json:"message"`
 	Code    int    `json:"code"`
