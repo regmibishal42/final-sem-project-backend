@@ -1,0 +1,11 @@
+type Sales{
+    id:ID!
+    product:Product! @goField(forceResolver:true)
+    organization:Organization! @goField(forceResolver:true)
+    unitsSold:Int!
+    soldAt:Float!
+    soldBy:User! @goField(forceResolver:true)
+    createdAt:Time!
+    updatedAt:Time
+    deletedAt:Time
+}
