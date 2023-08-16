@@ -161,3 +161,7 @@ func (r ProductRepository) GetProductsByFilter(ctx context.Context, user *model.
 		PageInfo: &pageInfo,
 	}, nil
 }
+
+func (r ProductRepository) GetProductDetailsById(ctx context.Context, productID *string) (*model.Product, error) {
+	return r.TableProduct.GetProductByID(ctx, productID)
+}

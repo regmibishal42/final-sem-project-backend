@@ -30,3 +30,7 @@ type AuthorizationError implements QueryError & MutationError {
     message:String!
     code:Int!
 }
+type AuthenticationError implements QueryError & MutationError {
+    message:String!
+    code:Int!
+}

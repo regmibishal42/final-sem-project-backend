@@ -47,6 +47,17 @@ type AuthToken struct {
 	AccessToken string `json:"accessToken"`
 }
 
+type AuthenticationError struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+}
+
+func (AuthenticationError) IsQueryError()           {}
+func (this AuthenticationError) GetMessage() string { return this.Message }
+func (this AuthenticationError) GetCode() int       { return this.Code }
+
+func (AuthenticationError) IsMutationError() {}
+
 type AuthorizationError struct {
 	Message string `json:"message"`
 	Code    int    `json:"code"`
@@ -118,6 +129,12 @@ type CreateProfileInput struct {
 	Address       *AddressInput `json:"Address,omitempty"`
 }
 
+type CreateSaleInput struct {
+	ProductID string  `json:"productID"`
+	Units     int     `json:"units"`
+	SoldAt    float64 `json:"soldAt"`
+}
+
 type CreateStaffInput struct {
 	OrganizationID string        `json:"organizationID"`
 	ContactNumber  string        `json:"contactNumber"`
@@ -139,6 +156,16 @@ type DeleteProductInput struct {
 	ProductID string `json:"productID"`
 }
 
+type DeleteSalesInput struct {
+	SalesID string `json:"salesID"`
+}
+
+type FilterSalesInput struct {
+	FilterType SalesInfoType `json:"filterType"`
+	ProductID  *string       `json:"productID,omitempty"`
+	CategoryID *string       `json:"categoryID,omitempty"`
+}
+
 type ForgetPasswordInput struct {
 	Email string `json:"email"`
 }
@@ -158,6 +185,10 @@ type GetProductByIDInput struct {
 type GetProductsByFilterInput struct {
 	Params *ProductParamsFilter    `json:"params,omitempty"`
 	Page   *OffsetPaginationFilter `json:"page,omitempty"`
+}
+
+type GetSalesByIDInput struct {
+	SalesID string `json:"salesID"`
 }
 
 type GetStaffInput struct {
@@ -309,7 +340,32 @@ type ResetPasswordInput struct {
 	Otp         string `json:"otp"`
 }
 
+type SaleQueryResponse struct {
+	Data  *Sales     `json:"data,omitempty"`
+	Error QueryError `json:"error,omitempty"`
+}
 
+type SalesMutation struct {
+	CreateSales *SalesMutationResponse `json:"createSales"`
+	UpdateSales *SalesMutationResponse `json:"updateSales"`
+	DeleteSales *SalesMutationResponse `json:"deleteSales"`
+}
+
+type SalesMutationResponse struct {
+	ID    *string       `json:"id,omitempty"`
+	Data  *Sales        `json:"data,omitempty"`
+	Error MutationError `json:"error,omitempty"`
+}
+
+type SalesQuery struct {
+	GetSalesByFilter *SalesQueryResponse `json:"getSalesByFilter"`
+	GetSaleByID      *SaleQueryResponse  `json:"getSaleByID"`
+}
+
+type SalesQueryResponse struct {
+	Data  []*Sales   `json:"data,omitempty"`
+	Error QueryError `json:"error,omitempty"`
+}
 
 type ServerError struct {
 	Message string `json:"message"`
@@ -382,6 +438,12 @@ type UpdateProfileInput struct {
 	ContactNumber *string       `json:"contactNumber,omitempty"`
 	DateOfBirth   *time.Time    `json:"DateOfBirth,omitempty"`
 	Address       *AddressInput `json:"Address,omitempty"`
+}
+
+type UpdateSalesInput struct {
+	SalesID string   `json:"salesID"`
+	Units   *int     `json:"units,omitempty"`
+	SoldAt  *float64 `json:"soldAt,omitempty"`
 }
 
 type UpdateStaffInput struct {
@@ -513,6 +575,51 @@ func (e *Gender) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Gender) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SalesInfoType string
+
+const (
+	SalesInfoTypeYearly  SalesInfoType = "YEARLY"
+	SalesInfoTypeMonthly SalesInfoType = "MONTHLY"
+	SalesInfoTypeWeekly  SalesInfoType = "WEEKLY"
+	SalesInfoTypeDaily   SalesInfoType = "DAILY"
+)
+
+var AllSalesInfoType = []SalesInfoType{
+	SalesInfoTypeYearly,
+	SalesInfoTypeMonthly,
+	SalesInfoTypeWeekly,
+	SalesInfoTypeDaily,
+}
+
+func (e SalesInfoType) IsValid() bool {
+	switch e {
+	case SalesInfoTypeYearly, SalesInfoTypeMonthly, SalesInfoTypeWeekly, SalesInfoTypeDaily:
+		return true
+	}
+	return false
+}
+
+func (e SalesInfoType) String() string {
+	return string(e)
+}
+
+func (e *SalesInfoType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SalesInfoType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SalesInfoType", str)
+	}
+	return nil
+}
+
+func (e SalesInfoType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

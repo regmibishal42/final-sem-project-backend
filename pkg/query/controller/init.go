@@ -20,4 +20,5 @@ type ProductQueryController struct {
 	TableUser            UserQueryInterface
 	TableCategory        ProductCategoryQueryInterface
 	TableDeletedProducts DeletedProductsQueryInterface
+	TableSales           SalesQueryInterface
 }

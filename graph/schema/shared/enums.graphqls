@@ -29,3 +29,10 @@ enum SortType {
     ASC
     DESC
 }
+
+enum SalesInfoType{
+    YEARLY
+    MONTHLY
+    WEEKLY
+    DAILY
+}

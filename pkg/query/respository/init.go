@@ -57,3 +57,9 @@ func NewDeletedProductsQueryRepository(db *gorm.DB) query_controller.DeletedProd
 		db: db,
 	}
 }
+
+func NewSalesQueryRepository(db *gorm.DB) query_controller.SalesQueryInterface {
+	return QueryRepository{
+		db: db,
+	}
+}

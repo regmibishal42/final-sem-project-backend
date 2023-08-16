@@ -23,5 +23,10 @@ type ProductInterface interface {
 	DeleteProduct(ctx context.Context, user *model.User, productID *string) (*model.ProductMutationResponse, error)
 
 	GetProductByID(ctx context.Context, user *model.User, productID *string) (*model.ProductQueryResponse, error)
+	GetProductDetailsById(ctx context.Context, productID *string) (*model.Product, error)
 	GetProductsByFilter(ctx context.Context, user *model.User, filter *model.GetProductsByFilterInput) (*model.ProductsQueryResponse, error)
+
+	//sales
+	CreateSales(ctx context.Context, user *model.User, input *model.CreateSaleInput) (*model.SalesMutationResponse, error)
+	UpdateSales(ctx context.Context, user *model.User, input *model.UpdateSalesInput) (*model.SalesMutationResponse, error)
 }
