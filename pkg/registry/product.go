@@ -13,6 +13,7 @@ func (r *Registry) NewProductRegistry() products_handler.ProductInterface {
 		TableProduct:         query_repository.NewProductQueryRepository(r.db),
 		TableCategory:        query_repository.NewProductCategoryQueryRepository(r.db),
 		TableDeletedProducts: query_repository.NewDeletedProductsQueryRepository(r.db),
+		TableSales:           query_repository.NewSalesQueryRepository(r.db),
 	}
 	return products_handler.NewProductRepository(db)
 }

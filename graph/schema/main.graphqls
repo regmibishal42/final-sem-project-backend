@@ -5,6 +5,7 @@ type Mutation{
     organization:OrganizationMutation!
     staff:StaffMutation!
     product:ProductMutation!
+    sales:SalesMutation!
 }
 
 type Query{
@@ -13,5 +14,6 @@ type Query{
     organization:OrganizationQuery!
     staff:StaffQuery!
     product:ProductQuery!
+    sales:SalesQuery!
 }
 

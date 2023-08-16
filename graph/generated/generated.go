@@ -142,6 +142,7 @@ type ComplexityRoot struct {
 		Organization func(childComplexity int) int
 		Product      func(childComplexity int) int
 		Profile      func(childComplexity int) int
+		Sales        func(childComplexity int) int
 		Staff        func(childComplexity int) int
 	}
 
@@ -283,6 +284,7 @@ type ComplexityRoot struct {
 		Organization func(childComplexity int) int
 		Product      func(childComplexity int) int
 		Profile      func(childComplexity int) int
+		Sales        func(childComplexity int) int
 		Staff        func(childComplexity int) int
 	}
 
@@ -421,6 +423,7 @@ type MutationResolver interface {
 	Organization(ctx context.Context) (*model.OrganizationMutation, error)
 	Staff(ctx context.Context) (*model.StaffMutation, error)
 	Product(ctx context.Context) (*model.ProductMutation, error)
+	Sales(ctx context.Context) (*model.SalesMutation, error)
 }
 type OrganizationResolver interface {
 	CreatedBy(ctx context.Context, obj *model.Organization) (*model.User, error)
@@ -460,6 +463,7 @@ type QueryResolver interface {
 	Organization(ctx context.Context) (*model.OrganizationQuery, error)
 	Staff(ctx context.Context) (*model.StaffQuery, error)
 	Product(ctx context.Context) (*model.ProductQuery, error)
+	Sales(ctx context.Context) (*model.SalesQuery, error)
 }
 type ResendOtpMutationResolver interface {
 	Resend(ctx context.Context, obj *model.ResendOtpMutation, input model.ResendOtpInput) (*model.OtpMutationResponse, error)
@@ -791,6 +795,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Profile(childComplexity), true
+
+	case "Mutation.sales":
+		if e.complexity.Mutation.Sales == nil {
+			break
+		}
+
+		return e.complexity.Mutation.Sales(childComplexity), true
 
 	case "Mutation.staff":
 		if e.complexity.Mutation.Staff == nil {
@@ -1371,6 +1382,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Profile(childComplexity), true
+
+	case "Query.sales":
+		if e.complexity.Query.Sales == nil {
+			break
+		}
+
+		return e.complexity.Query.Sales(childComplexity), true
 
 	case "Query.staff":
 		if e.complexity.Query.Staff == nil {
@@ -2236,6 +2254,7 @@ type Mutation{
     organization:OrganizationMutation!
     staff:StaffMutation!
     product:ProductMutation!
+    sales:SalesMutation!
 }
 
 type Query{
@@ -2244,6 +2263,7 @@ type Query{
     organization:OrganizationQuery!
     staff:StaffQuery!
     product:ProductQuery!
+    sales:SalesQuery!
 }
 
 `, BuiltIn: false},
@@ -4974,6 +4994,58 @@ func (ec *executionContext) fieldContext_Mutation_product(ctx context.Context, f
 				return ec.fieldContext_ProductMutation_deleteProduct(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ProductMutation", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_sales(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_sales(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Sales(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SalesMutation)
+	fc.Result = res
+	return ec.marshalNSalesMutation2ᚖbackendᚋgraphᚋmodelᚐSalesMutation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_sales(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "createSales":
+				return ec.fieldContext_SalesMutation_createSales(ctx, field)
+			case "updateSales":
+				return ec.fieldContext_SalesMutation_updateSales(ctx, field)
+			case "deleteSales":
+				return ec.fieldContext_SalesMutation_deleteSales(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SalesMutation", field.Name)
 		},
 	}
 	return fc, nil
@@ -8685,6 +8757,56 @@ func (ec *executionContext) fieldContext_Query_product(ctx context.Context, fiel
 				return ec.fieldContext_ProductQuery_getProductByID(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ProductQuery", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_sales(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_sales(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Sales(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SalesQuery)
+	fc.Result = res
+	return ec.marshalNSalesQuery2ᚖbackendᚋgraphᚋmodelᚐSalesQuery(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_sales(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "getSalesByFilter":
+				return ec.fieldContext_SalesQuery_getSalesByFilter(ctx, field)
+			case "getSaleByID":
+				return ec.fieldContext_SalesQuery_getSaleByID(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SalesQuery", field.Name)
 		},
 	}
 	return fc, nil
@@ -16311,6 +16433,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "sales":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_sales(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -17915,6 +18044,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_product(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "sales":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_sales(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -20527,6 +20678,20 @@ func (ec *executionContext) marshalNSalesInfoType2backendᚋgraphᚋmodelᚐSale
 	return v
 }
 
+func (ec *executionContext) marshalNSalesMutation2backendᚋgraphᚋmodelᚐSalesMutation(ctx context.Context, sel ast.SelectionSet, v model.SalesMutation) graphql.Marshaler {
+	return ec._SalesMutation(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSalesMutation2ᚖbackendᚋgraphᚋmodelᚐSalesMutation(ctx context.Context, sel ast.SelectionSet, v *model.SalesMutation) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SalesMutation(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNSalesMutationResponse2backendᚋgraphᚋmodelᚐSalesMutationResponse(ctx context.Context, sel ast.SelectionSet, v model.SalesMutationResponse) graphql.Marshaler {
 	return ec._SalesMutationResponse(ctx, sel, &v)
 }
@@ -20539,6 +20704,20 @@ func (ec *executionContext) marshalNSalesMutationResponse2ᚖbackendᚋgraphᚋm
 		return graphql.Null
 	}
 	return ec._SalesMutationResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSalesQuery2backendᚋgraphᚋmodelᚐSalesQuery(ctx context.Context, sel ast.SelectionSet, v model.SalesQuery) graphql.Marshaler {
+	return ec._SalesQuery(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSalesQuery2ᚖbackendᚋgraphᚋmodelᚐSalesQuery(ctx context.Context, sel ast.SelectionSet, v *model.SalesQuery) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SalesQuery(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNSalesQueryResponse2backendᚋgraphᚋmodelᚐSalesQueryResponse(ctx context.Context, sel ast.SelectionSet, v model.SalesQueryResponse) graphql.Marshaler {

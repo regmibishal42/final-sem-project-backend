@@ -24,4 +24,7 @@ type ProductInterface interface {
 
 	GetProductByID(ctx context.Context, user *model.User, productID *string) (*model.ProductQueryResponse, error)
 	GetProductsByFilter(ctx context.Context, user *model.User, filter *model.GetProductsByFilterInput) (*model.ProductsQueryResponse, error)
+
+	//sales
+	CreateSales(ctx context.Context, user *model.User, input *model.CreateSaleInput) (*model.SalesMutationResponse, error)
 }
