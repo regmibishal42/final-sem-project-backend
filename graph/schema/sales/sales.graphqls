@@ -9,3 +9,55 @@ type Sales{
     updatedAt:Time
     deletedAt:Time
 }
+
+# Inputs
+input CreateSaleInput{
+    productID:ID!
+    units:Int!
+    soldAt:Float!
+}
+input UpdateSalesInput{
+    salesID:ID!
+    units:Int
+    soldAt:Float
+}
+input DeleteSalesInput{
+    salesID:ID!
+}
+input FilterSalesInput{
+    filterType:SalesInfoType!
+    productID:ID
+    categoryID:ID
+}
+input GetSalesByIDInput{
+    salesID:ID!
+}
+
+#Response
+type SalesMutationResponse{
+    id:ID
+    data:Sales
+    error:MutationError
+}
+
+type SalesQueryResponse{
+    data:[Sales]
+    error:QueryError
+}
+type SaleQueryResponse{
+    data:Sales
+    error:QueryError
+}
+
+# Mutation
+type SalesMutation{
+    createSales(input:CreateSaleInput!):SalesMutationResponse! @goField(forceResolver:true)
+    updateSales(input:UpdateSalesInput!):SalesMutationResponse! @goField(forceResolver:true)
+    deleteSales(input:DeleteSalesInput!):SalesMutationResponse! @goField(forceResolver:true)
+}
+
+# Query
+type SalesQuery{
+    getSalesByFilter(input:FilterSalesInput!):SalesQueryResponse! @goField(forceResolver:true)
+    getSaleByID(input:GetSalesByIDInput!):SaleQueryResponse! @goField(forceResolver:true)
+}
