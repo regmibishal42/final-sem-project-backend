@@ -56,7 +56,7 @@ func (r ProductRepository) CreateSales(ctx context.Context, user *model.User, in
 		}, nil
 	}
 	product.Units = product.Units - input.Units
-	updatedProduct, err := r.TableProduct.UpdateProduct(ctx, product)
+	updatedProduct, err := r.TableProduct.UpdateProduct(ctx, product, organizationID)
 	if err != nil {
 		return &model.SalesMutationResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),

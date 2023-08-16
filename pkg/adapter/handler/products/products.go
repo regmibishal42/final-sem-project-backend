@@ -54,7 +54,7 @@ func (r ProductRepository) UpdateProduct(ctx context.Context, user *model.User, 
 		}, nil
 	}
 	//check for user
-	_, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &model.ProductMutationResponse{
@@ -67,7 +67,7 @@ func (r ProductRepository) UpdateProduct(ctx context.Context, user *model.User, 
 	}
 
 	//update the product
-	updatedProduct, err := r.TableProduct.UpdateProduct(ctx, product)
+	updatedProduct, err := r.TableProduct.UpdateProduct(ctx, product, organizationID)
 	if err != nil {
 		return &model.ProductMutationResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
@@ -88,7 +88,7 @@ func (r ProductRepository) DeleteProduct(ctx context.Context, user *model.User, 
 		}, nil
 	}
 	//check for user
-	_, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &model.ProductMutationResponse{
@@ -100,7 +100,7 @@ func (r ProductRepository) DeleteProduct(ctx context.Context, user *model.User, 
 		}, nil
 	}
 	//Delete the product
-	err = r.TableProduct.DeleteProduct(ctx, productID)
+	err = r.TableProduct.DeleteProduct(ctx, productID, organizationID)
 	if err != nil {
 		return &model.ProductMutationResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
