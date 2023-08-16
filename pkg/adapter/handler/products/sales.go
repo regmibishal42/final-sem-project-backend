@@ -3,21 +3,18 @@ package products_handler
 import (
 	"backend/exception"
 	"backend/graph/model"
-	"backend/pkg/util"
 	"context"
 	"errors"
 	"fmt"
 )
 
 func (r ProductRepository) CreateSales(ctx context.Context, user *model.User, input *model.CreateSaleInput) (*model.SalesMutationResponse, error) {
-	//validate input id
-	if !util.IsValidID(input.ProductID) {
+	//validate input
+	sales, validationError := input.Validator()
+	if validationError != nil {
 		return &model.SalesMutationResponse{
-			Error: exception.MutationErrorHandler(ctx, errors.New("invalid ProductID"), exception.BAD_REQUEST, nil),
+			Error: validationError,
 		}, nil
-	}
-	sales := model.Sales{
-		ProductID: input.ProductID,
 	}
 	//get organization of the user
 	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
@@ -49,7 +46,7 @@ func (r ProductRepository) CreateSales(ctx context.Context, user *model.User, in
 	sales.SoldByID = user.ID
 	sales.UnitsSold = input.Units
 	//create sales and update the product units
-	err = r.TableSales.CreateSales(ctx, &sales)
+	err = r.TableSales.CreateSales(ctx, sales)
 	if err != nil {
 		return &model.SalesMutationResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
@@ -66,6 +63,6 @@ func (r ProductRepository) CreateSales(ctx context.Context, user *model.User, in
 	sales.SoldBy = user
 	return &model.SalesMutationResponse{
 		ID:   &sales.ID,
-		Data: &sales,
+		Data: sales,
 	}, nil
 }
