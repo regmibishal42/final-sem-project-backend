@@ -50,7 +50,14 @@ func (r *salesMutationResolver) CreateSales(ctx context.Context, obj *model.Sale
 
 // UpdateSales is the resolver for the updateSales field.
 func (r *salesMutationResolver) UpdateSales(ctx context.Context, obj *model.SalesMutation, input model.UpdateSalesInput) (*model.SalesMutationResponse, error) {
-	panic(fmt.Errorf("not implemented: UpdateSales - updateSales"))
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.SalesMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.AUTHENTICATION, nil),
+		}, nil
+	}
+	return r.ProductDomain.UpdateSales(ctx, user, &input)
 }
 
 // DeleteSales is the resolver for the deleteSales field.

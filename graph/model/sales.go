@@ -49,10 +49,10 @@ func (input *UpdateSalesInput) Validator() (*Sales, *ValidationError) {
 		}
 	}
 	sales.ID = input.SalesID
-	if input.Units != nil {
-		if *input.Units < 1 {
+	if input.SoldAt != nil {
+		if *input.SoldAt < 1 {
 			return nil, &ValidationError{
-				Message: "units cannot be less then 1",
+				Message: "invalid SoldAt",
 				Code:    401,
 			}
 

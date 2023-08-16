@@ -66,3 +66,37 @@ func (r ProductRepository) CreateSales(ctx context.Context, user *model.User, in
 		Data: sales,
 	}, nil
 }
+
+func (r ProductRepository) UpdateSales(ctx context.Context, user *model.User, input *model.UpdateSalesInput) (*model.SalesMutationResponse, error) {
+	//validation error
+	sales, validationError := input.Validator()
+	if validationError != nil {
+		return &model.SalesMutationResponse{
+			Error: validationError,
+		}, nil
+	}
+	//get organization of the user
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		return &model.SalesMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	if organizationID == nil {
+		return &model.SalesMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, errors.New("not authorized for this task"), exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	// update the sales
+	updatedSales, err := r.TableSales.UpdateSales(ctx, sales)
+	if err != nil {
+		return &model.SalesMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+
+	return &model.SalesMutationResponse{
+		ID:   &sales.ID,
+		Data: updatedSales,
+	}, nil
+}
