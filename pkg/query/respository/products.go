@@ -13,20 +13,20 @@ func (r QueryRepository) CreateProduct(ctx context.Context, product *model.Produ
 	return nil
 }
 
-func (r QueryRepository) UpdateProduct(ctx context.Context, product *model.Product) (*model.Product, error) {
+func (r QueryRepository) UpdateProduct(ctx context.Context, product *model.Product, organizationID *string) (*model.Product, error) {
 	updatedProduct := model.Product{}
-	err := r.db.Model(&model.Product{}).Where("deleted_at IS NULL AND id = ?", product.ID).Updates(&product).Find(&updatedProduct).Error
+	err := r.db.Model(&model.Product{}).Where("deleted_at IS NULL AND id = ? AND organization_id = ?", product.ID, organizationID).Updates(&product).Find(&updatedProduct).Error
 	if err != nil {
 		return nil, err
 	}
 	return &updatedProduct, nil
 }
 
-func (r QueryRepository) DeleteProduct(ctx context.Context, productID *string) error {
+func (r QueryRepository) DeleteProduct(ctx context.Context, productID *string, organizationID *string) error {
 	product := model.Product{}
 	deletedProduct := model.DeletedProducts{}
 	tx := r.db.Begin()
-	if err := tx.Where("deleted_at IS NULL AND id = ?", productID).Find(&product).Error; err != nil {
+	if err := tx.Where("deleted_at IS NULL AND id = ? AND organization_id = ?", productID, organizationID).Find(&product).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

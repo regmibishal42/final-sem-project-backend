@@ -62,16 +62,37 @@ func (r *salesMutationResolver) UpdateSales(ctx context.Context, obj *model.Sale
 
 // DeleteSales is the resolver for the deleteSales field.
 func (r *salesMutationResolver) DeleteSales(ctx context.Context, obj *model.SalesMutation, input model.DeleteSalesInput) (*model.SalesMutationResponse, error) {
-	panic(fmt.Errorf("not implemented: DeleteSales - deleteSales"))
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.SalesMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.AUTHENTICATION, nil),
+		}, nil
+	}
+	return r.ProductDomain.DeleteSale(ctx, user, &input)
 }
 
 // GetSalesByFilter is the resolver for the getSalesByFilter field.
 func (r *salesQueryResolver) GetSalesByFilter(ctx context.Context, obj *model.SalesQuery, input model.FilterSalesInput) (*model.SalesQueryResponse, error) {
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.SalesQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHENTICATION, nil),
+		}, nil
+	}
 	panic(fmt.Errorf("not implemented: GetSalesByFilter - getSalesByFilter"))
 }
 
 // GetSaleByID is the resolver for the getSaleByID field.
 func (r *salesQueryResolver) GetSaleByID(ctx context.Context, obj *model.SalesQuery, input model.GetSalesByIDInput) (*model.SaleQueryResponse, error) {
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.SaleQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHENTICATION, nil),
+		}, nil
+	}
 	panic(fmt.Errorf("not implemented: GetSaleByID - getSaleByID"))
 }
 
