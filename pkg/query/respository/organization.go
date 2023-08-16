@@ -41,13 +41,13 @@ func (r QueryRepository) GetOrganizationIDByUser(ctx context.Context, user *mode
 	var id string
 	db := r.db.Model(&model.Organization{})
 	if user.UserType == model.UserTypeAdmin {
-		err := db.Where("created_by_id = ?", user.ID).Select("id").Find(&id).Error
+		err := db.Where("created_by_id = ?", user.ID).Select("id").First(&id).Error
 		if err != nil {
 			return nil, err
 		}
 		return &id, nil
 	}
-	err := db.Joins("left join staffs on staffs.organization_id = organizations.id").Where("staffs.staff_id = ?", user.ID).Select("organizations.id").Find(&id).Error
+	err := db.Joins("left join staffs on staffs.organization_id = organizations.id").Where("staffs.staff_id = ?", user.ID).Select("organizations.id").First(&id).Error
 	if err != nil {
 		return nil, err
 	}

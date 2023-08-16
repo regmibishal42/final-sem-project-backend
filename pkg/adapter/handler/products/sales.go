@@ -3,9 +3,12 @@ package products_handler
 import (
 	"backend/exception"
 	"backend/graph/model"
+	"backend/pkg/util"
 	"context"
 	"errors"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 func (r ProductRepository) CreateSales(ctx context.Context, user *model.User, input *model.CreateSaleInput) (*model.SalesMutationResponse, error) {
@@ -19,13 +22,13 @@ func (r ProductRepository) CreateSales(ctx context.Context, user *model.User, in
 	//get organization of the user
 	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.SalesMutationResponse{
+				Error: exception.MutationErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
 		return &model.SalesMutationResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
-		}, nil
-	}
-	if organizationID == nil {
-		return &model.SalesMutationResponse{
-			Error: exception.MutationErrorHandler(ctx, errors.New("not authorized for this task"), exception.SERVER_ERROR, nil),
 		}, nil
 	}
 	sales.OrganizationID = *organizationID
@@ -78,17 +81,49 @@ func (r ProductRepository) UpdateSales(ctx context.Context, user *model.User, in
 	//get organization of the user
 	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.SalesMutationResponse{
+				Error: exception.MutationErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
 		return &model.SalesMutationResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
 		}, nil
 	}
-	if organizationID == nil {
+	// update the sales
+	updatedSales, err := r.TableSales.UpdateSales(ctx, sales, organizationID)
+	if err != nil {
 		return &model.SalesMutationResponse{
-			Error: exception.MutationErrorHandler(ctx, errors.New("not authorized for this task"), exception.SERVER_ERROR, nil),
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
 		}, nil
 	}
-	// update the sales
-	updatedSales, err := r.TableSales.UpdateSales(ctx, sales)
+	return &model.SalesMutationResponse{
+		ID:   &sales.ID,
+		Data: updatedSales,
+	}, nil
+}
+
+func (r ProductRepository) DeleteSale(ctx context.Context, user *model.User, input *model.DeleteSalesInput) (*model.SalesMutationResponse, error) {
+	// Validate ID From The Input
+	if !util.IsValidID(input.SalesID) {
+		return &model.SalesMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, errors.New("invalid salesID"), exception.BAD_REQUEST, nil),
+		}, nil
+	}
+	// Get OrganizationID from the user
+	//get organization of the user
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.SalesMutationResponse{
+				Error: exception.MutationErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
+		return &model.SalesMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	err = r.TableSales.DeleteSales(ctx, &input.SalesID, organizationID)
 	if err != nil {
 		return &model.SalesMutationResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
@@ -96,7 +131,6 @@ func (r ProductRepository) UpdateSales(ctx context.Context, user *model.User, in
 	}
 
 	return &model.SalesMutationResponse{
-		ID:   &sales.ID,
-		Data: updatedSales,
+		ID: &input.SalesID,
 	}, nil
 }

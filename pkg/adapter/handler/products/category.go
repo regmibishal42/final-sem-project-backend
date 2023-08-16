@@ -7,6 +7,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 func (r ProductRepository) CreateProductCategory(ctx context.Context, user *model.User, input model.CreateCategoryInput) (*model.CategoryMutationResponse, error) {
@@ -17,13 +19,13 @@ func (r ProductRepository) CreateProductCategory(ctx context.Context, user *mode
 	}
 	id, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.CategoryMutationResponse{
+				Error: exception.MutationErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
 		return &model.CategoryMutationResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
-		}, nil
-	}
-	if id == nil {
-		return &model.CategoryMutationResponse{
-			Error: exception.MutationErrorHandler(ctx, errors.New("not authorized for this task"), exception.AUTHORIZATION, nil),
 		}, nil
 	}
 	//create Category
@@ -51,15 +53,15 @@ func (r ProductRepository) DeleteCategory(ctx context.Context, user *model.User,
 		}, nil
 	}
 	//Get OrganizationID from userID
-	id, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	_, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.CategoryMutationResponse{
+				Error: exception.MutationErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
 		return &model.CategoryMutationResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
-		}, nil
-	}
-	if id == nil {
-		return &model.CategoryMutationResponse{
-			Error: exception.MutationErrorHandler(ctx, errors.New("not authorized for this task"), exception.AUTHORIZATION, nil),
 		}, nil
 	}
 	//Soft delete category
@@ -78,13 +80,13 @@ func (r ProductRepository) GetCategoryByOrganization(ctx context.Context, user *
 	//Get OrganizationID from userID
 	id, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.CategoryQueryResponse{
+				Error: exception.QueryErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
 		return &model.CategoryQueryResponse{
 			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
-		}, nil
-	}
-	if id == nil {
-		return &model.CategoryQueryResponse{
-			Error: exception.QueryErrorHandler(ctx, errors.New("not authorized for this task"), exception.AUTHORIZATION, nil),
 		}, nil
 	}
 	//get category

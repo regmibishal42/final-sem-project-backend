@@ -6,6 +6,8 @@ import (
 	"backend/pkg/util"
 	"context"
 	"errors"
+
+	"gorm.io/gorm"
 )
 
 func (r ProductRepository) CreateProduct(ctx context.Context, user *model.User, input *model.CreateProductInput) (*model.ProductMutationResponse, error) {
@@ -19,13 +21,13 @@ func (r ProductRepository) CreateProduct(ctx context.Context, user *model.User, 
 	//check for user
 	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.ProductMutationResponse{
+				Error: exception.MutationErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
 		return &model.ProductMutationResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
-		}, nil
-	}
-	if organizationID == nil {
-		return &model.ProductMutationResponse{
-			Error: exception.MutationErrorHandler(ctx, errors.New("not authorized for this task"), exception.AUTHORIZATION, nil),
 		}, nil
 	}
 	//add organizationID to product
@@ -51,6 +53,18 @@ func (r ProductRepository) UpdateProduct(ctx context.Context, user *model.User, 
 			Error: validationError,
 		}, nil
 	}
+	//check for user
+	_, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.ProductMutationResponse{
+				Error: exception.MutationErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
+		return &model.ProductMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
 
 	//update the product
 	updatedProduct, err := r.TableProduct.UpdateProduct(ctx, product)
@@ -73,8 +87,20 @@ func (r ProductRepository) DeleteProduct(ctx context.Context, user *model.User, 
 			Error: exception.MutationErrorHandler(ctx, errors.New("invalid productID"), exception.BAD_REQUEST, nil),
 		}, nil
 	}
+	//check for user
+	_, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.ProductMutationResponse{
+				Error: exception.MutationErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
+		return &model.ProductMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
 	//Delete the product
-	err := r.TableProduct.DeleteProduct(ctx, productID)
+	err = r.TableProduct.DeleteProduct(ctx, productID)
 	if err != nil {
 		return &model.ProductMutationResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
@@ -95,15 +121,15 @@ func (r ProductRepository) GetProductByID(ctx context.Context, user *model.User,
 		}, nil
 	}
 	//validate the user -> permission
-	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	_, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.ProductQueryResponse{
+				Error: exception.QueryErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
 		return &model.ProductQueryResponse{
 			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
-		}, nil
-	}
-	if organizationID == nil {
-		return &model.ProductQueryResponse{
-			Error: exception.QueryErrorHandler(ctx, errors.New("not authorized for this task"), exception.AUTHORIZATION, nil),
 		}, nil
 	}
 	//get the product
@@ -140,13 +166,13 @@ func (r ProductRepository) GetProductsByFilter(ctx context.Context, user *model.
 	//validate the user -> permission
 	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.ProductsQueryResponse{
+				Error: exception.QueryErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
 		return &model.ProductsQueryResponse{
 			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
-		}, nil
-	}
-	if organizationID == nil {
-		return &model.ProductsQueryResponse{
-			Error: exception.QueryErrorHandler(ctx, errors.New("not authorized for this task"), exception.AUTHORIZATION, nil),
 		}, nil
 	}
 	// get the products
