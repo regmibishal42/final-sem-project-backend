@@ -11,3 +11,17 @@ type Sales struct {
 	SoldByID       string        `json:"soldByID"`
 	SoldBy         *User         `json:"soldBy" gorm:"foreignKey:SoldByID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
+
+// func (input *CreateSaleInput) Validator() (*Sales, *ValidationError) {
+// 	sales := Sales{}
+// 	if !util.IsValidID(input.ProductID) {
+// 		return nil, &ValidationError{
+// 			Message: "invalid productID",
+// 			Code:    401,
+// 		}
+// 	}
+// 	sales.ProductID = input.ProductID
+// 	sales.SoldAt = input.SoldAt
+// 	input.Units = in
+// 	return nil, nil
+// }

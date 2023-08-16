@@ -47,6 +47,17 @@ type AuthToken struct {
 	AccessToken string `json:"accessToken"`
 }
 
+type AuthenticationError struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+}
+
+func (AuthenticationError) IsQueryError()           {}
+func (this AuthenticationError) GetMessage() string { return this.Message }
+func (this AuthenticationError) GetCode() int       { return this.Code }
+
+func (AuthenticationError) IsMutationError() {}
+
 type AuthorizationError struct {
 	Message string `json:"message"`
 	Code    int    `json:"code"`

@@ -29,6 +29,7 @@ const (
 	AUTHORIZATION    ErrorType = "AUTHORIZATION"
 	BAD_REQUEST      ErrorType = "BAD_REQUEST"
 	SERVER_ERROR     ErrorType = "SERVER_ERROR"
+	AUTHENTICATION   ErrorType = "AUTHENTICATION"
 	VALIDATION_ERROR ErrorType = "VALIDATION_ERROR"
 )
 
@@ -53,6 +54,11 @@ func MutationErrorHandler(ctx context.Context, err error, errorType ErrorType, f
 		return model.ServerError{
 			Message: err.Error(),
 			Code:    http.StatusInternalServerError,
+		}
+	case AUTHENTICATION:
+		return model.AuthenticationError{
+			Message: err.Error(),
+			Code:    http.StatusUnauthorized,
 		}
 	case VALIDATION_ERROR:
 		return model.CreateValidationError(err.Error(), *field)
@@ -82,6 +88,11 @@ func QueryErrorHandler(ctx context.Context, err error, errorType ErrorType, mess
 		return model.ServerError{
 			Message: err.Error(),
 			Code:    http.StatusInternalServerError,
+		}
+	case AUTHENTICATION:
+		return model.AuthenticationError{
+			Message: err.Error(),
+			Code:    http.StatusUnauthorized,
 		}
 	default:
 		return nil
