@@ -338,8 +338,9 @@ type ComplexityRoot struct {
 	}
 
 	SalesQueryResponse struct {
-		Data  func(childComplexity int) int
-		Error func(childComplexity int) int
+		Data     func(childComplexity int) int
+		Error    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
 	}
 
 	ServerError struct {
@@ -1626,6 +1627,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SalesQueryResponse.Error(childComplexity), true
 
+	case "SalesQueryResponse.pageInfo":
+		if e.complexity.SalesQueryResponse.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.SalesQueryResponse.PageInfo(childComplexity), true
+
 	case "ServerError.code":
 		if e.complexity.ServerError.Code == nil {
 			break
@@ -1973,6 +1981,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDeleteProductInput,
 		ec.unmarshalInputDeleteSalesInput,
 		ec.unmarshalInputFilterSalesInput,
+		ec.unmarshalInputFilterSalesParams,
 		ec.unmarshalInputForgetPasswordInput,
 		ec.unmarshalInputGetByIDInput,
 		ec.unmarshalInputGetOrganizationStaffsInput,
@@ -2575,10 +2584,14 @@ input UpdateSalesInput{
 input DeleteSalesInput{
     salesID:ID!
 }
-input FilterSalesInput{
+input FilterSalesParams{
     filterType:SalesInfoType!
     productID:ID
     categoryID:ID
+}
+input FilterSalesInput{
+    params:FilterSalesParams
+    page:OffsetPaginationFilter
 }
 input GetSalesByIDInput{
     salesID:ID!
@@ -2594,6 +2607,7 @@ type SalesMutationResponse{
 type SalesQueryResponse{
     data:[Sales]
     error:QueryError
+    pageInfo: OffsetPageInfo
 }
 type SaleQueryResponse{
     data:Sales
@@ -10191,6 +10205,8 @@ func (ec *executionContext) fieldContext_SalesQuery_getSalesByFilter(ctx context
 				return ec.fieldContext_SalesQueryResponse_data(ctx, field)
 			case "error":
 				return ec.fieldContext_SalesQueryResponse_error(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_SalesQueryResponse_pageInfo(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SalesQueryResponse", field.Name)
 		},
@@ -10367,6 +10383,57 @@ func (ec *executionContext) fieldContext_SalesQueryResponse_error(ctx context.Co
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesQueryResponse_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.SalesQueryResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesQueryResponse_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.OffsetPageInfo)
+	fc.Result = res
+	return ec.marshalOOffsetPageInfo2ᚖbackendᚋgraphᚋmodelᚐOffsetPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesQueryResponse_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesQueryResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "page":
+				return ec.fieldContext_OffsetPageInfo_page(ctx, field)
+			case "count":
+				return ec.fieldContext_OffsetPageInfo_count(ctx, field)
+			case "totalRows":
+				return ec.fieldContext_OffsetPageInfo_totalRows(ctx, field)
+			case "totalPages":
+				return ec.fieldContext_OffsetPageInfo_totalPages(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type OffsetPageInfo", field.Name)
 		},
 	}
 	return fc, nil
@@ -14663,6 +14730,44 @@ func (ec *executionContext) unmarshalInputFilterSalesInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
+	fieldsInOrder := [...]string{"params", "page"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "params":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("params"))
+			data, err := ec.unmarshalOFilterSalesParams2ᚖbackendᚋgraphᚋmodelᚐFilterSalesParams(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Params = data
+		case "page":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("page"))
+			data, err := ec.unmarshalOOffsetPaginationFilter2ᚖbackendᚋgraphᚋmodelᚐOffsetPaginationFilter(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Page = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputFilterSalesParams(ctx context.Context, obj interface{}) (model.FilterSalesParams, error) {
+	var it model.FilterSalesParams
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
 	fieldsInOrder := [...]string{"filterType", "productID", "categoryID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
@@ -18929,6 +19034,8 @@ func (ec *executionContext) _SalesQueryResponse(ctx context.Context, sel ast.Sel
 			out.Values[i] = ec._SalesQueryResponse_data(ctx, field, obj)
 		case "error":
 			out.Values[i] = ec._SalesQueryResponse_error(ctx, field, obj)
+		case "pageInfo":
+			out.Values[i] = ec._SalesQueryResponse_pageInfo(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21452,6 +21559,14 @@ func (ec *executionContext) marshalOCategory2ᚖbackendᚋgraphᚋmodelᚐCatego
 		return graphql.Null
 	}
 	return ec._Category(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOFilterSalesParams2ᚖbackendᚋgraphᚋmodelᚐFilterSalesParams(ctx context.Context, v interface{}) (*model.FilterSalesParams, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputFilterSalesParams(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOFloat2float64(ctx context.Context, v interface{}) (float64, error) {

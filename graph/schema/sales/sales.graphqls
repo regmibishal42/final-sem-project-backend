@@ -24,10 +24,14 @@ input UpdateSalesInput{
 input DeleteSalesInput{
     salesID:ID!
 }
-input FilterSalesInput{
+input FilterSalesParams{
     filterType:SalesInfoType!
     productID:ID
     categoryID:ID
+}
+input FilterSalesInput{
+    params:FilterSalesParams
+    page:OffsetPaginationFilter
 }
 input GetSalesByIDInput{
     salesID:ID!
@@ -43,6 +47,7 @@ type SalesMutationResponse{
 type SalesQueryResponse{
     data:[Sales]
     error:QueryError
+    pageInfo: OffsetPageInfo
 }
 type SaleQueryResponse{
     data:Sales

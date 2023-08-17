@@ -161,6 +161,11 @@ type DeleteSalesInput struct {
 }
 
 type FilterSalesInput struct {
+	Params *FilterSalesParams      `json:"params,omitempty"`
+	Page   *OffsetPaginationFilter `json:"page,omitempty"`
+}
+
+type FilterSalesParams struct {
 	FilterType SalesInfoType `json:"filterType"`
 	ProductID  *string       `json:"productID,omitempty"`
 	CategoryID *string       `json:"categoryID,omitempty"`
@@ -363,8 +368,9 @@ type SalesQuery struct {
 }
 
 type SalesQueryResponse struct {
-	Data  []*Sales   `json:"data,omitempty"`
-	Error QueryError `json:"error,omitempty"`
+	Data     []*Sales        `json:"data,omitempty"`
+	Error    QueryError      `json:"error,omitempty"`
+	PageInfo *OffsetPageInfo `json:"pageInfo,omitempty"`
 }
 
 type ServerError struct {

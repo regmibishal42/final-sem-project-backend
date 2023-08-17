@@ -10,6 +10,6 @@ type SalesQueryInterface interface {
 	UpdateSales(ctx context.Context, sales *model.Sales, organizationID *string) (*model.Sales, error)
 	DeleteSales(ctx context.Context, salesID *string, organizationID *string) error
 
-	GetSalesByFilter(ctx context.Context, filter *model.FilterSalesInput, organizationID *string) ([]*model.Sales, error)
+	GetSalesByFilter(ctx context.Context, filter *model.FilterSalesInput, organizationID *string, pageInfo *model.OffsetPageInfo) ([]*model.Sales, error)
 	GetSalesByID(ctx context.Context, salesID *string, organizationID *string) (*model.Sales, error)
 }
