@@ -81,7 +81,7 @@ func (r *salesQueryResolver) GetSalesByFilter(ctx context.Context, obj *model.Sa
 			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHENTICATION, nil),
 		}, nil
 	}
-	panic(fmt.Errorf("not implemented: GetSalesByFilter - getSalesByFilter"))
+	return r.ProductDomain.GetSalesByFilter(ctx, user, &input)
 }
 
 // GetSaleByID is the resolver for the getSaleByID field.
