@@ -63,18 +63,20 @@ func (input *UpdateSalesInput) Validator() (*Sales, *ValidationError) {
 }
 
 func (input *FilterSalesInput) Validator() *ValidationError {
-	if input.CategoryID != nil && !util.IsValidID(*input.CategoryID) {
-		return &ValidationError{
-			Message: "invalid CategoryID",
-			Code:    401,
+	if input.Params != nil {
+		if input.Params.CategoryID != nil && !util.IsValidID(*input.Params.CategoryID) {
+			return &ValidationError{
+				Message: "invalid CategoryID",
+				Code:    401,
+			}
 		}
-	}
-	if input.ProductID != nil && !util.IsValidID(*input.ProductID) {
-		return &ValidationError{
-			Message: "invalid CategoryID",
-			Code:    401,
+		if input.Params.ProductID != nil && !util.IsValidID(*input.Params.ProductID) {
+			return &ValidationError{
+				Message: "invalid CategoryID",
+				Code:    401,
+			}
 		}
+
 	}
 	return nil
-
 }
