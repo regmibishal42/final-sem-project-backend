@@ -63,3 +63,12 @@ func (r QueryRepository) GetSalesByFilter(ctx context.Context, filter *model.Fil
 	}
 	return sales, nil
 }
+
+func (r QueryRepository) GetSalesByID(ctx context.Context, salesID *string, organizationID *string) (*model.Sales, error) {
+	sales := model.Sales{}
+	err := r.db.Where("deleted_at IS NULL AND id = ? AND organization_id = ?", salesID, organizationID).Find(&sales).Error
+	if err != nil {
+		return nil, err
+	}
+	return &sales, nil
+}

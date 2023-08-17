@@ -9,7 +9,6 @@ import (
 	"backend/graph/generated"
 	"backend/graph/model"
 	"context"
-	"fmt"
 )
 
 // Product is the resolver for the product field.
@@ -93,7 +92,7 @@ func (r *salesQueryResolver) GetSaleByID(ctx context.Context, obj *model.SalesQu
 			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHENTICATION, nil),
 		}, nil
 	}
-	panic(fmt.Errorf("not implemented: GetSaleByID - getSaleByID"))
+	return r.ProductDomain.GetSalesByID(ctx, user, input)
 }
 
 // Sales returns generated.SalesResolver implementation.

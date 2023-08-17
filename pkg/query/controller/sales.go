@@ -11,4 +11,5 @@ type SalesQueryInterface interface {
 	DeleteSales(ctx context.Context, salesID *string, organizationID *string) error
 
 	GetSalesByFilter(ctx context.Context, filter *model.FilterSalesInput, organizationID *string) ([]*model.Sales, error)
+	GetSalesByID(ctx context.Context, salesID *string, organizationID *string) (*model.Sales, error)
 }

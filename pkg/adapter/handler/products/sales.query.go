@@ -3,6 +3,7 @@ package products_handler
 import (
 	"backend/exception"
 	"backend/graph/model"
+	"backend/pkg/util"
 	"context"
 	"errors"
 
@@ -36,6 +37,36 @@ func (r ProductRepository) GetSalesByFilter(ctx context.Context, user *model.Use
 		}, nil
 	}
 	return &model.SalesQueryResponse{
+		Data: sales,
+	}, nil
+}
+
+func (r ProductRepository) GetSalesByID(ctx context.Context, user *model.User, input model.GetSalesByIDInput) (*model.SaleQueryResponse, error) {
+	//validate the id from input
+	if !util.IsValidID(input.SalesID) {
+		return &model.SaleQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, errors.New("invalid salesID"), exception.BAD_REQUEST, nil),
+		}, nil
+	}
+	//get organizationID from user
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.SaleQueryResponse{
+				Error: exception.QueryErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
+		return &model.SaleQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	sales, err := r.TableSales.GetSalesByID(ctx, &input.SalesID, organizationID)
+	if err != nil {
+		return &model.SaleQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.SaleQueryResponse{
 		Data: sales,
 	}, nil
 }
