@@ -29,3 +29,46 @@ func (r QueryRepository) DeleteSales(ctx context.Context, salesID *string, organ
 	err := r.db.Model(&model.Sales{}).Where("deleted_at IS NULL AND id = ? AND organization_id = ?", salesID, organizationID).Update("deleted_at", time.Now()).Error
 	return err
 }
+
+func (r QueryRepository) GetSalesByFilter(ctx context.Context, filter *model.FilterSalesInput, organizationID *string) ([]*model.Sales, error) {
+	sales := []*model.Sales{}
+	now := time.Now()
+	db := r.db.Model(&model.Sales{}).Where("sales.deleted_at IS NULL AND sales.organization_id = ?", organizationID)
+	if filter.FilterType == model.SalesInfoTypeDaily {
+		today := time.Now().Truncate(24 * time.Hour)
+		// Truncate to beginning of the day
+		db = db.Where("sales.created_at >= ?", today)
+	}
+	if filter.FilterType == model.SalesInfoTypeWeekly {
+		beginningOfWeek := now.AddDate(0, 0, int(time.Sunday-now.Weekday()))
+		db = db.Where("sales.created_at >= ?", beginningOfWeek)
+	}
+	if filter.FilterType == model.SalesInfoTypeMonthly {
+		beginningOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+		db = db.Where("sales.created_at >= ?", beginningOfMonth)
+	}
+	if filter.FilterType == model.SalesInfoTypeYearly {
+		beginningOfYear := time.Date(now.Year(), time.January, 1, 0, 0, 0, 0, now.Location())
+		db = db.Where("sales.created_at >= ?", beginningOfYear)
+	}
+	if filter.ProductID != nil {
+		db = db.Where("sales.product_id = ?", filter.ProductID)
+	}
+	if filter.CategoryID != nil {
+		db = db.Joins("left join products on sales.product_id = products.id").Where("products.category_id = ?", filter.CategoryID)
+	}
+	err := db.Find(&sales).Error
+	if err != nil {
+		return nil, err
+	}
+	return sales, nil
+}
+
+func (r QueryRepository) GetSalesByID(ctx context.Context, salesID *string, organizationID *string) (*model.Sales, error) {
+	sales := model.Sales{}
+	err := r.db.Where("deleted_at IS NULL AND id = ? AND organization_id = ?", salesID, organizationID).Find(&sales).Error
+	if err != nil {
+		return nil, err
+	}
+	return &sales, nil
+}
