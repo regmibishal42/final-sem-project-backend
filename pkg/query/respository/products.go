@@ -3,6 +3,7 @@ package query_repository
 import (
 	"backend/graph/model"
 	"context"
+	"strings"
 )
 
 func (r QueryRepository) CreateProduct(ctx context.Context, product *model.Product) error {
@@ -58,9 +59,12 @@ func (r QueryRepository) GetProductsByFilter(ctx context.Context, pageInfo *mode
 		if filter.Params.CategoryID != nil {
 			db = db.Where("category_id = ?", filter.Params.CategoryID)
 		}
+		if filter.Params.SearchQuery != nil && *filter.Params.SearchQuery != "" {
+			splitQuery := strings.Split(strings.TrimSpace(*filter.Params.SearchQuery), " ")
+			db = db.Where("LOWER(name) LIKE(?) OR lower(name) LIKE(?)", "%"+*filter.Params.SearchQuery+"%", "%"+splitQuery[0]+"%")
+		}
 	}
 	err := db.Scopes(Paginate(products, pageInfo, filter.Page, db)).Find(&products).Error
-	//err := db.Find(&products).Error
 	if err != nil {
 		return nil, err
 	}

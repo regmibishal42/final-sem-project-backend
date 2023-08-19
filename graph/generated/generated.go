@@ -2513,6 +2513,7 @@ input UpdateProductInput{
 
 input ProductParamsFilter{
     categoryID:ID
+    searchQuery:String
 }
 
 input GetProductsByFilterInput{
@@ -2586,6 +2587,7 @@ input DeleteSalesInput{
 }
 input FilterSalesParams{
     filterType:SalesInfoType!
+    searchQuery:String
     productID:ID
     categoryID:ID
 }
@@ -14768,7 +14770,7 @@ func (ec *executionContext) unmarshalInputFilterSalesParams(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"filterType", "productID", "categoryID"}
+	fieldsInOrder := [...]string{"filterType", "searchQuery", "productID", "categoryID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -14784,6 +14786,15 @@ func (ec *executionContext) unmarshalInputFilterSalesParams(ctx context.Context,
 				return it, err
 			}
 			it.FilterType = data
+		case "searchQuery":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("searchQuery"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SearchQuery = data
 		case "productID":
 			var err error
 
@@ -15217,7 +15228,7 @@ func (ec *executionContext) unmarshalInputProductParamsFilter(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"categoryID"}
+	fieldsInOrder := [...]string{"categoryID", "searchQuery"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -15233,6 +15244,15 @@ func (ec *executionContext) unmarshalInputProductParamsFilter(ctx context.Contex
 				return it, err
 			}
 			it.CategoryID = data
+		case "searchQuery":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("searchQuery"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SearchQuery = data
 		}
 	}
 

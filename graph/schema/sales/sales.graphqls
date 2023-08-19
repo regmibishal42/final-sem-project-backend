@@ -26,6 +26,7 @@ input DeleteSalesInput{
 }
 input FilterSalesParams{
     filterType:SalesInfoType!
+    searchQuery:String
     productID:ID
     categoryID:ID
 }

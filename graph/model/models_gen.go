@@ -166,9 +166,10 @@ type FilterSalesInput struct {
 }
 
 type FilterSalesParams struct {
-	FilterType SalesInfoType `json:"filterType"`
-	ProductID  *string       `json:"productID,omitempty"`
-	CategoryID *string       `json:"categoryID,omitempty"`
+	FilterType  SalesInfoType `json:"filterType"`
+	SearchQuery *string       `json:"searchQuery,omitempty"`
+	ProductID   *string       `json:"productID,omitempty"`
+	CategoryID  *string       `json:"categoryID,omitempty"`
 }
 
 type ForgetPasswordInput struct {
@@ -286,7 +287,8 @@ type ProductMutationResponse struct {
 }
 
 type ProductParamsFilter struct {
-	CategoryID *string `json:"categoryID,omitempty"`
+	CategoryID  *string `json:"categoryID,omitempty"`
+	SearchQuery *string `json:"searchQuery,omitempty"`
 }
 
 type ProductQuery struct {
