@@ -3,6 +3,7 @@ package query_repository
 import (
 	"backend/graph/model"
 	"context"
+	"strings"
 	"time"
 
 	"gorm.io/gorm/clause"
@@ -51,6 +52,11 @@ func (r QueryRepository) GetSalesByFilter(ctx context.Context, filter *model.Fil
 		if filter.Params.FilterType == model.SalesInfoTypeYearly {
 			beginningOfYear := time.Date(now.Year(), time.January, 1, 0, 0, 0, 0, now.Location())
 			db = db.Where("sales.created_at >= ?", beginningOfYear)
+		}
+		if filter.Params.SearchQuery != nil && *filter.Params.SearchQuery != "" {
+			splitQueryString := strings.Split(strings.TrimSpace(*filter.Params.SearchQuery), " ")
+			db = db.Joins("left join products on products.id = sales.product_id").
+				Where("LOWER(products.name) LIKE(?) OR lower(products.name) LIKE(?)", "%"+*filter.Params.SearchQuery+"%", "%"+splitQueryString[0]+"%")
 		}
 		if filter.Params.ProductID != nil {
 			db = db.Where("sales.product_id = ?", filter.Params.ProductID)
