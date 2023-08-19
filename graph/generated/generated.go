@@ -65,6 +65,11 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	AdditionalUserInformation struct {
+		HasOrganization func(childComplexity int) int
+		IsStaff         func(childComplexity int) int
+	}
+
 	Address struct {
 		City     func(childComplexity int) int
 		District func(childComplexity int) int
@@ -371,7 +376,7 @@ type ComplexityRoot struct {
 
 	StaffQuery struct {
 		GetStaffByID           func(childComplexity int, input model.GetStaffInput) int
-		GetStaffByOrganization func(childComplexity int, input model.GetOrganizationStaffsInput) int
+		GetStaffByOrganization func(childComplexity int) int
 	}
 
 	StaffQueryResponse struct {
@@ -385,15 +390,16 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		CreatedAt  func(childComplexity int) int
-		DeletedAt  func(childComplexity int) int
-		Email      func(childComplexity int) int
-		ID         func(childComplexity int) int
-		IsVerified func(childComplexity int) int
-		Profile    func(childComplexity int) int
-		Status     func(childComplexity int) int
-		UpdatedAt  func(childComplexity int) int
-		UserType   func(childComplexity int) int
+		AdditionalInformation func(childComplexity int) int
+		CreatedAt             func(childComplexity int) int
+		DeletedAt             func(childComplexity int) int
+		Email                 func(childComplexity int) int
+		ID                    func(childComplexity int) int
+		IsVerified            func(childComplexity int) int
+		Profile               func(childComplexity int) int
+		Status                func(childComplexity int) int
+		UpdatedAt             func(childComplexity int) int
+		UserType              func(childComplexity int) int
 	}
 
 	UserMutation struct {
@@ -499,11 +505,12 @@ type StaffMutationResolver interface {
 	UpdateStaff(ctx context.Context, obj *model.StaffMutation, input model.UpdateStaffInput) (*model.StaffMutationResponse, error)
 }
 type StaffQueryResolver interface {
-	GetStaffByOrganization(ctx context.Context, obj *model.StaffQuery, input model.GetOrganizationStaffsInput) (*model.StaffsQueryResponse, error)
+	GetStaffByOrganization(ctx context.Context, obj *model.StaffQuery) (*model.StaffsQueryResponse, error)
 	GetStaffByID(ctx context.Context, obj *model.StaffQuery, input model.GetStaffInput) (*model.StaffQueryResponse, error)
 }
 type UserResolver interface {
 	Profile(ctx context.Context, obj *model.User) (*model.Profile, error)
+	AdditionalInformation(ctx context.Context, obj *model.User) (*model.AdditionalUserInformation, error)
 }
 type UserMutationResolver interface {
 	CreateUser(ctx context.Context, obj *model.UserMutation, input model.UserInput) (*model.AuthMutationResponse, error)
@@ -532,6 +539,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "AdditionalUserInformation.hasOrganization":
+		if e.complexity.AdditionalUserInformation.HasOrganization == nil {
+			break
+		}
+
+		return e.complexity.AdditionalUserInformation.HasOrganization(childComplexity), true
+
+	case "AdditionalUserInformation.isStaff":
+		if e.complexity.AdditionalUserInformation.IsStaff == nil {
+			break
+		}
+
+		return e.complexity.AdditionalUserInformation.IsStaff(childComplexity), true
 
 	case "Address.City":
 		if e.complexity.Address.City == nil {
@@ -1759,12 +1780,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_StaffQuery_getStaffByOrganization_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.StaffQuery.GetStaffByOrganization(childComplexity, args["input"].(model.GetOrganizationStaffsInput)), true
+		return e.complexity.StaffQuery.GetStaffByOrganization(childComplexity), true
 
 	case "StaffQueryResponse.data":
 		if e.complexity.StaffQueryResponse.Data == nil {
@@ -1793,6 +1809,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.StaffsQueryResponse.Error(childComplexity), true
+
+	case "User.additionalInformation":
+		if e.complexity.User.AdditionalInformation == nil {
+			break
+		}
+
+		return e.complexity.User.AdditionalInformation(childComplexity), true
 
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
@@ -1984,7 +2007,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputFilterSalesParams,
 		ec.unmarshalInputForgetPasswordInput,
 		ec.unmarshalInputGetByIDInput,
-		ec.unmarshalInputGetOrganizationStaffsInput,
 		ec.unmarshalInputGetProductByIDInput,
 		ec.unmarshalInputGetProductsByFilterInput,
 		ec.unmarshalInputGetSalesByIDInput,
@@ -2131,9 +2153,15 @@ type ResendOtpMutation{
     isVerified:Boolean!
     status:UserStatus!
     profile:Profile @goField(forceResolver:true)
+    additionalInformation:AdditionalUserInformation @goField(forceResolver:true)
     createdAt:Time!
     updatedAt:Time
     deletedAt:Time
+}
+
+type AdditionalUserInformation{
+    isStaff:Boolean
+    hasOrganization:Boolean
 }
 
 # Inputs
@@ -2382,9 +2410,7 @@ input CreateStaffInput{
     isAuthorized:Boolean
     address:AddressInput
 }
-input GetOrganizationStaffsInput{
-    organizationID:ID!
-}
+
 input GetStaffInput{
     staffID:ID!
 }
@@ -2418,7 +2444,7 @@ type StaffMutation{
 }
 
 type StaffQuery{
-    getStaffByOrganization(input:GetOrganizationStaffsInput!):StaffsQueryResponse! @goField(forceResolver:true)
+    getStaffByOrganization:StaffsQueryResponse! @goField(forceResolver:true)
     getStaffByID(input:GetStaffInput!):StaffQueryResponse! @goField(forceResolver:true)
 }`, BuiltIn: false},
 	{Name: "../schema/pagination.graphqls", Input: `input OffsetPaginationFilter{
@@ -2513,6 +2539,7 @@ input UpdateProductInput{
 
 input ProductParamsFilter{
     categoryID:ID
+    searchQuery:String
 }
 
 input GetProductsByFilterInput{
@@ -2586,6 +2613,7 @@ input DeleteSalesInput{
 }
 input FilterSalesParams{
     filterType:SalesInfoType!
+    searchQuery:String
     productID:ID
     categoryID:ID
 }
@@ -3079,21 +3107,6 @@ func (ec *executionContext) field_StaffQuery_getStaffByID_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_StaffQuery_getStaffByOrganization_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.GetOrganizationStaffsInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGetOrganizationStaffsInput2backendᚋgraphᚋmodelᚐGetOrganizationStaffsInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_UserMutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3236,6 +3249,88 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _AdditionalUserInformation_isStaff(ctx context.Context, field graphql.CollectedField, obj *model.AdditionalUserInformation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdditionalUserInformation_isStaff(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsStaff, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdditionalUserInformation_isStaff(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdditionalUserInformation",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AdditionalUserInformation_hasOrganization(ctx context.Context, field graphql.CollectedField, obj *model.AdditionalUserInformation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdditionalUserInformation_hasOrganization(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasOrganization, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdditionalUserInformation_hasOrganization(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdditionalUserInformation",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _Address_City(ctx context.Context, field graphql.CollectedField, obj *model.Address) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Address_City(ctx, field)
@@ -3417,6 +3512,8 @@ func (ec *executionContext) fieldContext_AuthMutationResponse_data(ctx context.C
 				return ec.fieldContext_User_status(ctx, field)
 			case "profile":
 				return ec.fieldContext_User_profile(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_User_additionalInformation(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -3519,6 +3616,8 @@ func (ec *executionContext) fieldContext_AuthQueryResponse_data(ctx context.Cont
 				return ec.fieldContext_User_status(ctx, field)
 			case "profile":
 				return ec.fieldContext_User_profile(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_User_additionalInformation(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -5757,6 +5856,8 @@ func (ec *executionContext) fieldContext_Organization_createdBy(ctx context.Cont
 				return ec.fieldContext_User_status(ctx, field)
 			case "profile":
 				return ec.fieldContext_User_profile(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_User_additionalInformation(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -6486,6 +6587,8 @@ func (ec *executionContext) fieldContext_Otp_user(ctx context.Context, field gra
 				return ec.fieldContext_User_status(ctx, field)
 			case "profile":
 				return ec.fieldContext_User_profile(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_User_additionalInformation(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -9691,6 +9794,8 @@ func (ec *executionContext) fieldContext_Sales_soldBy(ctx context.Context, field
 				return ec.fieldContext_User_status(ctx, field)
 			case "profile":
 				return ec.fieldContext_User_profile(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_User_additionalInformation(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -10622,6 +10727,8 @@ func (ec *executionContext) fieldContext_Staff_staff(ctx context.Context, field 
 				return ec.fieldContext_User_status(ctx, field)
 			case "profile":
 				return ec.fieldContext_User_profile(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_User_additionalInformation(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -11150,7 +11257,7 @@ func (ec *executionContext) _StaffQuery_getStaffByOrganization(ctx context.Conte
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.StaffQuery().GetStaffByOrganization(rctx, obj, fc.Args["input"].(model.GetOrganizationStaffsInput))
+		return ec.resolvers.StaffQuery().GetStaffByOrganization(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -11182,17 +11289,6 @@ func (ec *executionContext) fieldContext_StaffQuery_getStaffByOrganization(ctx c
 			}
 			return nil, fmt.Errorf("no field named %q was found under type StaffsQueryResponse", field.Name)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_StaffQuery_getStaffByOrganization_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -11728,6 +11824,53 @@ func (ec *executionContext) fieldContext_User_profile(ctx context.Context, field
 				return ec.fieldContext_Profile_Address(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_additionalInformation(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_additionalInformation(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().AdditionalInformation(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.AdditionalUserInformation)
+	fc.Result = res
+	return ec.marshalOAdditionalUserInformation2ᚖbackendᚋgraphᚋmodelᚐAdditionalUserInformation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_additionalInformation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "isStaff":
+				return ec.fieldContext_AdditionalUserInformation_isStaff(ctx, field)
+			case "hasOrganization":
+				return ec.fieldContext_AdditionalUserInformation_hasOrganization(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AdditionalUserInformation", field.Name)
 		},
 	}
 	return fc, nil
@@ -14768,7 +14911,7 @@ func (ec *executionContext) unmarshalInputFilterSalesParams(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"filterType", "productID", "categoryID"}
+	fieldsInOrder := [...]string{"filterType", "searchQuery", "productID", "categoryID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -14784,6 +14927,15 @@ func (ec *executionContext) unmarshalInputFilterSalesParams(ctx context.Context,
 				return it, err
 			}
 			it.FilterType = data
+		case "searchQuery":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("searchQuery"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SearchQuery = data
 		case "productID":
 			var err error
 
@@ -14860,35 +15012,6 @@ func (ec *executionContext) unmarshalInputGetByIDInput(ctx context.Context, obj 
 				return it, err
 			}
 			it.ID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputGetOrganizationStaffsInput(ctx context.Context, obj interface{}) (model.GetOrganizationStaffsInput, error) {
-	var it model.GetOrganizationStaffsInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"organizationID"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "organizationID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organizationID"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.OrganizationID = data
 		}
 	}
 
@@ -15217,7 +15340,7 @@ func (ec *executionContext) unmarshalInputProductParamsFilter(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"categoryID"}
+	fieldsInOrder := [...]string{"categoryID", "searchQuery"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -15233,6 +15356,15 @@ func (ec *executionContext) unmarshalInputProductParamsFilter(ctx context.Contex
 				return it, err
 			}
 			it.CategoryID = data
+		case "searchQuery":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("searchQuery"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SearchQuery = data
 		}
 	}
 
@@ -15959,6 +16091,44 @@ func (ec *executionContext) _QueryError(ctx context.Context, sel ast.SelectionSe
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var additionalUserInformationImplementors = []string{"AdditionalUserInformation"}
+
+func (ec *executionContext) _AdditionalUserInformation(ctx context.Context, sel ast.SelectionSet, obj *model.AdditionalUserInformation) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, additionalUserInformationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AdditionalUserInformation")
+		case "isStaff":
+			out.Values[i] = ec._AdditionalUserInformation_isStaff(ctx, field, obj)
+		case "hasOrganization":
+			out.Values[i] = ec._AdditionalUserInformation_hasOrganization(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
 
 var addressImplementors = []string{"Address"}
 
@@ -19625,6 +19795,39 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "additionalInformation":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_additionalInformation(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "createdAt":
 			out.Values[i] = ec._User_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -20589,11 +20792,6 @@ func (ec *executionContext) unmarshalNForgetPasswordInput2backendᚋgraphᚋmode
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNGetOrganizationStaffsInput2backendᚋgraphᚋmodelᚐGetOrganizationStaffsInput(ctx context.Context, v interface{}) (model.GetOrganizationStaffsInput, error) {
-	res, err := ec.unmarshalInputGetOrganizationStaffsInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNGetProductByIDInput2backendᚋgraphᚋmodelᚐGetProductByIDInput(ctx context.Context, v interface{}) (model.GetProductByIDInput, error) {
 	res, err := ec.unmarshalInputGetProductByIDInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -21463,6 +21661,13 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 func (ec *executionContext) unmarshalNuserVerificationInput2backendᚋgraphᚋmodelᚐUserVerificationInput(ctx context.Context, v interface{}) (model.UserVerificationInput, error) {
 	res, err := ec.unmarshalInputuserVerificationInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOAdditionalUserInformation2ᚖbackendᚋgraphᚋmodelᚐAdditionalUserInformation(ctx context.Context, sel ast.SelectionSet, v *model.AdditionalUserInformation) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AdditionalUserInformation(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOAddress2ᚖbackendᚋgraphᚋmodelᚐAddress(ctx context.Context, sel ast.SelectionSet, v *model.Address) graphql.Marshaler {

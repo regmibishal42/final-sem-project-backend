@@ -21,6 +21,11 @@ type QueryError interface {
 	GetCode() int
 }
 
+type AdditionalUserInformation struct {
+	IsStaff         *bool `json:"isStaff,omitempty"`
+	HasOrganization *bool `json:"hasOrganization,omitempty"`
+}
+
 type AddressInput struct {
 	City     string `json:"City"`
 	District string `json:"District"`
@@ -166,9 +171,10 @@ type FilterSalesInput struct {
 }
 
 type FilterSalesParams struct {
-	FilterType SalesInfoType `json:"filterType"`
-	ProductID  *string       `json:"productID,omitempty"`
-	CategoryID *string       `json:"categoryID,omitempty"`
+	FilterType  SalesInfoType `json:"filterType"`
+	SearchQuery *string       `json:"searchQuery,omitempty"`
+	ProductID   *string       `json:"productID,omitempty"`
+	CategoryID  *string       `json:"categoryID,omitempty"`
 }
 
 type ForgetPasswordInput struct {
@@ -177,10 +183,6 @@ type ForgetPasswordInput struct {
 
 type GetByIDInput struct {
 	ID string `json:"ID"`
-}
-
-type GetOrganizationStaffsInput struct {
-	OrganizationID string `json:"organizationID"`
 }
 
 type GetProductByIDInput struct {
@@ -286,7 +288,8 @@ type ProductMutationResponse struct {
 }
 
 type ProductParamsFilter struct {
-	CategoryID *string `json:"categoryID,omitempty"`
+	CategoryID  *string `json:"categoryID,omitempty"`
+	SearchQuery *string `json:"searchQuery,omitempty"`
 }
 
 type ProductQuery struct {

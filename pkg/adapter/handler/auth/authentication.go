@@ -111,3 +111,7 @@ func (r AuthRepository) VerifyUser(ctx context.Context, input *model.UserVerific
 		Error: exception.MutationErrorHandler(ctx, errors.New("invalid otp"), exception.BAD_REQUEST, nil),
 	}
 }
+
+func (r AuthRepository) GetAdditionalUserInfo(ctx context.Context, userID *string) (*model.AdditionalUserInformation, error) {
+	return r.TableUser.GetAdditionalInformation(ctx, userID)
+}

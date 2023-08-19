@@ -16,6 +16,11 @@ func (r *userResolver) Profile(ctx context.Context, obj *model.User) (*model.Pro
 	return r.AuthDomain.GetProfileByUserID(ctx, obj.ID)
 }
 
+// AdditionalInformation is the resolver for the additionalInformation field.
+func (r *userResolver) AdditionalInformation(ctx context.Context, obj *model.User) (*model.AdditionalUserInformation, error) {
+	return r.AuthDomain.GetAdditionalUserInfo(ctx, &obj.ID)
+}
+
 // CreateUser is the resolver for the createUser field.
 func (r *userMutationResolver) CreateUser(ctx context.Context, obj *model.UserMutation, input model.UserInput) (*model.AuthMutationResponse, error) {
 	return r.AuthDomain.CreateUser(ctx, input), nil

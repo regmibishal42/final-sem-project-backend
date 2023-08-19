@@ -5,9 +5,15 @@ type User{
     isVerified:Boolean!
     status:UserStatus!
     profile:Profile @goField(forceResolver:true)
+    additionalInformation:AdditionalUserInformation @goField(forceResolver:true)
     createdAt:Time!
     updatedAt:Time
     deletedAt:Time
+}
+
+type AdditionalUserInformation{
+    isStaff:Boolean
+    hasOrganization:Boolean
 }
 
 # Inputs

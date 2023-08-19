@@ -46,7 +46,7 @@ func (r *staffMutationResolver) UpdateStaff(ctx context.Context, obj *model.Staf
 }
 
 // GetStaffByOrganization is the resolver for the getStaffByOrganization field.
-func (r *staffQueryResolver) GetStaffByOrganization(ctx context.Context, obj *model.StaffQuery, input model.GetOrganizationStaffsInput) (*model.StaffsQueryResponse, error) {
+func (r *staffQueryResolver) GetStaffByOrganization(ctx context.Context, obj *model.StaffQuery) (*model.StaffsQueryResponse, error) {
 	user := UserForContext(ctx)
 	err := CheckLoggedIn(user)
 	if err != nil {
@@ -54,7 +54,7 @@ func (r *staffQueryResolver) GetStaffByOrganization(ctx context.Context, obj *mo
 			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
 		}, nil
 	}
-	return r.OrganizationDomain.GetStaffsByOrganization(ctx, user, &input)
+	return r.OrganizationDomain.GetStaffsByOrganization(ctx, user)
 }
 
 // GetStaffByID is the resolver for the getStaffByID field.
