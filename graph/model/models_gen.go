@@ -21,6 +21,11 @@ type QueryError interface {
 	GetCode() int
 }
 
+type AdditionalUserInformation struct {
+	IsStaff         *bool `json:"isStaff,omitempty"`
+	HasOrganization *bool `json:"hasOrganization,omitempty"`
+}
+
 type AddressInput struct {
 	City     string `json:"City"`
 	District string `json:"District"`

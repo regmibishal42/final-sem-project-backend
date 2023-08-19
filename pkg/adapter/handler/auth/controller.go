@@ -17,6 +17,7 @@ type AuthInterface interface {
 	UpdateUserPassword(ctx context.Context, user *model.User, input *model.UpdatePasswordInput) (*model.AuthMutationResponse, error)
 	ForgetUserPassword(ctx context.Context, input *model.ForgetPasswordInput) (*model.RegisterResponse, error)
 	ResetPassword(ctx context.Context, input *model.ResetPasswordInput) (*model.RegisterResponse, error)
+	GetAdditionalUserInfo(ctx context.Context, userID *string) (*model.AdditionalUserInformation, error)
 
 	//login
 	Login(ctx context.Context, input *model.LoginInput) *model.AuthResponse

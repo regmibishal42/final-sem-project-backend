@@ -2,6 +2,7 @@ package query_repository
 
 import (
 	"backend/graph/model"
+	"backend/pkg/util"
 	"context"
 )
 
@@ -38,4 +39,33 @@ func (r QueryRepository) UpdateUserDetails(ctx context.Context, user *model.User
 		return err
 	}
 	return nil
+}
+
+func (r QueryRepository) GetAdditionalInformation(ctx context.Context, userID *string) (*model.AdditionalUserInformation, error) {
+	additionalInformation := model.AdditionalUserInformation{
+		IsStaff:         util.Ref(false),
+		HasOrganization: util.Ref(false),
+	}
+	//check if user is admin
+	Organization := &model.Organization{}
+	err := r.db.Model(&model.Organization{}).Where("deleted_at IS NULL AND created_by_id = ?", userID).Find(&Organization)
+	if err.Error != nil {
+		return &additionalInformation, err.Error
+	}
+	if Organization != nil {
+		additionalInformation.HasOrganization = util.Ref(true)
+		return &additionalInformation, nil
+	}
+	//check if user  is staff
+	staff := &model.Staff{}
+	err1 := r.db.Model(&model.Staff{}).Where("id =? AND is_authorized = ?", userID, true).Find(&staff)
+	if err1.Error != nil {
+		return &additionalInformation, err.Error
+	}
+	if staff != nil {
+		additionalInformation.IsStaff = util.Ref(true)
+		return &additionalInformation, nil
+	}
+	return &additionalInformation, nil
+
 }

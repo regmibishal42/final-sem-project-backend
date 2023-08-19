@@ -65,6 +65,11 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	AdditionalUserInformation struct {
+		HasOrganization func(childComplexity int) int
+		IsStaff         func(childComplexity int) int
+	}
+
 	Address struct {
 		City     func(childComplexity int) int
 		District func(childComplexity int) int
@@ -385,15 +390,16 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		CreatedAt  func(childComplexity int) int
-		DeletedAt  func(childComplexity int) int
-		Email      func(childComplexity int) int
-		ID         func(childComplexity int) int
-		IsVerified func(childComplexity int) int
-		Profile    func(childComplexity int) int
-		Status     func(childComplexity int) int
-		UpdatedAt  func(childComplexity int) int
-		UserType   func(childComplexity int) int
+		AdditionalInformation func(childComplexity int) int
+		CreatedAt             func(childComplexity int) int
+		DeletedAt             func(childComplexity int) int
+		Email                 func(childComplexity int) int
+		ID                    func(childComplexity int) int
+		IsVerified            func(childComplexity int) int
+		Profile               func(childComplexity int) int
+		Status                func(childComplexity int) int
+		UpdatedAt             func(childComplexity int) int
+		UserType              func(childComplexity int) int
 	}
 
 	UserMutation struct {
@@ -504,6 +510,7 @@ type StaffQueryResolver interface {
 }
 type UserResolver interface {
 	Profile(ctx context.Context, obj *model.User) (*model.Profile, error)
+	AdditionalInformation(ctx context.Context, obj *model.User) (*model.AdditionalUserInformation, error)
 }
 type UserMutationResolver interface {
 	CreateUser(ctx context.Context, obj *model.UserMutation, input model.UserInput) (*model.AuthMutationResponse, error)
@@ -532,6 +539,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "AdditionalUserInformation.hasOrganization":
+		if e.complexity.AdditionalUserInformation.HasOrganization == nil {
+			break
+		}
+
+		return e.complexity.AdditionalUserInformation.HasOrganization(childComplexity), true
+
+	case "AdditionalUserInformation.isStaff":
+		if e.complexity.AdditionalUserInformation.IsStaff == nil {
+			break
+		}
+
+		return e.complexity.AdditionalUserInformation.IsStaff(childComplexity), true
 
 	case "Address.City":
 		if e.complexity.Address.City == nil {
@@ -1789,6 +1810,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.StaffsQueryResponse.Error(childComplexity), true
 
+	case "User.additionalInformation":
+		if e.complexity.User.AdditionalInformation == nil {
+			break
+		}
+
+		return e.complexity.User.AdditionalInformation(childComplexity), true
+
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
 			break
@@ -2125,9 +2153,15 @@ type ResendOtpMutation{
     isVerified:Boolean!
     status:UserStatus!
     profile:Profile @goField(forceResolver:true)
+    additionalInformation:AdditionalUserInformation @goField(forceResolver:true)
     createdAt:Time!
     updatedAt:Time
     deletedAt:Time
+}
+
+type AdditionalUserInformation{
+    isStaff:Boolean
+    hasOrganization:Boolean
 }
 
 # Inputs
@@ -3216,6 +3250,88 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _AdditionalUserInformation_isStaff(ctx context.Context, field graphql.CollectedField, obj *model.AdditionalUserInformation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdditionalUserInformation_isStaff(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsStaff, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdditionalUserInformation_isStaff(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdditionalUserInformation",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AdditionalUserInformation_hasOrganization(ctx context.Context, field graphql.CollectedField, obj *model.AdditionalUserInformation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdditionalUserInformation_hasOrganization(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasOrganization, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdditionalUserInformation_hasOrganization(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdditionalUserInformation",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Address_City(ctx context.Context, field graphql.CollectedField, obj *model.Address) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Address_City(ctx, field)
 	if err != nil {
@@ -3396,6 +3512,8 @@ func (ec *executionContext) fieldContext_AuthMutationResponse_data(ctx context.C
 				return ec.fieldContext_User_status(ctx, field)
 			case "profile":
 				return ec.fieldContext_User_profile(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_User_additionalInformation(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -3498,6 +3616,8 @@ func (ec *executionContext) fieldContext_AuthQueryResponse_data(ctx context.Cont
 				return ec.fieldContext_User_status(ctx, field)
 			case "profile":
 				return ec.fieldContext_User_profile(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_User_additionalInformation(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -5736,6 +5856,8 @@ func (ec *executionContext) fieldContext_Organization_createdBy(ctx context.Cont
 				return ec.fieldContext_User_status(ctx, field)
 			case "profile":
 				return ec.fieldContext_User_profile(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_User_additionalInformation(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -6465,6 +6587,8 @@ func (ec *executionContext) fieldContext_Otp_user(ctx context.Context, field gra
 				return ec.fieldContext_User_status(ctx, field)
 			case "profile":
 				return ec.fieldContext_User_profile(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_User_additionalInformation(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -9670,6 +9794,8 @@ func (ec *executionContext) fieldContext_Sales_soldBy(ctx context.Context, field
 				return ec.fieldContext_User_status(ctx, field)
 			case "profile":
 				return ec.fieldContext_User_profile(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_User_additionalInformation(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -10601,6 +10727,8 @@ func (ec *executionContext) fieldContext_Staff_staff(ctx context.Context, field 
 				return ec.fieldContext_User_status(ctx, field)
 			case "profile":
 				return ec.fieldContext_User_profile(ctx, field)
+			case "additionalInformation":
+				return ec.fieldContext_User_additionalInformation(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -11696,6 +11824,53 @@ func (ec *executionContext) fieldContext_User_profile(ctx context.Context, field
 				return ec.fieldContext_Profile_Address(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_additionalInformation(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_additionalInformation(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().AdditionalInformation(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.AdditionalUserInformation)
+	fc.Result = res
+	return ec.marshalOAdditionalUserInformation2ᚖbackendᚋgraphᚋmodelᚐAdditionalUserInformation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_additionalInformation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "isStaff":
+				return ec.fieldContext_AdditionalUserInformation_isStaff(ctx, field)
+			case "hasOrganization":
+				return ec.fieldContext_AdditionalUserInformation_hasOrganization(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AdditionalUserInformation", field.Name)
 		},
 	}
 	return fc, nil
@@ -15917,6 +16092,44 @@ func (ec *executionContext) _QueryError(ctx context.Context, sel ast.SelectionSe
 
 // region    **************************** object.gotpl ****************************
 
+var additionalUserInformationImplementors = []string{"AdditionalUserInformation"}
+
+func (ec *executionContext) _AdditionalUserInformation(ctx context.Context, sel ast.SelectionSet, obj *model.AdditionalUserInformation) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, additionalUserInformationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AdditionalUserInformation")
+		case "isStaff":
+			out.Values[i] = ec._AdditionalUserInformation_isStaff(ctx, field, obj)
+		case "hasOrganization":
+			out.Values[i] = ec._AdditionalUserInformation_hasOrganization(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var addressImplementors = []string{"Address"}
 
 func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, obj *model.Address) graphql.Marshaler {
@@ -19582,6 +19795,39 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "additionalInformation":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_additionalInformation(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "createdAt":
 			out.Values[i] = ec._User_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -21415,6 +21661,13 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 func (ec *executionContext) unmarshalNuserVerificationInput2backendᚋgraphᚋmodelᚐUserVerificationInput(ctx context.Context, v interface{}) (model.UserVerificationInput, error) {
 	res, err := ec.unmarshalInputuserVerificationInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOAdditionalUserInformation2ᚖbackendᚋgraphᚋmodelᚐAdditionalUserInformation(ctx context.Context, sel ast.SelectionSet, v *model.AdditionalUserInformation) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AdditionalUserInformation(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOAddress2ᚖbackendᚋgraphᚋmodelᚐAddress(ctx context.Context, sel ast.SelectionSet, v *model.Address) graphql.Marshaler {

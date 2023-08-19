@@ -1,9 +1,10 @@
 package query_controller
 
 type AuthQueryController struct {
-	TableUser    UserQueryInterface
-	TableProfile ProfileQueryInterface
-	TableOtp     OtpQueryInterface
+	TableUser         UserQueryInterface
+	TableProfile      ProfileQueryInterface
+	TableOtp          OtpQueryInterface
+	TableOrganization OrganizationQueryInterface
 }
 
 type OrganizationQueryController struct {
