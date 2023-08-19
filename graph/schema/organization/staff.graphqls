@@ -22,9 +22,7 @@ input CreateStaffInput{
     isAuthorized:Boolean
     address:AddressInput
 }
-input GetOrganizationStaffsInput{
-    organizationID:ID!
-}
+
 input GetStaffInput{
     staffID:ID!
 }
@@ -58,6 +56,6 @@ type StaffMutation{
 }
 
 type StaffQuery{
-    getStaffByOrganization(input:GetOrganizationStaffsInput!):StaffsQueryResponse! @goField(forceResolver:true)
+    getStaffByOrganization:StaffsQueryResponse! @goField(forceResolver:true)
     getStaffByID(input:GetStaffInput!):StaffQueryResponse! @goField(forceResolver:true)
 }

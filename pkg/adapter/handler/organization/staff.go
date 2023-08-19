@@ -6,6 +6,8 @@ import (
 	"backend/pkg/util"
 	"context"
 	"errors"
+
+	"gorm.io/gorm"
 )
 
 func (r OrganizationRepository) CreateStaff(ctx context.Context, user *model.User, input *model.CreateStaffInput) (*model.StaffMutationResponse, error) {
@@ -100,20 +102,27 @@ func (r OrganizationRepository) GetStaffByID(ctx context.Context, user *model.Us
 	}, nil
 }
 
-func (r OrganizationRepository) GetStaffsByOrganization(ctx context.Context, user *model.User, input *model.GetOrganizationStaffsInput) (*model.StaffsQueryResponse, error) {
+func (r OrganizationRepository) GetStaffsByOrganization(ctx context.Context, user *model.User) (*model.StaffsQueryResponse, error) {
 	//check validity of organizationID
-	if !util.IsValidID(input.OrganizationID) {
-		return &model.StaffsQueryResponse{
-			Error: exception.QueryErrorHandler(ctx, errors.New("invalid StaffID"), exception.BAD_REQUEST, nil),
-		}, nil
-	}
 	if user.UserType == model.UserTypeStaff {
 		return &model.StaffsQueryResponse{
 			Error: exception.QueryErrorHandler(ctx, errors.New("not authorized for this task"), exception.AUTHORIZATION, nil),
 		}, nil
 	}
+	//get organizationID from user
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.StaffsQueryResponse{
+				Error: exception.QueryErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
+		return &model.StaffsQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
 	//get all staffs of an organization
-	staffs, err := r.TableStaff.GetStaffsByOrganization(ctx, &input.OrganizationID)
+	staffs, err := r.TableStaff.GetStaffsByOrganization(ctx, organizationID)
 	if err != nil {
 		return &model.StaffsQueryResponse{
 			Error: exception.QueryErrorHandler(ctx, err, exception.BAD_REQUEST, nil),

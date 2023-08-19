@@ -371,7 +371,7 @@ type ComplexityRoot struct {
 
 	StaffQuery struct {
 		GetStaffByID           func(childComplexity int, input model.GetStaffInput) int
-		GetStaffByOrganization func(childComplexity int, input model.GetOrganizationStaffsInput) int
+		GetStaffByOrganization func(childComplexity int) int
 	}
 
 	StaffQueryResponse struct {
@@ -499,7 +499,7 @@ type StaffMutationResolver interface {
 	UpdateStaff(ctx context.Context, obj *model.StaffMutation, input model.UpdateStaffInput) (*model.StaffMutationResponse, error)
 }
 type StaffQueryResolver interface {
-	GetStaffByOrganization(ctx context.Context, obj *model.StaffQuery, input model.GetOrganizationStaffsInput) (*model.StaffsQueryResponse, error)
+	GetStaffByOrganization(ctx context.Context, obj *model.StaffQuery) (*model.StaffsQueryResponse, error)
 	GetStaffByID(ctx context.Context, obj *model.StaffQuery, input model.GetStaffInput) (*model.StaffQueryResponse, error)
 }
 type UserResolver interface {
@@ -1759,12 +1759,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_StaffQuery_getStaffByOrganization_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.StaffQuery.GetStaffByOrganization(childComplexity, args["input"].(model.GetOrganizationStaffsInput)), true
+		return e.complexity.StaffQuery.GetStaffByOrganization(childComplexity), true
 
 	case "StaffQueryResponse.data":
 		if e.complexity.StaffQueryResponse.Data == nil {
@@ -1984,7 +1979,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputFilterSalesParams,
 		ec.unmarshalInputForgetPasswordInput,
 		ec.unmarshalInputGetByIDInput,
-		ec.unmarshalInputGetOrganizationStaffsInput,
 		ec.unmarshalInputGetProductByIDInput,
 		ec.unmarshalInputGetProductsByFilterInput,
 		ec.unmarshalInputGetSalesByIDInput,
@@ -2382,9 +2376,7 @@ input CreateStaffInput{
     isAuthorized:Boolean
     address:AddressInput
 }
-input GetOrganizationStaffsInput{
-    organizationID:ID!
-}
+
 input GetStaffInput{
     staffID:ID!
 }
@@ -2418,7 +2410,7 @@ type StaffMutation{
 }
 
 type StaffQuery{
-    getStaffByOrganization(input:GetOrganizationStaffsInput!):StaffsQueryResponse! @goField(forceResolver:true)
+    getStaffByOrganization:StaffsQueryResponse! @goField(forceResolver:true)
     getStaffByID(input:GetStaffInput!):StaffQueryResponse! @goField(forceResolver:true)
 }`, BuiltIn: false},
 	{Name: "../schema/pagination.graphqls", Input: `input OffsetPaginationFilter{
@@ -3073,21 +3065,6 @@ func (ec *executionContext) field_StaffQuery_getStaffByID_args(ctx context.Conte
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNGetStaffInput2backendᚋgraphᚋmodelᚐGetStaffInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_StaffQuery_getStaffByOrganization_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.GetOrganizationStaffsInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGetOrganizationStaffsInput2backendᚋgraphᚋmodelᚐGetOrganizationStaffsInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -11152,7 +11129,7 @@ func (ec *executionContext) _StaffQuery_getStaffByOrganization(ctx context.Conte
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.StaffQuery().GetStaffByOrganization(rctx, obj, fc.Args["input"].(model.GetOrganizationStaffsInput))
+		return ec.resolvers.StaffQuery().GetStaffByOrganization(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -11184,17 +11161,6 @@ func (ec *executionContext) fieldContext_StaffQuery_getStaffByOrganization(ctx c
 			}
 			return nil, fmt.Errorf("no field named %q was found under type StaffsQueryResponse", field.Name)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_StaffQuery_getStaffByOrganization_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -14871,35 +14837,6 @@ func (ec *executionContext) unmarshalInputGetByIDInput(ctx context.Context, obj 
 				return it, err
 			}
 			it.ID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputGetOrganizationStaffsInput(ctx context.Context, obj interface{}) (model.GetOrganizationStaffsInput, error) {
-	var it model.GetOrganizationStaffsInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"organizationID"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "organizationID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organizationID"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.OrganizationID = data
 		}
 	}
 
@@ -20606,11 +20543,6 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 
 func (ec *executionContext) unmarshalNForgetPasswordInput2backendᚋgraphᚋmodelᚐForgetPasswordInput(ctx context.Context, v interface{}) (model.ForgetPasswordInput, error) {
 	res, err := ec.unmarshalInputForgetPasswordInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNGetOrganizationStaffsInput2backendᚋgraphᚋmodelᚐGetOrganizationStaffsInput(ctx context.Context, v interface{}) (model.GetOrganizationStaffsInput, error) {
-	res, err := ec.unmarshalInputGetOrganizationStaffsInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
