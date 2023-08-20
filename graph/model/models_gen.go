@@ -433,11 +433,13 @@ type UpdatePasswordInput struct {
 }
 
 type UpdateProductInput struct {
-	ProductID  string     `json:"productID"`
-	Name       *string    `json:"name,omitempty"`
-	BoughtOn   *time.Time `json:"boughtOn,omitempty"`
-	Units      *int       `json:"units,omitempty"`
-	CategoryID *string    `json:"categoryID,omitempty"`
+	ProductID    string     `json:"productID"`
+	Name         *string    `json:"name,omitempty"`
+	BoughtOn     *time.Time `json:"boughtOn,omitempty"`
+	Units        *int       `json:"units,omitempty"`
+	CostPrice    *float64   `json:"costPrice,omitempty"`
+	SellingPrice *float64   `json:"sellingPrice,omitempty"`
+	CategoryID   *string    `json:"categoryID,omitempty"`
 }
 
 type UpdateProfileInput struct {

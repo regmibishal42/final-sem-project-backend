@@ -27,6 +27,8 @@ input UpdateProductInput{
     name:String
     boughtOn:Time
     units:Int
+    costPrice:Float
+    sellingPrice:Float
     categoryID:ID
 }
 

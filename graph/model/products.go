@@ -54,7 +54,7 @@ func (input *CreateProductInput) Validator() (*Product, *ValidationError) {
 }
 
 //Update Inputs Validation
-func (input UpdateProductInput) Validator() (*Product, *ValidationError) {
+func (input *UpdateProductInput) Validator() (*Product, *ValidationError) {
 	product := Product{}
 	if !util.IsValidID(input.ProductID) {
 		return nil, &ValidationError{
@@ -102,6 +102,25 @@ func (input UpdateProductInput) Validator() (*Product, *ValidationError) {
 			}
 		}
 		product.BoughtOn = *input.BoughtOn
+	}
+	if input.SellingPrice != nil {
+		if *input.SellingPrice < 1 {
+			return nil, &ValidationError{
+				Message: "Selling Price cannot be less then 1",
+				Code:    401,
+			}
+		}
+		product.SellingPrice = *input.SellingPrice
+	}
+	if input.CostPrice != nil {
+		if *input.CostPrice < 1 {
+			return nil, &ValidationError{
+				Message: "Selling Price cannot be less then 1",
+				Code:    401,
+			}
+		}
+		product.CostPrice = *input.CostPrice
+
 	}
 	return &product, nil
 }
