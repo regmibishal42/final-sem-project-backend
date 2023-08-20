@@ -33,6 +33,22 @@ func (input *CreateProductInput) Validator() (*Product, *ValidationError) {
 			Code:    401,
 		}
 	}
+	if input.SellingPrice != nil {
+		if *input.SellingPrice < 1 {
+			return nil, &ValidationError{
+				Message: "Selling Price cannot be less then 1",
+				Code:    401,
+			}
+		}
+		product.SellingPrice = *input.SellingPrice
+	}
+	if input.CostPrice < 1 {
+		return nil, &ValidationError{
+			Message: "Selling Price cannot be less then 1",
+			Code:    401,
+		}
+	}
+
 	if input.Units < 1 || input.Units > 500 {
 		return nil, &ValidationError{
 			Message: "Units Should be between 1-500",
@@ -49,6 +65,7 @@ func (input *CreateProductInput) Validator() (*Product, *ValidationError) {
 	product.BoughtOn = input.BoughtOn
 	product.Units = input.Units
 	product.CategoryID = input.CategoryID
+	product.CostPrice = input.CostPrice
 
 	return product, nil
 }
