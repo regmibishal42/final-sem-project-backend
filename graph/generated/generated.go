@@ -2534,6 +2534,8 @@ input UpdateProductInput{
     name:String
     boughtOn:Time
     units:Int
+    costPrice:Float
+    sellingPrice:Float
     categoryID:ID
 }
 
@@ -15613,7 +15615,7 @@ func (ec *executionContext) unmarshalInputUpdateProductInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"productID", "name", "boughtOn", "units", "categoryID"}
+	fieldsInOrder := [...]string{"productID", "name", "boughtOn", "units", "costPrice", "sellingPrice", "categoryID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -15656,6 +15658,24 @@ func (ec *executionContext) unmarshalInputUpdateProductInput(ctx context.Context
 				return it, err
 			}
 			it.Units = data
+		case "costPrice":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("costPrice"))
+			data, err := ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CostPrice = data
+		case "sellingPrice":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sellingPrice"))
+			data, err := ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SellingPrice = data
 		case "categoryID":
 			var err error
 
