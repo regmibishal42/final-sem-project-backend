@@ -18,11 +18,6 @@ type Staff struct {
 }
 
 func (input *CreateStaffInput) Validator() *ValidationError {
-	if !util.IsValidID(input.OrganizationID) {
-		return &ValidationError{
-			Message: "invalid OrganizationID",
-		}
-	}
 	if len(input.ContactNumber) < 10 {
 		return &ValidationError{
 			Message: "invalid ContactNumber",

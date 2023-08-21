@@ -11,7 +11,6 @@ type Staff{
 
 # Inputs
 input CreateStaffInput{
-    organizationID:ID!
     contactNumber:String!
     email:String!
     firstName:String!
@@ -32,6 +31,9 @@ input UpdateStaffInput{
     salary:Float
     isAuthorized:Boolean
     isActive:Boolean
+}
+input FilterStaffInput{
+    isActive:Boolean!
 }
 
 
@@ -56,6 +58,6 @@ type StaffMutation{
 }
 
 type StaffQuery{
-    getStaffByOrganization:StaffsQueryResponse! @goField(forceResolver:true)
+    getStaffByOrganization(input:FilterStaffInput!):StaffsQueryResponse! @goField(forceResolver:true)
     getStaffByID(input:GetStaffInput!):StaffQueryResponse! @goField(forceResolver:true)
 }

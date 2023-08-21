@@ -141,16 +141,15 @@ type CreateSaleInput struct {
 }
 
 type CreateStaffInput struct {
-	OrganizationID string        `json:"organizationID"`
-	ContactNumber  string        `json:"contactNumber"`
-	Email          string        `json:"email"`
-	FirstName      string        `json:"firstName"`
-	LastName       string        `json:"lastName"`
-	Post           string        `json:"post"`
-	JoinedOn       time.Time     `json:"joinedOn"`
-	Salary         *float64      `json:"salary,omitempty"`
-	IsAuthorized   *bool         `json:"isAuthorized,omitempty"`
-	Address        *AddressInput `json:"address,omitempty"`
+	ContactNumber string        `json:"contactNumber"`
+	Email         string        `json:"email"`
+	FirstName     string        `json:"firstName"`
+	LastName      string        `json:"lastName"`
+	Post          string        `json:"post"`
+	JoinedOn      time.Time     `json:"joinedOn"`
+	Salary        *float64      `json:"salary,omitempty"`
+	IsAuthorized  *bool         `json:"isAuthorized,omitempty"`
+	Address       *AddressInput `json:"address,omitempty"`
 }
 
 type DeleteCategoryInput struct {
@@ -175,6 +174,10 @@ type FilterSalesParams struct {
 	SearchQuery *string       `json:"searchQuery,omitempty"`
 	ProductID   *string       `json:"productID,omitempty"`
 	CategoryID  *string       `json:"categoryID,omitempty"`
+}
+
+type FilterStaffInput struct {
+	IsActive bool `json:"isActive"`
 }
 
 type ForgetPasswordInput struct {
