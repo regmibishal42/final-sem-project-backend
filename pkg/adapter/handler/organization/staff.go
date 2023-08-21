@@ -17,8 +17,20 @@ func (r OrganizationRepository) CreateStaff(ctx context.Context, user *model.Use
 		}, nil
 	}
 	//create staff
+	//get organizationID from user
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.StaffMutationResponse{
+				Error: exception.MutationErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
+		return &model.StaffMutationResponse{
+			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
 	staff := model.Staff{
-		OrganizationID: input.OrganizationID,
+		OrganizationID: *organizationID,
 		JoinedOn:       input.JoinedOn,
 		Post:           input.Post,
 		Salary:         input.Salary,
@@ -42,7 +54,7 @@ func (r OrganizationRepository) CreateStaff(ctx context.Context, user *model.Use
 		go util.SendStaffAccountCreationEmail(input.Email, staffName)
 	}
 
-	err := r.TableStaff.CreateStaff(ctx, &staff)
+	err = r.TableStaff.CreateStaff(ctx, &staff)
 	if err != nil {
 		return &model.StaffMutationResponse{
 			Error: exception.MutationErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
@@ -102,7 +114,7 @@ func (r OrganizationRepository) GetStaffByID(ctx context.Context, user *model.Us
 	}, nil
 }
 
-func (r OrganizationRepository) GetStaffsByOrganization(ctx context.Context, user *model.User) (*model.StaffsQueryResponse, error) {
+func (r OrganizationRepository) GetStaffsByOrganization(ctx context.Context, user *model.User, filter *model.FilterStaffInput) (*model.StaffsQueryResponse, error) {
 	//check validity of organizationID
 	if user.UserType == model.UserTypeStaff {
 		return &model.StaffsQueryResponse{
@@ -122,7 +134,7 @@ func (r OrganizationRepository) GetStaffsByOrganization(ctx context.Context, use
 		}, nil
 	}
 	//get all staffs of an organization
-	staffs, err := r.TableStaff.GetStaffsByOrganization(ctx, organizationID)
+	staffs, err := r.TableStaff.GetStaffsByOrganization(ctx, organizationID, filter)
 	if err != nil {
 		return &model.StaffsQueryResponse{
 			Error: exception.QueryErrorHandler(ctx, err, exception.BAD_REQUEST, nil),

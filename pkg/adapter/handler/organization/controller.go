@@ -20,5 +20,5 @@ type OrganizationInterface interface {
 	CreateStaff(ctx context.Context, user *model.User, input *model.CreateStaffInput) (*model.StaffMutationResponse, error)
 	UpdateStaffDetails(ctx context.Context, user *model.User, input *model.UpdateStaffInput) (*model.StaffMutationResponse, error)
 	GetStaffByID(ctx context.Context, user *model.User, input *model.GetStaffInput) (*model.StaffQueryResponse, error)
-	GetStaffsByOrganization(ctx context.Context, user *model.User) (*model.StaffsQueryResponse, error)
+	GetStaffsByOrganization(ctx context.Context, user *model.User, filter *model.FilterStaffInput) (*model.StaffsQueryResponse, error)
 }
