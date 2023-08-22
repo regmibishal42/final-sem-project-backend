@@ -12,4 +12,6 @@ type SalesQueryInterface interface {
 
 	GetSalesByFilter(ctx context.Context, filter *model.FilterSalesInput, organizationID *string, pageInfo *model.OffsetPageInfo) ([]*model.Sales, error)
 	GetSalesByID(ctx context.Context, salesID *string, organizationID *string) (*model.Sales, error)
+
+	GetSalesStat(ctx context.Context, input *model.SalesStatInput, organizationID *string) (*model.SalesStatData, error)
 }

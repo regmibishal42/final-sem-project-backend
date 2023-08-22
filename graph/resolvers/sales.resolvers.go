@@ -95,6 +95,18 @@ func (r *salesQueryResolver) GetSaleByID(ctx context.Context, obj *model.SalesQu
 	return r.ProductDomain.GetSalesByID(ctx, user, input)
 }
 
+// GetSalesStat is the resolver for the getSalesStat field.
+func (r *salesQueryResolver) GetSalesStat(ctx context.Context, obj *model.SalesQuery, input model.SalesStatInput) (*model.SalesStatQueryResponse, error) {
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.SalesStatQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHENTICATION, nil),
+		}, nil
+	}
+	return r.ProductDomain.GetSalesStatOverview(ctx, user, &input)
+}
+
 // Sales returns generated.SalesResolver implementation.
 func (r *Resolver) Sales() generated.SalesResolver { return &salesResolver{r} }
 

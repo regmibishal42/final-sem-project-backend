@@ -10,6 +10,7 @@ type Sales{
     deletedAt:Time
 }
 
+
 # Inputs
 input CreateSaleInput{
     productID:ID!
@@ -37,6 +38,9 @@ input FilterSalesInput{
 input GetSalesByIDInput{
     salesID:ID!
 }
+input SalesStatInput{
+    categoryID:ID
+}
 
 #Response
 type SalesMutationResponse{
@@ -55,6 +59,7 @@ type SaleQueryResponse{
     error:QueryError
 }
 
+
 # Mutation
 type SalesMutation{
     createSales(input:CreateSaleInput!):SalesMutationResponse! @goField(forceResolver:true)
@@ -66,4 +71,5 @@ type SalesMutation{
 type SalesQuery{
     getSalesByFilter(input:FilterSalesInput!):SalesQueryResponse! @goField(forceResolver:true)
     getSaleByID(input:GetSalesByIDInput!):SaleQueryResponse! @goField(forceResolver:true)
+    getSalesStat(input:SalesStatInput!):SalesStatQueryResponse! @goField(forceResolver:true)
 }

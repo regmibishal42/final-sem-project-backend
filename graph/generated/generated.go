@@ -147,6 +147,12 @@ type ComplexityRoot struct {
 		UpdatedAt func(childComplexity int) int
 	}
 
+	MonthlyData struct {
+		Month      func(childComplexity int) int
+		TotalSales func(childComplexity int) int
+		TotalUnits func(childComplexity int) int
+	}
+
 	Mutation struct {
 		Auth         func(childComplexity int) int
 		Organization func(childComplexity int) int
@@ -340,12 +346,28 @@ type ComplexityRoot struct {
 	SalesQuery struct {
 		GetSaleByID      func(childComplexity int, input model.GetSalesByIDInput) int
 		GetSalesByFilter func(childComplexity int, input model.FilterSalesInput) int
+		GetSalesStat     func(childComplexity int, input model.SalesStatInput) int
 	}
 
 	SalesQueryResponse struct {
 		Data     func(childComplexity int) int
 		Error    func(childComplexity int) int
 		PageInfo func(childComplexity int) int
+	}
+
+	SalesStatData struct {
+		MonthlyData           func(childComplexity int) int
+		TotalDailySales       func(childComplexity int) int
+		TotalDailyUnitsSold   func(childComplexity int) int
+		TotalMonthlySales     func(childComplexity int) int
+		TotalMonthlyUnitsSold func(childComplexity int) int
+		TotalYearlySales      func(childComplexity int) int
+		TotalYearlyUnitsSold  func(childComplexity int) int
+	}
+
+	SalesStatQueryResponse struct {
+		Data  func(childComplexity int) int
+		Error func(childComplexity int) int
 	}
 
 	ServerError struct {
@@ -495,6 +517,7 @@ type SalesMutationResolver interface {
 type SalesQueryResolver interface {
 	GetSalesByFilter(ctx context.Context, obj *model.SalesQuery, input model.FilterSalesInput) (*model.SalesQueryResponse, error)
 	GetSaleByID(ctx context.Context, obj *model.SalesQuery, input model.GetSalesByIDInput) (*model.SaleQueryResponse, error)
+	GetSalesStat(ctx context.Context, obj *model.SalesQuery, input model.SalesStatInput) (*model.SalesStatQueryResponse, error)
 }
 type StaffResolver interface {
 	Staff(ctx context.Context, obj *model.Staff) (*model.User, error)
@@ -808,6 +831,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DeletedProducts.UpdatedAt(childComplexity), true
+
+	case "MonthlyData.month":
+		if e.complexity.MonthlyData.Month == nil {
+			break
+		}
+
+		return e.complexity.MonthlyData.Month(childComplexity), true
+
+	case "MonthlyData.totalSales":
+		if e.complexity.MonthlyData.TotalSales == nil {
+			break
+		}
+
+		return e.complexity.MonthlyData.TotalSales(childComplexity), true
+
+	case "MonthlyData.totalUnits":
+		if e.complexity.MonthlyData.TotalUnits == nil {
+			break
+		}
+
+		return e.complexity.MonthlyData.TotalUnits(childComplexity), true
 
 	case "Mutation.auth":
 		if e.complexity.Mutation.Auth == nil {
@@ -1634,6 +1678,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SalesQuery.GetSalesByFilter(childComplexity, args["input"].(model.FilterSalesInput)), true
 
+	case "SalesQuery.getSalesStat":
+		if e.complexity.SalesQuery.GetSalesStat == nil {
+			break
+		}
+
+		args, err := ec.field_SalesQuery_getSalesStat_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.SalesQuery.GetSalesStat(childComplexity, args["input"].(model.SalesStatInput)), true
+
 	case "SalesQueryResponse.data":
 		if e.complexity.SalesQueryResponse.Data == nil {
 			break
@@ -1654,6 +1710,69 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SalesQueryResponse.PageInfo(childComplexity), true
+
+	case "SalesStatData.monthlyData":
+		if e.complexity.SalesStatData.MonthlyData == nil {
+			break
+		}
+
+		return e.complexity.SalesStatData.MonthlyData(childComplexity), true
+
+	case "SalesStatData.totalDailySales":
+		if e.complexity.SalesStatData.TotalDailySales == nil {
+			break
+		}
+
+		return e.complexity.SalesStatData.TotalDailySales(childComplexity), true
+
+	case "SalesStatData.totalDailyUnitsSold":
+		if e.complexity.SalesStatData.TotalDailyUnitsSold == nil {
+			break
+		}
+
+		return e.complexity.SalesStatData.TotalDailyUnitsSold(childComplexity), true
+
+	case "SalesStatData.totalMonthlySales":
+		if e.complexity.SalesStatData.TotalMonthlySales == nil {
+			break
+		}
+
+		return e.complexity.SalesStatData.TotalMonthlySales(childComplexity), true
+
+	case "SalesStatData.totalMonthlyUnitsSold":
+		if e.complexity.SalesStatData.TotalMonthlyUnitsSold == nil {
+			break
+		}
+
+		return e.complexity.SalesStatData.TotalMonthlyUnitsSold(childComplexity), true
+
+	case "SalesStatData.totalYearlySales":
+		if e.complexity.SalesStatData.TotalYearlySales == nil {
+			break
+		}
+
+		return e.complexity.SalesStatData.TotalYearlySales(childComplexity), true
+
+	case "SalesStatData.totalYearlyUnitsSold":
+		if e.complexity.SalesStatData.TotalYearlyUnitsSold == nil {
+			break
+		}
+
+		return e.complexity.SalesStatData.TotalYearlyUnitsSold(childComplexity), true
+
+	case "SalesStatQueryResponse.data":
+		if e.complexity.SalesStatQueryResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.SalesStatQueryResponse.Data(childComplexity), true
+
+	case "SalesStatQueryResponse.error":
+		if e.complexity.SalesStatQueryResponse.Error == nil {
+			break
+		}
+
+		return e.complexity.SalesStatQueryResponse.Error(childComplexity), true
 
 	case "ServerError.code":
 		if e.complexity.ServerError.Code == nil {
@@ -2025,6 +2144,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputProductParamsFilter,
 		ec.unmarshalInputResendOtpInput,
 		ec.unmarshalInputResetPasswordInput,
+		ec.unmarshalInputSalesStatInput,
 		ec.unmarshalInputUpdateAddressInput,
 		ec.unmarshalInputUpdateOrganizationInput,
 		ec.unmarshalInputUpdatePasswordInput,
@@ -2607,6 +2727,7 @@ type ProductQuery{
     deletedAt:Time
 }
 
+
 # Inputs
 input CreateSaleInput{
     productID:ID!
@@ -2634,6 +2755,9 @@ input FilterSalesInput{
 input GetSalesByIDInput{
     salesID:ID!
 }
+input SalesStatInput{
+    categoryID:ID
+}
 
 #Response
 type SalesMutationResponse{
@@ -2652,6 +2776,7 @@ type SaleQueryResponse{
     error:QueryError
 }
 
+
 # Mutation
 type SalesMutation{
     createSales(input:CreateSaleInput!):SalesMutationResponse! @goField(forceResolver:true)
@@ -2663,8 +2788,30 @@ type SalesMutation{
 type SalesQuery{
     getSalesByFilter(input:FilterSalesInput!):SalesQueryResponse! @goField(forceResolver:true)
     getSaleByID(input:GetSalesByIDInput!):SaleQueryResponse! @goField(forceResolver:true)
+    getSalesStat(input:SalesStatInput!):SalesStatQueryResponse! @goField(forceResolver:true)
 }
 `, BuiltIn: false},
+	{Name: "../schema/sales/sales.stat.graphqls", Input: `type SalesStatData{
+    totalYearlySales:Float
+    totalYearlyUnitsSold:Int
+    totalMonthlySales:Float
+    totalMonthlyUnitsSold:Int
+    totalDailySales:Float
+    totalDailyUnitsSold:Int
+    monthlyData:[MonthlyData]
+
+}
+
+type MonthlyData{
+	month:String
+	totalSales:Float
+	totalUnits:Int
+}
+
+type SalesStatQueryResponse{
+    data:SalesStatData
+    error:QueryError
+}`, BuiltIn: false},
 	{Name: "../schema/shared/directives.graphqls", Input: `directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
 directive @goModel(model: String, models: [String!]) on OBJECT
@@ -3064,6 +3211,21 @@ func (ec *executionContext) field_SalesQuery_getSalesByFilter_args(ctx context.C
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNFilterSalesInput2backendᚋgraphᚋmodelᚐFilterSalesInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_SalesQuery_getSalesStat_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.SalesStatInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNSalesStatInput2backendᚋgraphᚋmodelᚐSalesStatInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -4981,6 +5143,129 @@ func (ec *executionContext) fieldContext_DeletedProducts_deletedAt(ctx context.C
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MonthlyData_month(ctx context.Context, field graphql.CollectedField, obj *model.MonthlyData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MonthlyData_month(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Month, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MonthlyData_month(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MonthlyData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MonthlyData_totalSales(ctx context.Context, field graphql.CollectedField, obj *model.MonthlyData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MonthlyData_totalSales(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalSales, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalOFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MonthlyData_totalSales(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MonthlyData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MonthlyData_totalUnits(ctx context.Context, field graphql.CollectedField, obj *model.MonthlyData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MonthlyData_totalUnits(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalUnits, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalOInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MonthlyData_totalUnits(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MonthlyData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -9058,6 +9343,8 @@ func (ec *executionContext) fieldContext_Query_sales(ctx context.Context, field 
 				return ec.fieldContext_SalesQuery_getSalesByFilter(ctx, field)
 			case "getSaleByID":
 				return ec.fieldContext_SalesQuery_getSaleByID(ctx, field)
+			case "getSalesStat":
+				return ec.fieldContext_SalesQuery_getSalesStat(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SalesQuery", field.Name)
 		},
@@ -10416,6 +10703,67 @@ func (ec *executionContext) fieldContext_SalesQuery_getSaleByID(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _SalesQuery_getSalesStat(ctx context.Context, field graphql.CollectedField, obj *model.SalesQuery) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesQuery_getSalesStat(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SalesQuery().GetSalesStat(rctx, obj, fc.Args["input"].(model.SalesStatInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SalesStatQueryResponse)
+	fc.Result = res
+	return ec.marshalNSalesStatQueryResponse2ᚖbackendᚋgraphᚋmodelᚐSalesStatQueryResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesQuery_getSalesStat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesQuery",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_SalesStatQueryResponse_data(ctx, field)
+			case "error":
+				return ec.fieldContext_SalesStatQueryResponse_error(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SalesStatQueryResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_SalesQuery_getSalesStat_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SalesQueryResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.SalesQueryResponse) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_SalesQueryResponse_data(ctx, field)
 	if err != nil {
@@ -10564,6 +10912,399 @@ func (ec *executionContext) fieldContext_SalesQueryResponse_pageInfo(ctx context
 				return ec.fieldContext_OffsetPageInfo_totalPages(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type OffsetPageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesStatData_totalYearlySales(ctx context.Context, field graphql.CollectedField, obj *model.SalesStatData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesStatData_totalYearlySales(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalYearlySales, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesStatData_totalYearlySales(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesStatData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesStatData_totalYearlyUnitsSold(ctx context.Context, field graphql.CollectedField, obj *model.SalesStatData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesStatData_totalYearlyUnitsSold(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalYearlyUnitsSold, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesStatData_totalYearlyUnitsSold(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesStatData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesStatData_totalMonthlySales(ctx context.Context, field graphql.CollectedField, obj *model.SalesStatData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesStatData_totalMonthlySales(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalMonthlySales, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesStatData_totalMonthlySales(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesStatData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesStatData_totalMonthlyUnitsSold(ctx context.Context, field graphql.CollectedField, obj *model.SalesStatData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesStatData_totalMonthlyUnitsSold(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalMonthlyUnitsSold, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesStatData_totalMonthlyUnitsSold(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesStatData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesStatData_totalDailySales(ctx context.Context, field graphql.CollectedField, obj *model.SalesStatData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesStatData_totalDailySales(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalDailySales, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesStatData_totalDailySales(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesStatData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesStatData_totalDailyUnitsSold(ctx context.Context, field graphql.CollectedField, obj *model.SalesStatData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesStatData_totalDailyUnitsSold(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalDailyUnitsSold, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesStatData_totalDailyUnitsSold(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesStatData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesStatData_monthlyData(ctx context.Context, field graphql.CollectedField, obj *model.SalesStatData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesStatData_monthlyData(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MonthlyData, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]model.MonthlyData)
+	fc.Result = res
+	return ec.marshalOMonthlyData2ᚕbackendᚋgraphᚋmodelᚐMonthlyData(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesStatData_monthlyData(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesStatData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "month":
+				return ec.fieldContext_MonthlyData_month(ctx, field)
+			case "totalSales":
+				return ec.fieldContext_MonthlyData_totalSales(ctx, field)
+			case "totalUnits":
+				return ec.fieldContext_MonthlyData_totalUnits(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MonthlyData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesStatQueryResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.SalesStatQueryResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesStatQueryResponse_data(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Data, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.SalesStatData)
+	fc.Result = res
+	return ec.marshalOSalesStatData2ᚖbackendᚋgraphᚋmodelᚐSalesStatData(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesStatQueryResponse_data(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesStatQueryResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalYearlySales":
+				return ec.fieldContext_SalesStatData_totalYearlySales(ctx, field)
+			case "totalYearlyUnitsSold":
+				return ec.fieldContext_SalesStatData_totalYearlyUnitsSold(ctx, field)
+			case "totalMonthlySales":
+				return ec.fieldContext_SalesStatData_totalMonthlySales(ctx, field)
+			case "totalMonthlyUnitsSold":
+				return ec.fieldContext_SalesStatData_totalMonthlyUnitsSold(ctx, field)
+			case "totalDailySales":
+				return ec.fieldContext_SalesStatData_totalDailySales(ctx, field)
+			case "totalDailyUnitsSold":
+				return ec.fieldContext_SalesStatData_totalDailyUnitsSold(ctx, field)
+			case "monthlyData":
+				return ec.fieldContext_SalesStatData_monthlyData(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SalesStatData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesStatQueryResponse_error(ctx context.Context, field graphql.CollectedField, obj *model.SalesStatQueryResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesStatQueryResponse_error(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Error, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(model.QueryError)
+	fc.Result = res
+	return ec.marshalOQueryError2backendᚋgraphᚋmodelᚐQueryError(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesStatQueryResponse_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesStatQueryResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
 		},
 	}
 	return fc, nil
@@ -15503,6 +16244,35 @@ func (ec *executionContext) unmarshalInputResetPasswordInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputSalesStatInput(ctx context.Context, obj interface{}) (model.SalesStatInput, error) {
+	var it model.SalesStatInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"categoryID"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "categoryID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("categoryID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CategoryID = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateAddressInput(ctx context.Context, obj interface{}) (model.UpdateAddressInput, error) {
 	var it model.UpdateAddressInput
 	asMap := map[string]interface{}{}
@@ -16874,6 +17644,46 @@ func (ec *executionContext) _DeletedProducts(ctx context.Context, sel ast.Select
 			out.Values[i] = ec._DeletedProducts_updatedAt(ctx, field, obj)
 		case "deletedAt":
 			out.Values[i] = ec._DeletedProducts_deletedAt(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var monthlyDataImplementors = []string{"MonthlyData"}
+
+func (ec *executionContext) _MonthlyData(ctx context.Context, sel ast.SelectionSet, obj *model.MonthlyData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, monthlyDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MonthlyData")
+		case "month":
+			out.Values[i] = ec._MonthlyData_month(ctx, field, obj)
+		case "totalSales":
+			out.Values[i] = ec._MonthlyData_totalSales(ctx, field, obj)
+		case "totalUnits":
+			out.Values[i] = ec._MonthlyData_totalUnits(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -19240,6 +20050,42 @@ func (ec *executionContext) _SalesQuery(ctx context.Context, sel ast.SelectionSe
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "getSalesStat":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SalesQuery_getSalesStat(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -19280,6 +20126,92 @@ func (ec *executionContext) _SalesQueryResponse(ctx context.Context, sel ast.Sel
 			out.Values[i] = ec._SalesQueryResponse_error(ctx, field, obj)
 		case "pageInfo":
 			out.Values[i] = ec._SalesQueryResponse_pageInfo(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var salesStatDataImplementors = []string{"SalesStatData"}
+
+func (ec *executionContext) _SalesStatData(ctx context.Context, sel ast.SelectionSet, obj *model.SalesStatData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, salesStatDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SalesStatData")
+		case "totalYearlySales":
+			out.Values[i] = ec._SalesStatData_totalYearlySales(ctx, field, obj)
+		case "totalYearlyUnitsSold":
+			out.Values[i] = ec._SalesStatData_totalYearlyUnitsSold(ctx, field, obj)
+		case "totalMonthlySales":
+			out.Values[i] = ec._SalesStatData_totalMonthlySales(ctx, field, obj)
+		case "totalMonthlyUnitsSold":
+			out.Values[i] = ec._SalesStatData_totalMonthlyUnitsSold(ctx, field, obj)
+		case "totalDailySales":
+			out.Values[i] = ec._SalesStatData_totalDailySales(ctx, field, obj)
+		case "totalDailyUnitsSold":
+			out.Values[i] = ec._SalesStatData_totalDailyUnitsSold(ctx, field, obj)
+		case "monthlyData":
+			out.Values[i] = ec._SalesStatData_monthlyData(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var salesStatQueryResponseImplementors = []string{"SalesStatQueryResponse"}
+
+func (ec *executionContext) _SalesStatQueryResponse(ctx context.Context, sel ast.SelectionSet, obj *model.SalesStatQueryResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, salesStatQueryResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SalesStatQueryResponse")
+		case "data":
+			out.Values[i] = ec._SalesStatQueryResponse_data(ctx, field, obj)
+		case "error":
+			out.Values[i] = ec._SalesStatQueryResponse_error(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21287,6 +22219,25 @@ func (ec *executionContext) marshalNSalesQueryResponse2ᚖbackendᚋgraphᚋmode
 	return ec._SalesQueryResponse(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNSalesStatInput2backendᚋgraphᚋmodelᚐSalesStatInput(ctx context.Context, v interface{}) (model.SalesStatInput, error) {
+	res, err := ec.unmarshalInputSalesStatInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSalesStatQueryResponse2backendᚋgraphᚋmodelᚐSalesStatQueryResponse(ctx context.Context, sel ast.SelectionSet, v model.SalesStatQueryResponse) graphql.Marshaler {
+	return ec._SalesStatQueryResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSalesStatQueryResponse2ᚖbackendᚋgraphᚋmodelᚐSalesStatQueryResponse(ctx context.Context, sel ast.SelectionSet, v *model.SalesStatQueryResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SalesStatQueryResponse(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNStaffMutation2backendᚋgraphᚋmodelᚐStaffMutation(ctx context.Context, sel ast.SelectionSet, v model.StaffMutation) graphql.Marshaler {
 	return ec._StaffMutation(ctx, sel, &v)
 }
@@ -21911,6 +22862,16 @@ func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	return res
+}
+
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
 	if v == nil {
 		return nil, nil
@@ -21925,6 +22886,51 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	}
 	res := graphql.MarshalInt(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOMonthlyData2backendᚋgraphᚋmodelᚐMonthlyData(ctx context.Context, sel ast.SelectionSet, v model.MonthlyData) graphql.Marshaler {
+	return ec._MonthlyData(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOMonthlyData2ᚕbackendᚋgraphᚋmodelᚐMonthlyData(ctx context.Context, sel ast.SelectionSet, v []model.MonthlyData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOMonthlyData2backendᚋgraphᚋmodelᚐMonthlyData(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
 }
 
 func (ec *executionContext) marshalOMutationError2backendᚋgraphᚋmodelᚐMutationError(ctx context.Context, sel ast.SelectionSet, v model.MutationError) graphql.Marshaler {
@@ -22123,6 +23129,13 @@ func (ec *executionContext) marshalOSales2ᚖbackendᚋgraphᚋmodelᚐSales(ctx
 	return ec._Sales(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOSalesStatData2ᚖbackendᚋgraphᚋmodelᚐSalesStatData(ctx context.Context, sel ast.SelectionSet, v *model.SalesStatData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._SalesStatData(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOSortType2ᚖbackendᚋgraphᚋmodelᚐSortType(ctx context.Context, v interface{}) (*model.SortType, error) {
 	if v == nil {
 		return nil, nil
@@ -22185,6 +23198,16 @@ func (ec *executionContext) marshalOStaff2ᚖbackendᚋgraphᚋmodelᚐStaff(ctx
 		return graphql.Null
 	}
 	return ec._Staff(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {

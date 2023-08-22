@@ -6,6 +6,7 @@ import (
 	"backend/pkg/util"
 	"context"
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -189,5 +190,15 @@ func (r ProductRepository) GetProductsByFilter(ctx context.Context, user *model.
 }
 
 func (r ProductRepository) GetProductDetailsById(ctx context.Context, productID *string) (*model.Product, error) {
-	return r.TableProduct.GetProductByID(ctx, productID)
+	fmt.Println("Getting Product")
+	product, err := r.TableProduct.GetProductByID(ctx, productID)
+	if err != nil {
+		fmt.Println("Getting Product Error")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			fmt.Println("Gorm Error")
+			return &model.Product{}, nil
+		}
+		return nil, err
+	}
+	return product, nil
 }

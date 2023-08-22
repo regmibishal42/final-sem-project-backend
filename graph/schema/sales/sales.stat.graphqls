@@ -1,0 +1,21 @@
+type SalesStatData{
+    totalYearlySales:Float
+    totalYearlyUnitsSold:Int
+    totalMonthlySales:Float
+    totalMonthlyUnitsSold:Int
+    totalDailySales:Float
+    totalDailyUnitsSold:Int
+    monthlyData:[MonthlyData]
+
+}
+
+type MonthlyData{
+	month:String
+	totalSales:Float
+	totalUnits:Int
+}
+
+type SalesStatQueryResponse{
+    data:SalesStatData
+    error:QueryError
+}

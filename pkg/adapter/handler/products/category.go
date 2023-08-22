@@ -6,7 +6,6 @@ import (
 	"backend/pkg/util"
 	"context"
 	"errors"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -102,6 +101,8 @@ func (r ProductRepository) GetCategoryByOrganization(ctx context.Context, user *
 }
 
 func (r ProductRepository) GetCategoryByID(ctx context.Context, categoryID *string) (*model.Category, error) {
-	fmt.Println("Category ID is", *categoryID)
-	return r.TableCategory.GetCategoryByID(ctx, categoryID)
+	if categoryID != nil {
+		return r.TableCategory.GetCategoryByID(ctx, categoryID)
+	}
+	return &model.Category{}, nil
 }
