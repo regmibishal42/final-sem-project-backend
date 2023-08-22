@@ -49,7 +49,7 @@ func (r QueryRepository) DeleteCategory(ctx context.Context, categoryID *string)
 
 func (r QueryRepository) GetCategoryByID(ctx context.Context, categoryID *string) (*model.Category, error) {
 	category := model.Category{}
-	err := r.db.Model(&model.Category{}).Clauses(clause.Returning{}).Where("deleted_at IS NULL AND id = ?", categoryID).First(&category).Error
+	err := r.db.Model(&model.Category{}).Clauses(clause.Returning{}).Where("deleted_at IS NULL AND id = ?", categoryID).Find(&category).Error
 	if err != nil {
 		return nil, err
 	}

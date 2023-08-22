@@ -369,14 +369,24 @@ type SalesMutationResponse struct {
 }
 
 type SalesQuery struct {
-	GetSalesByFilter *SalesQueryResponse `json:"getSalesByFilter"`
-	GetSaleByID      *SaleQueryResponse  `json:"getSaleByID"`
+	GetSalesByFilter *SalesQueryResponse     `json:"getSalesByFilter"`
+	GetSaleByID      *SaleQueryResponse      `json:"getSaleByID"`
+	GetSalesStat     *SalesStatQueryResponse `json:"getSalesStat"`
 }
 
 type SalesQueryResponse struct {
 	Data     []*Sales        `json:"data,omitempty"`
 	Error    QueryError      `json:"error,omitempty"`
 	PageInfo *OffsetPageInfo `json:"pageInfo,omitempty"`
+}
+
+type SalesStatInput struct {
+	CategoryID *string `json:"categoryID,omitempty"`
+}
+
+type SalesStatQueryResponse struct {
+	Data  *SalesStatData `json:"data,omitempty"`
+	Error QueryError     `json:"error,omitempty"`
 }
 
 type ServerError struct {
