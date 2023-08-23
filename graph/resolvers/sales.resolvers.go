@@ -107,6 +107,18 @@ func (r *salesQueryResolver) GetSalesStat(ctx context.Context, obj *model.SalesQ
 	return r.ProductDomain.GetSalesStatOverview(ctx, user, &input)
 }
 
+// GetDailySalesStat is the resolver for the getDailySalesStat field.
+func (r *salesQueryResolver) GetDailySalesStat(ctx context.Context, obj *model.SalesQuery) (*model.DailySalesQueryResponse, error) {
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.DailySalesQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHENTICATION, nil),
+		}, nil
+	}
+	return r.ProductDomain.GetDailySalesStat(ctx, user)
+}
+
 // Sales returns generated.SalesResolver implementation.
 func (r *Resolver) Sales() generated.SalesResolver { return &salesResolver{r} }
 

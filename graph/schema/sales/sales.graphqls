@@ -72,4 +72,5 @@ type SalesQuery{
     getSalesByFilter(input:FilterSalesInput!):SalesQueryResponse! @goField(forceResolver:true)
     getSaleByID(input:GetSalesByIDInput!):SaleQueryResponse! @goField(forceResolver:true)
     getSalesStat(input:SalesStatInput!):SalesStatQueryResponse! @goField(forceResolver:true)
+    getDailySalesStat:DailySalesQueryResponse! @goField(forceResolver:true)
 }

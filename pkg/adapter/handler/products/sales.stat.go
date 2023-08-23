@@ -42,3 +42,29 @@ func (r ProductRepository) GetSalesStatOverview(ctx context.Context, user *model
 		Data: salesStat,
 	}, nil
 }
+
+func (r ProductRepository) GetDailySalesStat(ctx context.Context, user *model.User) (*model.DailySalesQueryResponse, error) {
+	//get organizationID from user
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.DailySalesQueryResponse{
+				Error: exception.QueryErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
+		return &model.DailySalesQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	//get daily sales data
+	data, err := r.TableSales.GetDailySalesStat(ctx, organizationID)
+	if err != nil {
+		return &model.DailySalesQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+
+	return &model.DailySalesQueryResponse{
+		Data: data,
+	}, nil
+}

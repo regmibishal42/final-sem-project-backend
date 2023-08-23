@@ -36,4 +36,5 @@ type ProductInterface interface {
 
 	// Overview
 	GetSalesStatOverview(ctx context.Context, user *model.User, input *model.SalesStatInput) (*model.SalesStatQueryResponse, error)
+	GetDailySalesStat(ctx context.Context, user *model.User) (*model.DailySalesQueryResponse, error)
 }

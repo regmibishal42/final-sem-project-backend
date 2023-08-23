@@ -152,6 +152,11 @@ type CreateStaffInput struct {
 	Address       *AddressInput `json:"address,omitempty"`
 }
 
+type DailySalesQueryResponse struct {
+	Data  []*DailySalesData `json:"data,omitempty"`
+	Error QueryError        `json:"error,omitempty"`
+}
+
 type DeleteCategoryInput struct {
 	CategoryID string `json:"categoryID"`
 }
@@ -369,9 +374,10 @@ type SalesMutationResponse struct {
 }
 
 type SalesQuery struct {
-	GetSalesByFilter *SalesQueryResponse     `json:"getSalesByFilter"`
-	GetSaleByID      *SaleQueryResponse      `json:"getSaleByID"`
-	GetSalesStat     *SalesStatQueryResponse `json:"getSalesStat"`
+	GetSalesByFilter  *SalesQueryResponse      `json:"getSalesByFilter"`
+	GetSaleByID       *SaleQueryResponse       `json:"getSaleByID"`
+	GetSalesStat      *SalesStatQueryResponse  `json:"getSalesStat"`
+	GetDailySalesStat *DailySalesQueryResponse `json:"getDailySalesStat"`
 }
 
 type SalesQueryResponse struct {
