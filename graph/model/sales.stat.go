@@ -1,9 +1,16 @@
 package model
 
+import "time"
+
 type MonthlyData struct {
 	Month      string  `json:"month"`
 	TotalSales float64 `json:"totalSales"`
 	TotalUnits int     `json:"totalUnits"`
+}
+type DailySalesData struct {
+	Date       *time.Time `json:"date,omitempty"`
+	TotalSales *float64   `json:"totalSales,omitempty"`
+	TotalUnits *int       `json:"totalUnits,omitempty"`
 }
 
 type SalesStatData struct {

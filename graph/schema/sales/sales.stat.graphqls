@@ -14,6 +14,16 @@ type MonthlyData{
 	totalSales:Float
 	totalUnits:Int
 }
+type DailySalesData{
+    date:Time
+    totalSales:Float
+    totalUnits:Int
+}
+
+type DailySalesQueryResponse{
+    data:[DailySalesData]
+    error:QueryError
+}
 
 type SalesStatQueryResponse{
     data:SalesStatData

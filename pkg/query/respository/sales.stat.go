@@ -60,3 +60,21 @@ func (r QueryRepository) GetSalesStat(ctx context.Context, input *model.SalesSta
 	return &salesStat, nil
 
 }
+
+func (r QueryRepository) GetDailySalesStat(ctx context.Context, organizationID *string) ([]*model.DailySalesData, error) {
+	dailyData := []*model.DailySalesData{}
+	currentYear := time.Now().Year()
+	db := r.db.Model(&model.Sales{}).Where("deleted_at IS NULL AND organization_id = ?", organizationID)
+	query := fmt.Sprintf(`
+    SELECT DATE(created_at) as date, SUM(sold_at) as total_sales, SUM(units_sold) as total_units
+    FROM sales
+    WHERE EXTRACT(year FROM created_at) = %d
+    GROUP BY DATE(created_at)
+    ORDER BY DATE(created_at)
+`, currentYear)
+
+	if err := db.Raw(query).Scan(&dailyData).Error; err != nil {
+		return nil, err
+	}
+	return dailyData, nil
+}
