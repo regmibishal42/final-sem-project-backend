@@ -342,6 +342,16 @@ type ComplexityRoot struct {
 		UpdatedAt    func(childComplexity int) int
 	}
 
+	SalesBreakDownQueryResponse struct {
+		Data  func(childComplexity int) int
+		Error func(childComplexity int) int
+	}
+
+	SalesBreakdownData struct {
+		CategoryName func(childComplexity int) int
+		TotalSales   func(childComplexity int) int
+	}
+
 	SalesMutation struct {
 		CreateSales func(childComplexity int, input model.CreateSaleInput) int
 		DeleteSales func(childComplexity int, input model.DeleteSalesInput) int
@@ -357,6 +367,7 @@ type ComplexityRoot struct {
 	SalesQuery struct {
 		GetDailySalesStat func(childComplexity int) int
 		GetSaleByID       func(childComplexity int, input model.GetSalesByIDInput) int
+		GetSalesBreakdown func(childComplexity int, input model.SalesBreakDownInput) int
 		GetSalesByFilter  func(childComplexity int, input model.FilterSalesInput) int
 		GetSalesStat      func(childComplexity int, input model.SalesStatInput) int
 	}
@@ -531,6 +542,7 @@ type SalesQueryResolver interface {
 	GetSaleByID(ctx context.Context, obj *model.SalesQuery, input model.GetSalesByIDInput) (*model.SaleQueryResponse, error)
 	GetSalesStat(ctx context.Context, obj *model.SalesQuery, input model.SalesStatInput) (*model.SalesStatQueryResponse, error)
 	GetDailySalesStat(ctx context.Context, obj *model.SalesQuery) (*model.DailySalesQueryResponse, error)
+	GetSalesBreakdown(ctx context.Context, obj *model.SalesQuery, input model.SalesBreakDownInput) (*model.SalesBreakDownQueryResponse, error)
 }
 type StaffResolver interface {
 	Staff(ctx context.Context, obj *model.Staff) (*model.User, error)
@@ -1645,6 +1657,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Sales.UpdatedAt(childComplexity), true
 
+	case "SalesBreakDownQueryResponse.data":
+		if e.complexity.SalesBreakDownQueryResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.SalesBreakDownQueryResponse.Data(childComplexity), true
+
+	case "SalesBreakDownQueryResponse.error":
+		if e.complexity.SalesBreakDownQueryResponse.Error == nil {
+			break
+		}
+
+		return e.complexity.SalesBreakDownQueryResponse.Error(childComplexity), true
+
+	case "SalesBreakdownData.categoryName":
+		if e.complexity.SalesBreakdownData.CategoryName == nil {
+			break
+		}
+
+		return e.complexity.SalesBreakdownData.CategoryName(childComplexity), true
+
+	case "SalesBreakdownData.totalSales":
+		if e.complexity.SalesBreakdownData.TotalSales == nil {
+			break
+		}
+
+		return e.complexity.SalesBreakdownData.TotalSales(childComplexity), true
+
 	case "SalesMutation.createSales":
 		if e.complexity.SalesMutation.CreateSales == nil {
 			break
@@ -1720,6 +1760,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SalesQuery.GetSaleByID(childComplexity, args["input"].(model.GetSalesByIDInput)), true
+
+	case "SalesQuery.getSalesBreakdown":
+		if e.complexity.SalesQuery.GetSalesBreakdown == nil {
+			break
+		}
+
+		args, err := ec.field_SalesQuery_getSalesBreakdown_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.SalesQuery.GetSalesBreakdown(childComplexity, args["input"].(model.SalesBreakDownInput)), true
 
 	case "SalesQuery.getSalesByFilter":
 		if e.complexity.SalesQuery.GetSalesByFilter == nil {
@@ -2199,6 +2251,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputProductParamsFilter,
 		ec.unmarshalInputResendOtpInput,
 		ec.unmarshalInputResetPasswordInput,
+		ec.unmarshalInputSalesBreakDownInput,
 		ec.unmarshalInputSalesStatInput,
 		ec.unmarshalInputUpdateAddressInput,
 		ec.unmarshalInputUpdateOrganizationInput,
@@ -2845,6 +2898,7 @@ type SalesQuery{
     getSaleByID(input:GetSalesByIDInput!):SaleQueryResponse! @goField(forceResolver:true)
     getSalesStat(input:SalesStatInput!):SalesStatQueryResponse! @goField(forceResolver:true)
     getDailySalesStat:DailySalesQueryResponse! @goField(forceResolver:true)
+    getSalesBreakdown(input:SalesBreakDownInput!):SalesBreakDownQueryResponse! @goField(forceResolver:true)
 }
 `, BuiltIn: false},
 	{Name: "../schema/sales/sales.stat.graphqls", Input: `type SalesStatData{
@@ -2858,6 +2912,7 @@ type SalesQuery{
 
 }
 
+# Data
 type MonthlyData{
 	month:String
 	totalSales:Float
@@ -2868,7 +2923,16 @@ type DailySalesData{
     totalSales:Float
     totalUnits:Int
 }
+type SalesBreakdownData{
+    categoryName:String
+    totalSales:Float
+}
+# Input
+input SalesBreakDownInput{
+    filterType:SalesInfoType!
+}
 
+# Response
 type DailySalesQueryResponse{
     data:[DailySalesData]
     error:QueryError
@@ -2876,6 +2940,11 @@ type DailySalesQueryResponse{
 
 type SalesStatQueryResponse{
     data:SalesStatData
+    error:QueryError
+}
+
+type SalesBreakDownQueryResponse{
+    data:[SalesBreakdownData]
     error:QueryError
 }`, BuiltIn: false},
 	{Name: "../schema/shared/directives.graphqls", Input: `directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
@@ -3262,6 +3331,21 @@ func (ec *executionContext) field_SalesQuery_getSaleByID_args(ctx context.Contex
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNGetSalesByIDInput2backendᚋgraphᚋmodelᚐGetSalesByIDInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_SalesQuery_getSalesBreakdown_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.SalesBreakDownInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNSalesBreakDownInput2backendᚋgraphᚋmodelᚐSalesBreakDownInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -9626,6 +9710,8 @@ func (ec *executionContext) fieldContext_Query_sales(ctx context.Context, field 
 				return ec.fieldContext_SalesQuery_getSalesStat(ctx, field)
 			case "getDailySalesStat":
 				return ec.fieldContext_SalesQuery_getDailySalesStat(ctx, field)
+			case "getSalesBreakdown":
+				return ec.fieldContext_SalesQuery_getSalesBreakdown(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SalesQuery", field.Name)
 		},
@@ -10528,6 +10614,176 @@ func (ec *executionContext) fieldContext_Sales_deletedAt(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _SalesBreakDownQueryResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.SalesBreakDownQueryResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesBreakDownQueryResponse_data(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Data, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.SalesBreakdownData)
+	fc.Result = res
+	return ec.marshalOSalesBreakdownData2ᚕᚖbackendᚋgraphᚋmodelᚐSalesBreakdownData(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesBreakDownQueryResponse_data(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesBreakDownQueryResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "categoryName":
+				return ec.fieldContext_SalesBreakdownData_categoryName(ctx, field)
+			case "totalSales":
+				return ec.fieldContext_SalesBreakdownData_totalSales(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SalesBreakdownData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesBreakDownQueryResponse_error(ctx context.Context, field graphql.CollectedField, obj *model.SalesBreakDownQueryResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesBreakDownQueryResponse_error(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Error, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(model.QueryError)
+	fc.Result = res
+	return ec.marshalOQueryError2backendᚋgraphᚋmodelᚐQueryError(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesBreakDownQueryResponse_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesBreakDownQueryResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesBreakdownData_categoryName(ctx context.Context, field graphql.CollectedField, obj *model.SalesBreakdownData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesBreakdownData_categoryName(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CategoryName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesBreakdownData_categoryName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesBreakdownData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesBreakdownData_totalSales(ctx context.Context, field graphql.CollectedField, obj *model.SalesBreakdownData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesBreakdownData_totalSales(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalSales, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesBreakdownData_totalSales(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesBreakdownData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SalesMutation_createSales(ctx context.Context, field graphql.CollectedField, obj *model.SalesMutation) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_SalesMutation_createSales(ctx, field)
 	if err != nil {
@@ -11091,6 +11347,67 @@ func (ec *executionContext) fieldContext_SalesQuery_getDailySalesStat(ctx contex
 			}
 			return nil, fmt.Errorf("no field named %q was found under type DailySalesQueryResponse", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesQuery_getSalesBreakdown(ctx context.Context, field graphql.CollectedField, obj *model.SalesQuery) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesQuery_getSalesBreakdown(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SalesQuery().GetSalesBreakdown(rctx, obj, fc.Args["input"].(model.SalesBreakDownInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SalesBreakDownQueryResponse)
+	fc.Result = res
+	return ec.marshalNSalesBreakDownQueryResponse2ᚖbackendᚋgraphᚋmodelᚐSalesBreakDownQueryResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesQuery_getSalesBreakdown(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesQuery",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_SalesBreakDownQueryResponse_data(ctx, field)
+			case "error":
+				return ec.fieldContext_SalesBreakDownQueryResponse_error(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SalesBreakDownQueryResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_SalesQuery_getSalesBreakdown_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -16575,6 +16892,35 @@ func (ec *executionContext) unmarshalInputResetPasswordInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputSalesBreakDownInput(ctx context.Context, obj interface{}) (model.SalesBreakDownInput, error) {
+	var it model.SalesBreakDownInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"filterType"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "filterType":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filterType"))
+			data, err := ec.unmarshalNSalesInfoType2backendᚋgraphᚋmodelᚐSalesInfoType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilterType = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputSalesStatInput(ctx context.Context, obj interface{}) (model.SalesStatInput, error) {
 	var it model.SalesStatInput
 	asMap := map[string]interface{}{}
@@ -20194,6 +20540,82 @@ func (ec *executionContext) _Sales(ctx context.Context, sel ast.SelectionSet, ob
 	return out
 }
 
+var salesBreakDownQueryResponseImplementors = []string{"SalesBreakDownQueryResponse"}
+
+func (ec *executionContext) _SalesBreakDownQueryResponse(ctx context.Context, sel ast.SelectionSet, obj *model.SalesBreakDownQueryResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, salesBreakDownQueryResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SalesBreakDownQueryResponse")
+		case "data":
+			out.Values[i] = ec._SalesBreakDownQueryResponse_data(ctx, field, obj)
+		case "error":
+			out.Values[i] = ec._SalesBreakDownQueryResponse_error(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var salesBreakdownDataImplementors = []string{"SalesBreakdownData"}
+
+func (ec *executionContext) _SalesBreakdownData(ctx context.Context, sel ast.SelectionSet, obj *model.SalesBreakdownData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, salesBreakdownDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SalesBreakdownData")
+		case "categoryName":
+			out.Values[i] = ec._SalesBreakdownData_categoryName(ctx, field, obj)
+		case "totalSales":
+			out.Values[i] = ec._SalesBreakdownData_totalSales(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var salesMutationImplementors = []string{"SalesMutation"}
 
 func (ec *executionContext) _SalesMutation(ctx context.Context, sel ast.SelectionSet, obj *model.SalesMutation) graphql.Marshaler {
@@ -20505,6 +20927,42 @@ func (ec *executionContext) _SalesQuery(ctx context.Context, sel ast.SelectionSe
 					}
 				}()
 				res = ec._SalesQuery_getDailySalesStat(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "getSalesBreakdown":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SalesQuery_getSalesBreakdown(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -22612,6 +23070,25 @@ func (ec *executionContext) marshalNSaleQueryResponse2ᚖbackendᚋgraphᚋmodel
 	return ec._SaleQueryResponse(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNSalesBreakDownInput2backendᚋgraphᚋmodelᚐSalesBreakDownInput(ctx context.Context, v interface{}) (model.SalesBreakDownInput, error) {
+	res, err := ec.unmarshalInputSalesBreakDownInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSalesBreakDownQueryResponse2backendᚋgraphᚋmodelᚐSalesBreakDownQueryResponse(ctx context.Context, sel ast.SelectionSet, v model.SalesBreakDownQueryResponse) graphql.Marshaler {
+	return ec._SalesBreakDownQueryResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSalesBreakDownQueryResponse2ᚖbackendᚋgraphᚋmodelᚐSalesBreakDownQueryResponse(ctx context.Context, sel ast.SelectionSet, v *model.SalesBreakDownQueryResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SalesBreakDownQueryResponse(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNSalesInfoType2backendᚋgraphᚋmodelᚐSalesInfoType(ctx context.Context, v interface{}) (model.SalesInfoType, error) {
 	var res model.SalesInfoType
 	err := res.UnmarshalGQL(v)
@@ -23634,6 +24111,54 @@ func (ec *executionContext) marshalOSales2ᚖbackendᚋgraphᚋmodelᚐSales(ctx
 		return graphql.Null
 	}
 	return ec._Sales(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOSalesBreakdownData2ᚕᚖbackendᚋgraphᚋmodelᚐSalesBreakdownData(ctx context.Context, sel ast.SelectionSet, v []*model.SalesBreakdownData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOSalesBreakdownData2ᚖbackendᚋgraphᚋmodelᚐSalesBreakdownData(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOSalesBreakdownData2ᚖbackendᚋgraphᚋmodelᚐSalesBreakdownData(ctx context.Context, sel ast.SelectionSet, v *model.SalesBreakdownData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._SalesBreakdownData(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOSalesStatData2ᚖbackendᚋgraphᚋmodelᚐSalesStatData(ctx context.Context, sel ast.SelectionSet, v *model.SalesStatData) graphql.Marshaler {

@@ -78,3 +78,18 @@ func (r QueryRepository) GetDailySalesStat(ctx context.Context, organizationID *
 	}
 	return dailyData, nil
 }
+
+func (r QueryRepository) GetSalesStatBreakdownByCategory(ctx context.Context, organizationID string, input *model.SalesBreakDownInput) ([]*model.SalesBreakdownData, error) {
+	data := []*model.SalesBreakdownData{}
+
+	db := r.db.Model(&model.Sales{}).Where("sales.deleted_at IS NULL AND sales.organization_id = ?", organizationID)
+	db = db.Select("SUM(sales.sold_at) as total_sales,categories.name as category_name").Joins("left join products on products.id = sales.product_id").
+		Joins("left join categories on products.category_id = categories.id").Group("categories.name")
+	err := db.Scan(&data).Error
+	if err != nil {
+		fmt.Println("Query Error", err)
+		return nil, err
+	}
+
+	return data, nil
+}

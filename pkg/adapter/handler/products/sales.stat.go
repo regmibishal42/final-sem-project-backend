@@ -68,3 +68,29 @@ func (r ProductRepository) GetDailySalesStat(ctx context.Context, user *model.Us
 		Data: data,
 	}, nil
 }
+
+func (r ProductRepository) GetSalesBreakDownByCategory(ctx context.Context, user *model.User, input *model.SalesBreakDownInput) (*model.SalesBreakDownQueryResponse, error) {
+	//get organizationID from user
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.SalesBreakDownQueryResponse{
+				Error: exception.QueryErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
+		return &model.SalesBreakDownQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	//get sales data
+	data, err := r.TableSales.GetSalesStatBreakdownByCategory(ctx, *organizationID, input)
+	if err != nil {
+		return &model.SalesBreakDownQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+
+	return &model.SalesBreakDownQueryResponse{
+		Data: data,
+	}, nil
+}

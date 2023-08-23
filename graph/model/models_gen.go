@@ -361,6 +361,17 @@ type SaleQueryResponse struct {
 	Error QueryError `json:"error,omitempty"`
 }
 
+type SalesBreakDownInput struct {
+	FilterType SalesInfoType `json:"filterType"`
+}
+
+type SalesBreakDownQueryResponse struct {
+	Data  []*SalesBreakdownData `json:"data,omitempty"`
+	Error QueryError            `json:"error,omitempty"`
+}
+
+
+
 type SalesMutation struct {
 	CreateSales *SalesMutationResponse `json:"createSales"`
 	UpdateSales *SalesMutationResponse `json:"updateSales"`
@@ -374,10 +385,11 @@ type SalesMutationResponse struct {
 }
 
 type SalesQuery struct {
-	GetSalesByFilter  *SalesQueryResponse      `json:"getSalesByFilter"`
-	GetSaleByID       *SaleQueryResponse       `json:"getSaleByID"`
-	GetSalesStat      *SalesStatQueryResponse  `json:"getSalesStat"`
-	GetDailySalesStat *DailySalesQueryResponse `json:"getDailySalesStat"`
+	GetSalesByFilter  *SalesQueryResponse          `json:"getSalesByFilter"`
+	GetSaleByID       *SaleQueryResponse           `json:"getSaleByID"`
+	GetSalesStat      *SalesStatQueryResponse      `json:"getSalesStat"`
+	GetDailySalesStat *DailySalesQueryResponse     `json:"getDailySalesStat"`
+	GetSalesBreakdown *SalesBreakDownQueryResponse `json:"getSalesBreakdown"`
 }
 
 type SalesQueryResponse struct {

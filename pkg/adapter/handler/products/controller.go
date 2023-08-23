@@ -34,7 +34,8 @@ type ProductInterface interface {
 	GetSalesByFilter(ctx context.Context, user *model.User, filter *model.FilterSalesInput) (*model.SalesQueryResponse, error)
 	GetSalesByID(ctx context.Context, user *model.User, input model.GetSalesByIDInput) (*model.SaleQueryResponse, error)
 
-	// Overview
+	// Overview and statistics
 	GetSalesStatOverview(ctx context.Context, user *model.User, input *model.SalesStatInput) (*model.SalesStatQueryResponse, error)
 	GetDailySalesStat(ctx context.Context, user *model.User) (*model.DailySalesQueryResponse, error)
+	GetSalesBreakDownByCategory(ctx context.Context, user *model.User, input *model.SalesBreakDownInput) (*model.SalesBreakDownQueryResponse, error)
 }
