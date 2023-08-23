@@ -15,4 +15,5 @@ type SalesQueryInterface interface {
 
 	GetSalesStat(ctx context.Context, input *model.SalesStatInput, organizationID *string) (*model.SalesStatData, error)
 	GetDailySalesStat(ctx context.Context, organizationID *string) ([]*model.DailySalesData, error)
+	GetSalesStatBreakdownByCategory(ctx context.Context, organizationID string, input *model.SalesBreakDownInput) ([]*model.SalesBreakdownData, error)
 }

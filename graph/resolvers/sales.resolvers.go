@@ -119,6 +119,18 @@ func (r *salesQueryResolver) GetDailySalesStat(ctx context.Context, obj *model.S
 	return r.ProductDomain.GetDailySalesStat(ctx, user)
 }
 
+// GetSalesBreakdown is the resolver for the getSalesBreakdown field.
+func (r *salesQueryResolver) GetSalesBreakdown(ctx context.Context, obj *model.SalesQuery, input model.SalesBreakDownInput) (*model.SalesBreakDownQueryResponse, error) {
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.SalesBreakDownQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHENTICATION, nil),
+		}, nil
+	}
+	return r.ProductDomain.GetSalesBreakDownByCategory(ctx, user, &input)
+}
+
 // Sales returns generated.SalesResolver implementation.
 func (r *Resolver) Sales() generated.SalesResolver { return &salesResolver{r} }
 
