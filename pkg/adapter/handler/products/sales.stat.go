@@ -94,3 +94,52 @@ func (r ProductRepository) GetSalesBreakDownByCategory(ctx context.Context, user
 		Data: data,
 	}, nil
 }
+
+func (r ProductRepository) GetSalesStatByStaff(ctx context.Context, user *model.User, input *model.SalesBreakDownInput) (*model.SalesDataByStaffQueryResponse, error) {
+	//get organizationID from user
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.SalesDataByStaffQueryResponse{
+				Error: exception.QueryErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
+		return &model.SalesDataByStaffQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	//get sales data
+	data, err := r.TableSales.GetSalesStatByStaff(ctx, organizationID, input)
+	if err != nil {
+		return &model.SalesDataByStaffQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.SalesDataByStaffQueryResponse{
+		Data: data,
+	}, nil
+}
+
+func (r ProductRepository) GetDashboardSalesData(ctx context.Context, user *model.User) (*model.DashboardDataQueryResponse, error) {
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.DashboardDataQueryResponse{
+				Error: exception.QueryErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
+		return &model.DashboardDataQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	//get sales data
+	data, err := r.TableSales.GetDashboardSalesData(ctx, organizationID)
+	if err != nil {
+		return &model.DashboardDataQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.DashboardDataQueryResponse{
+		Data: data,
+	}, nil
+}

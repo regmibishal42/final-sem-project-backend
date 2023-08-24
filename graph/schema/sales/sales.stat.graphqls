@@ -24,6 +24,18 @@ type SalesBreakdownData{
     categoryName:String
     totalSales:Float
 }
+type SalesDataByStaffs{
+    staffName:String
+    totalSales:Float
+    totalUnits:Int
+}
+type DashboardSalesData{
+    totalYearlySales:Float
+    totalMonthlySales:Float
+    totalWeeklySales:Float
+    totalDailySales:Float
+}
+
 # Input
 input SalesBreakDownInput{
     filterType:SalesInfoType!
@@ -39,8 +51,16 @@ type SalesStatQueryResponse{
     data:SalesStatData
     error:QueryError
 }
+type DashboardDataQueryResponse{
+    data:DashboardSalesData
+    error:QueryError
+}
 
 type SalesBreakDownQueryResponse{
     data:[SalesBreakdownData]
+    error:QueryError
+}
+type SalesDataByStaffQueryResponse{
+    data:[SalesDataByStaffs]
     error:QueryError
 }

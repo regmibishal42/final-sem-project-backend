@@ -131,6 +131,30 @@ func (r *salesQueryResolver) GetSalesBreakdown(ctx context.Context, obj *model.S
 	return r.ProductDomain.GetSalesBreakDownByCategory(ctx, user, &input)
 }
 
+// GetSalesByStaff is the resolver for the getSalesByStaff field.
+func (r *salesQueryResolver) GetSalesByStaff(ctx context.Context, obj *model.SalesQuery, input model.SalesBreakDownInput) (*model.SalesDataByStaffQueryResponse, error) {
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.SalesDataByStaffQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHENTICATION, nil),
+		}, nil
+	}
+	return r.ProductDomain.GetSalesStatByStaff(ctx, user, &input)
+}
+
+// GetDashboardSalesData is the resolver for the getDashboardSalesData field.
+func (r *salesQueryResolver) GetDashboardSalesData(ctx context.Context, obj *model.SalesQuery) (*model.DashboardDataQueryResponse, error) {
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.DashboardDataQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHENTICATION, nil),
+		}, nil
+	}
+	return r.ProductDomain.GetDashboardSalesData(ctx, user)
+}
+
 // Sales returns generated.SalesResolver implementation.
 func (r *Resolver) Sales() generated.SalesResolver { return &salesResolver{r} }
 
