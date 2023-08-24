@@ -38,4 +38,5 @@ type ProductInterface interface {
 	GetSalesStatOverview(ctx context.Context, user *model.User, input *model.SalesStatInput) (*model.SalesStatQueryResponse, error)
 	GetDailySalesStat(ctx context.Context, user *model.User) (*model.DailySalesQueryResponse, error)
 	GetSalesBreakDownByCategory(ctx context.Context, user *model.User, input *model.SalesBreakDownInput) (*model.SalesBreakDownQueryResponse, error)
+	GetSalesStatByStaff(ctx context.Context, user *model.User, input *model.SalesBreakDownInput) (*model.SalesDataByStaffQueryResponse, error)
 }

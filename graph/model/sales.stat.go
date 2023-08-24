@@ -16,6 +16,11 @@ type SalesBreakdownData struct {
 	CategoryName *string  `json:"categoryName,omitempty"`
 	TotalSales   *float64 `json:"totalSales,omitempty"`
 }
+type SalesDataByStaffs struct {
+	StaffName  *string  `json:"staffName,omitempty"`
+	TotalSales *float64 `json:"totalSales,omitempty"`
+	TotalUnits *int     `json:"totalUnits,omitempty"`
+}
 
 type SalesStatData struct {
 	TotalYearlySales      *float64      `json:"totalYearlySales,omitempty"`
