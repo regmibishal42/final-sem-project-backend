@@ -24,6 +24,11 @@ type SalesBreakdownData{
     categoryName:String
     totalSales:Float
 }
+type SalesDataByStaffs{
+    staffName:String
+    totalSales:Float
+    totalUnits:Int
+}
 # Input
 input SalesBreakDownInput{
     filterType:SalesInfoType!
@@ -42,5 +47,9 @@ type SalesStatQueryResponse{
 
 type SalesBreakDownQueryResponse{
     data:[SalesBreakdownData]
+    error:QueryError
+}
+type SalesDataByStaffQueryResponse{
+    data:[SalesDataByStaffs]
     error:QueryError
 }

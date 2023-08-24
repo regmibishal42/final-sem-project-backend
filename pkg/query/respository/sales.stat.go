@@ -93,3 +93,15 @@ func (r QueryRepository) GetSalesStatBreakdownByCategory(ctx context.Context, or
 
 	return data, nil
 }
+
+func (r QueryRepository) GetSalesStatByStaff(ctx context.Context, organizationID *string, input *model.SalesBreakDownInput) ([]*model.SalesDataByStaffs, error) {
+	data := []*model.SalesDataByStaffs{}
+	db := r.db.Model(&model.Sales{}).Where("sales.deleted_at IS NULL AND sales.organization_id = ?", organizationID)
+	db = db.Select("SUM(sales.sold_at) as total_sales,SUM(sales.units_sold) as total_units,CONCAT(profiles.first_name,' ',profiles.last_name) as staff_name").
+		Joins("left join profiles on sales.sold_by_id = profiles.user_id").Group("staff_name")
+	err := db.Scan(&data).Error
+	if err != nil {
+		return nil, err
+	}
+	return data, err
+}
