@@ -6,6 +6,7 @@ import (
 	"backend/pkg/util"
 	"context"
 	"errors"
+	"fmt"
 )
 
 func (r OrganizationRepository) CreateOrganization(ctx context.Context, input *model.CreateOrganizationInput, user *model.User) (*model.OrganizationMutationResponse, error) {
@@ -24,9 +25,9 @@ func (r OrganizationRepository) CreateOrganization(ctx context.Context, input *m
 		}
 	}
 
-	organization.CreatedBy = user
+	//	organization.CreatedBy = user
 	organization.CreatedByID = user.ID
-
+	fmt.Println("User ID is", user.ID)
 	//create organization
 	err := r.TableOrganization.CreateOrganization(ctx, &organization)
 	if err != nil {

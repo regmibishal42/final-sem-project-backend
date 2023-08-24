@@ -4,6 +4,10 @@ import (
 	"backend/graph/model"
 	"backend/pkg/util"
 	"context"
+	"errors"
+	"fmt"
+
+	"gorm.io/gorm"
 )
 
 func (r QueryRepository) CreateUser(ctx context.Context, user *model.User) error {
@@ -50,16 +54,23 @@ func (r QueryRepository) GetAdditionalInformation(ctx context.Context, userID *s
 	Organization := &model.Organization{}
 	err := r.db.Model(&model.Organization{}).Where("deleted_at IS NULL AND created_by_id = ?", userID).Find(&Organization)
 	if err.Error != nil {
-		return &additionalInformation, err.Error
+		fmt.Println("Rows", err.RowsAffected)
+		if errors.Is(err.Error, gorm.ErrRecordNotFound) {
+			additionalInformation.HasOrganization = util.Ref(false)
+		} else {
+			return &additionalInformation, err.Error
+		}
 	}
-	if Organization != nil {
+	fmt.Println("The Organization is", Organization)
+	if Organization != nil && err.RowsAffected > 0 {
+		fmt.Printf("Checking has organization")
 		additionalInformation.HasOrganization = util.Ref(true)
 		return &additionalInformation, nil
 	}
 	//check if user  is staff
 	staff := &model.Staff{}
 	err1 := r.db.Model(&model.Staff{}).Where("id =? AND is_authorized = ?", userID, true).Find(&staff)
-	if err1.Error != nil {
+	if err1.Error != nil && !errors.Is(err.Error, gorm.ErrRecordNotFound) {
 		return &additionalInformation, err.Error
 	}
 	if staff != nil {
