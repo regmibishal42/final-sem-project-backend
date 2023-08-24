@@ -48,10 +48,10 @@ func (r QueryRepository) GetSalesStat(ctx context.Context, input *model.SalesSta
            SUM(sold_at) as total_sales,
            SUM(units_sold) as total_units
     FROM sales
-    WHERE EXTRACT(year FROM created_at) = %d
+    WHERE EXTRACT(year FROM created_at) = %d AND organization_id = '%s'
     GROUP BY DATE_TRUNC('month', created_at)
     ORDER BY DATE_TRUNC('month', created_at)
-`, currentYear)
+`, currentYear, *organizationID)
 
 	if err := db.Raw(query).Scan(&monthlyData).Error; err != nil {
 		return nil, err
