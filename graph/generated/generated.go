@@ -150,6 +150,18 @@ type ComplexityRoot struct {
 		Error func(childComplexity int) int
 	}
 
+	DashboardDataQueryResponse struct {
+		Data  func(childComplexity int) int
+		Error func(childComplexity int) int
+	}
+
+	DashboardSalesData struct {
+		TotalDailySales   func(childComplexity int) int
+		TotalMonthlySales func(childComplexity int) int
+		TotalWeeklySales  func(childComplexity int) int
+		TotalYearlySales  func(childComplexity int) int
+	}
+
 	DeletedProducts struct {
 		CreatedAt func(childComplexity int) int
 		DeletedAt func(childComplexity int) int
@@ -376,12 +388,13 @@ type ComplexityRoot struct {
 	}
 
 	SalesQuery struct {
-		GetDailySalesStat func(childComplexity int) int
-		GetSaleByID       func(childComplexity int, input model.GetSalesByIDInput) int
-		GetSalesBreakdown func(childComplexity int, input model.SalesBreakDownInput) int
-		GetSalesByFilter  func(childComplexity int, input model.FilterSalesInput) int
-		GetSalesByStaff   func(childComplexity int, input model.SalesBreakDownInput) int
-		GetSalesStat      func(childComplexity int, input model.SalesStatInput) int
+		GetDailySalesStat     func(childComplexity int) int
+		GetDashboardSalesData func(childComplexity int) int
+		GetSaleByID           func(childComplexity int, input model.GetSalesByIDInput) int
+		GetSalesBreakdown     func(childComplexity int, input model.SalesBreakDownInput) int
+		GetSalesByFilter      func(childComplexity int, input model.FilterSalesInput) int
+		GetSalesByStaff       func(childComplexity int, input model.SalesBreakDownInput) int
+		GetSalesStat          func(childComplexity int, input model.SalesStatInput) int
 	}
 
 	SalesQueryResponse struct {
@@ -556,6 +569,7 @@ type SalesQueryResolver interface {
 	GetDailySalesStat(ctx context.Context, obj *model.SalesQuery) (*model.DailySalesQueryResponse, error)
 	GetSalesBreakdown(ctx context.Context, obj *model.SalesQuery, input model.SalesBreakDownInput) (*model.SalesBreakDownQueryResponse, error)
 	GetSalesByStaff(ctx context.Context, obj *model.SalesQuery, input model.SalesBreakDownInput) (*model.SalesDataByStaffQueryResponse, error)
+	GetDashboardSalesData(ctx context.Context, obj *model.SalesQuery) (*model.DashboardDataQueryResponse, error)
 }
 type StaffResolver interface {
 	Staff(ctx context.Context, obj *model.Staff) (*model.User, error)
@@ -869,6 +883,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DailySalesQueryResponse.Error(childComplexity), true
+
+	case "DashboardDataQueryResponse.data":
+		if e.complexity.DashboardDataQueryResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.DashboardDataQueryResponse.Data(childComplexity), true
+
+	case "DashboardDataQueryResponse.error":
+		if e.complexity.DashboardDataQueryResponse.Error == nil {
+			break
+		}
+
+		return e.complexity.DashboardDataQueryResponse.Error(childComplexity), true
+
+	case "DashboardSalesData.totalDailySales":
+		if e.complexity.DashboardSalesData.TotalDailySales == nil {
+			break
+		}
+
+		return e.complexity.DashboardSalesData.TotalDailySales(childComplexity), true
+
+	case "DashboardSalesData.totalMonthlySales":
+		if e.complexity.DashboardSalesData.TotalMonthlySales == nil {
+			break
+		}
+
+		return e.complexity.DashboardSalesData.TotalMonthlySales(childComplexity), true
+
+	case "DashboardSalesData.totalWeeklySales":
+		if e.complexity.DashboardSalesData.TotalWeeklySales == nil {
+			break
+		}
+
+		return e.complexity.DashboardSalesData.TotalWeeklySales(childComplexity), true
+
+	case "DashboardSalesData.totalYearlySales":
+		if e.complexity.DashboardSalesData.TotalYearlySales == nil {
+			break
+		}
+
+		return e.complexity.DashboardSalesData.TotalYearlySales(childComplexity), true
 
 	case "DeletedProducts.createdAt":
 		if e.complexity.DeletedProducts.CreatedAt == nil {
@@ -1796,6 +1852,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SalesQuery.GetDailySalesStat(childComplexity), true
+
+	case "SalesQuery.getDashboardSalesData":
+		if e.complexity.SalesQuery.GetDashboardSalesData == nil {
+			break
+		}
+
+		return e.complexity.SalesQuery.GetDashboardSalesData(childComplexity), true
 
 	case "SalesQuery.getSaleByID":
 		if e.complexity.SalesQuery.GetSaleByID == nil {
@@ -2960,6 +3023,7 @@ type SalesQuery{
     getDailySalesStat:DailySalesQueryResponse! @goField(forceResolver:true)
     getSalesBreakdown(input:SalesBreakDownInput!):SalesBreakDownQueryResponse! @goField(forceResolver:true)
     getSalesByStaff(input:SalesBreakDownInput!):SalesDataByStaffQueryResponse! @goField(forceResolver:true)
+    getDashboardSalesData:DashboardDataQueryResponse!@goField(forceResolver:true)
 }
 `, BuiltIn: false},
 	{Name: "../schema/sales/sales.stat.graphqls", Input: `type SalesStatData{
@@ -2993,6 +3057,13 @@ type SalesDataByStaffs{
     totalSales:Float
     totalUnits:Int
 }
+type DashboardSalesData{
+    totalYearlySales:Float
+    totalMonthlySales:Float
+    totalWeeklySales:Float
+    totalDailySales:Float
+}
+
 # Input
 input SalesBreakDownInput{
     filterType:SalesInfoType!
@@ -3006,6 +3077,10 @@ type DailySalesQueryResponse{
 
 type SalesStatQueryResponse{
     data:SalesStatData
+    error:QueryError
+}
+type DashboardDataQueryResponse{
+    data:DashboardSalesData
     error:QueryError
 }
 
@@ -5356,6 +5431,262 @@ func (ec *executionContext) fieldContext_DailySalesQueryResponse_error(ctx conte
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardDataQueryResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.DashboardDataQueryResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DashboardDataQueryResponse_data(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Data, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DashboardSalesData)
+	fc.Result = res
+	return ec.marshalODashboardSalesData2ᚖbackendᚋgraphᚋmodelᚐDashboardSalesData(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DashboardDataQueryResponse_data(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardDataQueryResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalYearlySales":
+				return ec.fieldContext_DashboardSalesData_totalYearlySales(ctx, field)
+			case "totalMonthlySales":
+				return ec.fieldContext_DashboardSalesData_totalMonthlySales(ctx, field)
+			case "totalWeeklySales":
+				return ec.fieldContext_DashboardSalesData_totalWeeklySales(ctx, field)
+			case "totalDailySales":
+				return ec.fieldContext_DashboardSalesData_totalDailySales(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DashboardSalesData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardDataQueryResponse_error(ctx context.Context, field graphql.CollectedField, obj *model.DashboardDataQueryResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DashboardDataQueryResponse_error(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Error, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(model.QueryError)
+	fc.Result = res
+	return ec.marshalOQueryError2backendᚋgraphᚋmodelᚐQueryError(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DashboardDataQueryResponse_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardDataQueryResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardSalesData_totalYearlySales(ctx context.Context, field graphql.CollectedField, obj *model.DashboardSalesData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DashboardSalesData_totalYearlySales(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalYearlySales, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DashboardSalesData_totalYearlySales(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardSalesData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardSalesData_totalMonthlySales(ctx context.Context, field graphql.CollectedField, obj *model.DashboardSalesData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DashboardSalesData_totalMonthlySales(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalMonthlySales, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DashboardSalesData_totalMonthlySales(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardSalesData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardSalesData_totalWeeklySales(ctx context.Context, field graphql.CollectedField, obj *model.DashboardSalesData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DashboardSalesData_totalWeeklySales(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalWeeklySales, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DashboardSalesData_totalWeeklySales(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardSalesData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardSalesData_totalDailySales(ctx context.Context, field graphql.CollectedField, obj *model.DashboardSalesData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DashboardSalesData_totalDailySales(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalDailySales, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DashboardSalesData_totalDailySales(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardSalesData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -9799,6 +10130,8 @@ func (ec *executionContext) fieldContext_Query_sales(ctx context.Context, field 
 				return ec.fieldContext_SalesQuery_getSalesBreakdown(ctx, field)
 			case "getSalesByStaff":
 				return ec.fieldContext_SalesQuery_getSalesByStaff(ctx, field)
+			case "getDashboardSalesData":
+				return ec.fieldContext_SalesQuery_getDashboardSalesData(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SalesQuery", field.Name)
 		},
@@ -11769,6 +12102,56 @@ func (ec *executionContext) fieldContext_SalesQuery_getSalesByStaff(ctx context.
 	if fc.Args, err = ec.field_SalesQuery_getSalesByStaff_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SalesQuery_getDashboardSalesData(ctx context.Context, field graphql.CollectedField, obj *model.SalesQuery) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SalesQuery_getDashboardSalesData(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SalesQuery().GetDashboardSalesData(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.DashboardDataQueryResponse)
+	fc.Result = res
+	return ec.marshalNDashboardDataQueryResponse2ᚖbackendᚋgraphᚋmodelᚐDashboardDataQueryResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SalesQuery_getDashboardSalesData(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SalesQuery",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_DashboardDataQueryResponse_data(ctx, field)
+			case "error":
+				return ec.fieldContext_DashboardDataQueryResponse_error(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DashboardDataQueryResponse", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -18733,6 +19116,86 @@ func (ec *executionContext) _DailySalesQueryResponse(ctx context.Context, sel as
 	return out
 }
 
+var dashboardDataQueryResponseImplementors = []string{"DashboardDataQueryResponse"}
+
+func (ec *executionContext) _DashboardDataQueryResponse(ctx context.Context, sel ast.SelectionSet, obj *model.DashboardDataQueryResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dashboardDataQueryResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DashboardDataQueryResponse")
+		case "data":
+			out.Values[i] = ec._DashboardDataQueryResponse_data(ctx, field, obj)
+		case "error":
+			out.Values[i] = ec._DashboardDataQueryResponse_error(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var dashboardSalesDataImplementors = []string{"DashboardSalesData"}
+
+func (ec *executionContext) _DashboardSalesData(ctx context.Context, sel ast.SelectionSet, obj *model.DashboardSalesData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dashboardSalesDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DashboardSalesData")
+		case "totalYearlySales":
+			out.Values[i] = ec._DashboardSalesData_totalYearlySales(ctx, field, obj)
+		case "totalMonthlySales":
+			out.Values[i] = ec._DashboardSalesData_totalMonthlySales(ctx, field, obj)
+		case "totalWeeklySales":
+			out.Values[i] = ec._DashboardSalesData_totalWeeklySales(ctx, field, obj)
+		case "totalDailySales":
+			out.Values[i] = ec._DashboardSalesData_totalDailySales(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var deletedProductsImplementors = []string{"DeletedProducts"}
 
 func (ec *executionContext) _DeletedProducts(ctx context.Context, sel ast.SelectionSet, obj *model.DeletedProducts) graphql.Marshaler {
@@ -21464,6 +21927,42 @@ func (ec *executionContext) _SalesQuery(ctx context.Context, sel ast.SelectionSe
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "getDashboardSalesData":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SalesQuery_getDashboardSalesData(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -23150,6 +23649,20 @@ func (ec *executionContext) marshalNDailySalesQueryResponse2ᚖbackendᚋgraph�
 	return ec._DailySalesQueryResponse(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNDashboardDataQueryResponse2backendᚋgraphᚋmodelᚐDashboardDataQueryResponse(ctx context.Context, sel ast.SelectionSet, v model.DashboardDataQueryResponse) graphql.Marshaler {
+	return ec._DashboardDataQueryResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDashboardDataQueryResponse2ᚖbackendᚋgraphᚋmodelᚐDashboardDataQueryResponse(ctx context.Context, sel ast.SelectionSet, v *model.DashboardDataQueryResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DashboardDataQueryResponse(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNDeleteCategoryInput2backendᚋgraphᚋmodelᚐDeleteCategoryInput(ctx context.Context, v interface{}) (model.DeleteCategoryInput, error) {
 	res, err := ec.unmarshalInputDeleteCategoryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -24267,6 +24780,13 @@ func (ec *executionContext) marshalODailySalesData2ᚖbackendᚋgraphᚋmodelᚐ
 		return graphql.Null
 	}
 	return ec._DailySalesData(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalODashboardSalesData2ᚖbackendᚋgraphᚋmodelᚐDashboardSalesData(ctx context.Context, sel ast.SelectionSet, v *model.DashboardSalesData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DashboardSalesData(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOFilterSalesParams2ᚖbackendᚋgraphᚋmodelᚐFilterSalesParams(ctx context.Context, v interface{}) (*model.FilterSalesParams, error) {
