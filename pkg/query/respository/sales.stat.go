@@ -85,6 +85,26 @@ func (r QueryRepository) GetSalesStatBreakdownByCategory(ctx context.Context, or
 	db := r.db.Model(&model.Sales{}).Where("sales.deleted_at IS NULL AND sales.organization_id = ?", organizationID)
 	db = db.Select("SUM(sales.sold_at) as total_sales,categories.name as category_name").Joins("left join products on products.id = sales.product_id").
 		Joins("left join categories on products.category_id = categories.id").Group("categories.name")
+	if input != nil {
+		if input.FilterType == model.SalesInfoTypeYearly {
+			currentYear := time.Now().Year()
+			db = db.Where("EXTRACT(year FROM sales.created_at) = ?", currentYear)
+		}
+		if input.FilterType == model.SalesInfoTypeMonthly {
+			currentYear := time.Now().Year()
+			currentMonth := time.Now().Month()
+			db = db.Where("EXTRACT(year FROM sales.created_at) = ? AND EXTRACT(month FROM sales.created_at) = ?", currentYear, currentMonth)
+		}
+		if input.FilterType == model.SalesInfoTypeWeekly {
+			currentYear := time.Now().Year()
+			_, currentWeek := time.Now().ISOWeek()
+			db = db.Where("EXTRACT(year FROM sales.created_at) = ? AND EXTRACT(week FROM sales.created_at) = ?", currentYear, currentWeek)
+		}
+		if input.FilterType == model.SalesInfoTypeDaily {
+			currentDate := time.Now().Format("2006-01-02")
+			db = db.Where("DATE(sales.created_at) = ?", currentDate)
+		}
+	}
 	err := db.Scan(&data).Error
 	if err != nil {
 		fmt.Println("Query Error", err)
@@ -99,6 +119,26 @@ func (r QueryRepository) GetSalesStatByStaff(ctx context.Context, organizationID
 	db := r.db.Model(&model.Sales{}).Where("sales.deleted_at IS NULL AND sales.organization_id = ?", organizationID)
 	db = db.Select("SUM(sales.sold_at) as total_sales,SUM(sales.units_sold) as total_units,CONCAT(profiles.first_name,' ',profiles.last_name) as staff_name").
 		Joins("left join profiles on sales.sold_by_id = profiles.user_id").Group("staff_name")
+	if input != nil {
+		if input.FilterType == model.SalesInfoTypeYearly {
+			currentYear := time.Now().Year()
+			db = db.Where("EXTRACT(year FROM created_at) = ?", currentYear)
+		}
+		if input.FilterType == model.SalesInfoTypeMonthly {
+			currentYear := time.Now().Year()
+			currentMonth := time.Now().Month()
+			db = db.Where("EXTRACT(year FROM created_at) = ? AND EXTRACT(month FROM created_at) = ?", currentYear, currentMonth)
+		}
+		if input.FilterType == model.SalesInfoTypeWeekly {
+			currentYear := time.Now().Year()
+			_, currentWeek := time.Now().ISOWeek()
+			db = db.Where("EXTRACT(year FROM created_at) = ? AND EXTRACT(week FROM created_at) = ?", currentYear, currentWeek)
+		}
+		if input.FilterType == model.SalesInfoTypeDaily {
+			currentDate := time.Now().Format("2006-01-02")
+			db = db.Where("DATE(created_at) = ?", currentDate)
+		}
+	}
 	err := db.Scan(&data).Error
 	if err != nil {
 		return nil, err
