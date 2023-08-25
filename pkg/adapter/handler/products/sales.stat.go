@@ -143,3 +143,28 @@ func (r ProductRepository) GetDashboardSalesData(ctx context.Context, user *mode
 		Data: data,
 	}, nil
 }
+
+func (r ProductRepository) GetSalesStatByProduct(ctx context.Context, user *model.User, input *model.ProductSalesInput) (*model.ProductSalesQueryResponse, error) {
+	//get organization ID from the user
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.ProductSalesQueryResponse{
+				Error: exception.QueryErrorHandler(ctx, errors.New("not authorized"), exception.AUTHORIZATION, nil),
+			}, nil
+		}
+		return &model.ProductSalesQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	//get products sales data
+	data, err := r.TableSales.GetSalesStatByProduct(ctx, organizationID, input)
+	if err != nil {
+		return &model.ProductSalesQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.SERVER_ERROR, nil),
+		}, nil
+	}
+	return &model.ProductSalesQueryResponse{
+		Data: data,
+	}, nil
+}

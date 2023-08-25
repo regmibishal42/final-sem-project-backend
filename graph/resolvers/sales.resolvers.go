@@ -155,6 +155,18 @@ func (r *salesQueryResolver) GetDashboardSalesData(ctx context.Context, obj *mod
 	return r.ProductDomain.GetDashboardSalesData(ctx, user)
 }
 
+// GetProductSalesStat is the resolver for the getProductSalesStat field.
+func (r *salesQueryResolver) GetProductSalesStat(ctx context.Context, obj *model.SalesQuery, input model.ProductSalesInput) (*model.ProductSalesQueryResponse, error) {
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.ProductSalesQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHENTICATION, nil),
+		}, nil
+	}
+	return r.ProductDomain.GetSalesStatByProduct(ctx, user, &input)
+}
+
 // Sales returns generated.SalesResolver implementation.
 func (r *Resolver) Sales() generated.SalesResolver { return &salesResolver{r} }
 

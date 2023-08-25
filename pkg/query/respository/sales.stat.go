@@ -180,3 +180,43 @@ func (r QueryRepository) GetDashboardSalesData(ctx context.Context, organization
 	}
 	return &data, nil
 }
+
+func (r QueryRepository) GetSalesStatByProduct(ctx context.Context, organizationID *string, input *model.ProductSalesInput) ([]*model.ProductSalesStat, error) {
+	data := []*model.ProductSalesStat{}
+	db := r.db.Model(&model.Sales{}).Where("sales.deleted_at IS NULL AND sales.organization_id = ?", organizationID)
+	db = db.Select("products.name as product_name,categories.name as category_name,SUM(sales.units_sold) as total_units").
+		Joins("left join products on sales.product_id = products.id").Joins("left join categories on categories.id = products.category_id").
+		Group("products.name,categories.name")
+	if input != nil {
+		if input.FilterType == model.SalesInfoTypeYearly {
+			currentYear := time.Now().Year()
+			db = db.Where("EXTRACT(year FROM sales.created_at) = ?", currentYear)
+		}
+		if input.FilterType == model.SalesInfoTypeMonthly {
+			currentYear := time.Now().Year()
+			currentMonth := time.Now().Month()
+			db = db.Where("EXTRACT(year FROM sales.created_at) = ? AND EXTRACT(month FROM sales.created_at) = ?", currentYear, currentMonth)
+		}
+		if input.FilterType == model.SalesInfoTypeWeekly {
+			currentYear := time.Now().Year()
+			_, currentWeek := time.Now().ISOWeek()
+			db = db.Where("EXTRACT(year FROM sales.created_at) = ? AND EXTRACT(week FROM sales.created_at) = ?", currentYear, currentWeek)
+		}
+		if input.FilterType == model.SalesInfoTypeDaily {
+			currentDate := time.Now().Format("2006-01-02")
+			db = db.Where("DATE(sales.created_at) = ?", currentDate)
+		}
+		if input.OrderBy == model.ProductSalesTypeMostSold {
+			db = db.Order("total_units DESC")
+		}
+		if input.OrderBy == model.ProductSalesTypeLeastSold {
+			db = db.Order("total_units ASC")
+		}
+	}
+	err := db.Scan(&data).Error
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+
+}

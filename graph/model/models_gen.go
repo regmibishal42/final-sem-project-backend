@@ -317,6 +317,18 @@ type ProductQueryResponse struct {
 	Error QueryError `json:"error,omitempty"`
 }
 
+type ProductSalesInput struct {
+	FilterType SalesInfoType    `json:"filterType"`
+	OrderBy    ProductSalesType `json:"orderBy"`
+}
+
+type ProductSalesQueryResponse struct {
+	Data  []*ProductSalesStat `json:"data,omitempty"`
+	Error QueryError          `json:"error,omitempty"`
+}
+
+
+
 type ProductsQueryResponse struct {
 	Data     []*Product      `json:"data,omitempty"`
 	Error    QueryError      `json:"error,omitempty"`
@@ -401,6 +413,7 @@ type SalesQuery struct {
 	GetSalesBreakdown     *SalesBreakDownQueryResponse   `json:"getSalesBreakdown"`
 	GetSalesByStaff       *SalesDataByStaffQueryResponse `json:"getSalesByStaff"`
 	GetDashboardSalesData *DashboardDataQueryResponse    `json:"getDashboardSalesData"`
+	GetProductSalesStat   *ProductSalesQueryResponse     `json:"getProductSalesStat"`
 }
 
 type SalesQueryResponse struct {
@@ -627,6 +640,47 @@ func (e *Gender) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Gender) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ProductSalesType string
+
+const (
+	ProductSalesTypeLeastSold ProductSalesType = "LEAST_SOLD"
+	ProductSalesTypeMostSold  ProductSalesType = "MOST_SOLD"
+)
+
+var AllProductSalesType = []ProductSalesType{
+	ProductSalesTypeLeastSold,
+	ProductSalesTypeMostSold,
+}
+
+func (e ProductSalesType) IsValid() bool {
+	switch e {
+	case ProductSalesTypeLeastSold, ProductSalesTypeMostSold:
+		return true
+	}
+	return false
+}
+
+func (e ProductSalesType) String() string {
+	return string(e)
+}
+
+func (e *ProductSalesType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductSalesType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductSalesType", str)
+	}
+	return nil
+}
+
+func (e ProductSalesType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

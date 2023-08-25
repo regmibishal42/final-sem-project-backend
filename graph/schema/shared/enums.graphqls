@@ -36,3 +36,8 @@ enum SalesInfoType{
     WEEKLY
     DAILY
 }
+
+enum ProductSalesType{
+    LEAST_SOLD,
+    MOST_SOLD
+}
