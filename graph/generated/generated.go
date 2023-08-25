@@ -223,6 +223,7 @@ type ComplexityRoot struct {
 	OrganizationQuery struct {
 		GetOrganizationByFilter func(childComplexity int, input *model.OrganizationFilterInput) int
 		GetOrganizationByID     func(childComplexity int, input model.OrganizationInput) int
+		GetUserOrganization     func(childComplexity int) int
 	}
 
 	OrganizationQueryResponse struct {
@@ -516,6 +517,7 @@ type OrganizationMutationResolver interface {
 type OrganizationQueryResolver interface {
 	GetOrganizationByID(ctx context.Context, obj *model.OrganizationQuery, input model.OrganizationInput) (*model.OrganizationQueryResponse, error)
 	GetOrganizationByFilter(ctx context.Context, obj *model.OrganizationQuery, input *model.OrganizationFilterInput) (*model.OrganizationsQueryResponse, error)
+	GetUserOrganization(ctx context.Context, obj *model.OrganizationQuery) (*model.OrganizationQueryResponse, error)
 }
 type ProductResolver interface {
 	Category(ctx context.Context, obj *model.Product) (*model.Category, error)
@@ -1192,6 +1194,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.OrganizationQuery.GetOrganizationByID(childComplexity, args["input"].(model.OrganizationInput)), true
+
+	case "OrganizationQuery.getUserOrganization":
+		if e.complexity.OrganizationQuery.GetUserOrganization == nil {
+			break
+		}
+
+		return e.complexity.OrganizationQuery.GetUserOrganization(childComplexity), true
 
 	case "OrganizationQueryResponse.data":
 		if e.complexity.OrganizationQueryResponse.Data == nil {
@@ -2631,7 +2640,6 @@ input CreateProfileInput{
 }
 
 input UpdateProfileInput{
-    userID:ID!
     firstName:String
     lastName:String
     contactNumber:String
@@ -2739,6 +2747,7 @@ type OrganizationMutation{
 type OrganizationQuery{
     getOrganizationByID(input:OrganizationInput!):OrganizationQueryResponse! @goField(forceResolver:true)
     getOrganizationByFilter(input:OrganizationFilterInput):OrganizationsQueryResponse! @goField(forceResolver:true)
+    getUserOrganization:OrganizationQueryResponse! @goField(forceResolver:true)
 }
 
 
@@ -7416,6 +7425,56 @@ func (ec *executionContext) fieldContext_OrganizationQuery_getOrganizationByFilt
 	return fc, nil
 }
 
+func (ec *executionContext) _OrganizationQuery_getUserOrganization(ctx context.Context, field graphql.CollectedField, obj *model.OrganizationQuery) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OrganizationQuery_getUserOrganization(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.OrganizationQuery().GetUserOrganization(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.OrganizationQueryResponse)
+	fc.Result = res
+	return ec.marshalNOrganizationQueryResponse2ᚖbackendᚋgraphᚋmodelᚐOrganizationQueryResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_OrganizationQuery_getUserOrganization(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "OrganizationQuery",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_OrganizationQueryResponse_data(ctx, field)
+			case "error":
+				return ec.fieldContext_OrganizationQueryResponse_error(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type OrganizationQueryResponse", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _OrganizationQueryResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.OrganizationQueryResponse) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_OrganizationQueryResponse_data(ctx, field)
 	if err != nil {
@@ -9970,6 +10029,8 @@ func (ec *executionContext) fieldContext_Query_organization(ctx context.Context,
 				return ec.fieldContext_OrganizationQuery_getOrganizationByID(ctx, field)
 			case "getOrganizationByFilter":
 				return ec.fieldContext_OrganizationQuery_getOrganizationByFilter(ctx, field)
+			case "getUserOrganization":
+				return ec.fieldContext_OrganizationQuery_getUserOrganization(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type OrganizationQuery", field.Name)
 		},
@@ -17943,22 +18004,13 @@ func (ec *executionContext) unmarshalInputUpdateProfileInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userID", "firstName", "lastName", "contactNumber", "DateOfBirth", "Address"}
+	fieldsInOrder := [...]string{"firstName", "lastName", "contactNumber", "DateOfBirth", "Address"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "firstName":
 			var err error
 
@@ -19738,6 +19790,42 @@ func (ec *executionContext) _OrganizationQuery(ctx context.Context, sel ast.Sele
 					}
 				}()
 				res = ec._OrganizationQuery_getOrganizationByFilter(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "getUserOrganization":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._OrganizationQuery_getUserOrganization(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

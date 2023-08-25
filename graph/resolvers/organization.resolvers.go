@@ -55,6 +55,18 @@ func (r *organizationQueryResolver) GetOrganizationByFilter(ctx context.Context,
 	return r.OrganizationDomain.GetOrganizationByFilter(ctx, input)
 }
 
+// GetUserOrganization is the resolver for the getUserOrganization field.
+func (r *organizationQueryResolver) GetUserOrganization(ctx context.Context, obj *model.OrganizationQuery) (*model.OrganizationQueryResponse, error) {
+	user := UserForContext(ctx)
+	err := CheckLoggedIn(user)
+	if err != nil {
+		return &model.OrganizationQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.AUTHORIZATION, nil),
+		}, nil
+	}
+	return r.OrganizationDomain.GetUserOrganization(ctx, user)
+}
+
 // Organization returns generated.OrganizationResolver implementation.
 func (r *Resolver) Organization() generated.OrganizationResolver { return &organizationResolver{r} }
 

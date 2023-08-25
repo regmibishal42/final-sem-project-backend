@@ -34,7 +34,6 @@ input CreateProfileInput{
 }
 
 input UpdateProfileInput{
-    userID:ID!
     firstName:String
     lastName:String
     contactNumber:String

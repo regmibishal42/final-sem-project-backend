@@ -162,7 +162,6 @@ type DashboardDataQueryResponse struct {
 	Error QueryError          `json:"error,omitempty"`
 }
 
-
 type DeleteCategoryInput struct {
 	CategoryID string `json:"categoryID"`
 }
@@ -271,6 +270,7 @@ type OrganizationMutationResponse struct {
 type OrganizationQuery struct {
 	GetOrganizationByID     *OrganizationQueryResponse  `json:"getOrganizationByID"`
 	GetOrganizationByFilter *OrganizationsQueryResponse `json:"getOrganizationByFilter"`
+	GetUserOrganization     *OrganizationQueryResponse  `json:"getUserOrganization"`
 }
 
 type OrganizationQueryResponse struct {
@@ -485,7 +485,6 @@ type UpdateProductInput struct {
 }
 
 type UpdateProfileInput struct {
-	UserID        string        `json:"userID"`
 	FirstName     *string       `json:"firstName,omitempty"`
 	LastName      *string       `json:"lastName,omitempty"`
 	ContactNumber *string       `json:"contactNumber,omitempty"`

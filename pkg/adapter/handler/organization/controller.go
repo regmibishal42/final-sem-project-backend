@@ -13,7 +13,7 @@ type OrganizationInterface interface {
 	CreateOrganization(ctx context.Context, input *model.CreateOrganizationInput, user *model.User) (*model.OrganizationMutationResponse, error)
 	GetOrganizationByID(ctx context.Context, input *model.OrganizationInput) (*model.OrganizationQueryResponse, error)
 	GetOrganizationDetailsByID(ctx context.Context, organizationID string) (*model.Organization, error)
-
+	GetUserOrganization(ctx context.Context, user *model.User) (*model.OrganizationQueryResponse, error)
 	GetOrganizationByFilter(ctx context.Context, filters *model.OrganizationFilterInput) (*model.OrganizationsQueryResponse, error)
 
 	// Staff

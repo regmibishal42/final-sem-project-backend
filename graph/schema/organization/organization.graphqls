@@ -57,6 +57,7 @@ type OrganizationMutation{
 type OrganizationQuery{
     getOrganizationByID(input:OrganizationInput!):OrganizationQueryResponse! @goField(forceResolver:true)
     getOrganizationByFilter(input:OrganizationFilterInput):OrganizationsQueryResponse! @goField(forceResolver:true)
+    getUserOrganization:OrganizationQueryResponse! @goField(forceResolver:true)
 }
 
 

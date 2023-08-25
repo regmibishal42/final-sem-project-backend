@@ -24,6 +24,7 @@ type AuthInterface interface {
 
 	//Profile
 	GetProfileByUserID(ctx context.Context, userID string) (*model.Profile, error)
+	UpdateProfileInformation(ctx context.Context, user *model.User, input *model.UpdateProfileInput) (*model.ProfileMutationResponse, error)
 
 	//otp
 	CreateOtp(ctx context.Context, user *model.User) (*model.Otp, error)
