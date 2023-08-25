@@ -7,6 +7,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 func (r OrganizationRepository) CreateOrganization(ctx context.Context, input *model.CreateOrganizationInput, user *model.User) (*model.OrganizationMutationResponse, error) {
@@ -73,4 +75,29 @@ func (r OrganizationRepository) GetOrganizationByFilter(ctx context.Context, fil
 //get organization only
 func (r OrganizationRepository) GetOrganizationDetailsByID(ctx context.Context, organizationID string) (*model.Organization, error) {
 	return r.TableOrganization.GetOrganizationByID(ctx, &organizationID)
+}
+
+func (r OrganizationRepository) GetUserOrganization(ctx context.Context, user *model.User) (*model.OrganizationQueryResponse, error) {
+	//get user's organization id
+	organizationID, err := r.TableOrganization.GetOrganizationIDByUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &model.OrganizationQueryResponse{
+				Error: exception.QueryErrorHandler(ctx, errors.New("organization Not Found"), exception.BAD_REQUEST, nil),
+			}, nil
+		}
+		return &model.OrganizationQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.BAD_REQUEST, nil),
+		}, nil
+	}
+	//get organization by id
+	organization, err := r.TableOrganization.GetOrganizationByID(ctx, organizationID)
+	if err != nil {
+		return &model.OrganizationQueryResponse{
+			Error: exception.QueryErrorHandler(ctx, err, exception.BAD_REQUEST, nil),
+		}, nil
+	}
+	return &model.OrganizationQueryResponse{
+		Data: organization,
+	}, nil
 }

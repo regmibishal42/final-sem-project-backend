@@ -21,3 +21,11 @@ func (r QueryRepository) GetProfileByUserID(ctx context.Context, userID string) 
 	}
 	return &userProfile, nil
 }
+
+func (r QueryRepository) UpdateProfile(ctx context.Context, profile *model.Profile, userID *string) error {
+	err := r.db.Model(&model.Profile{}).Where("user_id = ?", userID).Updates(&profile).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
