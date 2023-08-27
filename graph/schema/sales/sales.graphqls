@@ -76,4 +76,5 @@ type SalesQuery{
     getSalesBreakdown(input:SalesBreakDownInput!):SalesBreakDownQueryResponse! @goField(forceResolver:true)
     getSalesByStaff(input:SalesBreakDownInput!):SalesDataByStaffQueryResponse! @goField(forceResolver:true)
     getDashboardSalesData:DashboardDataQueryResponse!@goField(forceResolver:true)
+    getProductSalesStat(input:ProductSalesInput!):ProductSalesQueryResponse! @goField(forceResolver:true)
 }

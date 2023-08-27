@@ -27,6 +27,11 @@ type DashboardSalesData struct {
 	TotalWeeklySales  *float64 `json:"totalWeeklySales,omitempty"`
 	TotalDailySales   *float64 `json:"totalDailySales,omitempty"`
 }
+type ProductSalesStat struct {
+	ProductName  *string `json:"productName,omitempty"`
+	CategoryName *string `json:"categoryName,omitempty"`
+	TotalUnits   *int    `json:"totalUnits,omitempty"`
+}
 
 type SalesStatData struct {
 	TotalYearlySales      *float64      `json:"totalYearlySales,omitempty"`

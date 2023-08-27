@@ -35,10 +35,20 @@ type DashboardSalesData{
     totalWeeklySales:Float
     totalDailySales:Float
 }
+type ProductSalesStat{
+    productName:String
+    categoryName:String
+    totalUnits:Int
+}
+
 
 # Input
 input SalesBreakDownInput{
     filterType:SalesInfoType!
+}
+input ProductSalesInput{
+    filterType:SalesInfoType!
+    orderBy:ProductSalesType!
 }
 
 # Response
@@ -62,5 +72,10 @@ type SalesBreakDownQueryResponse{
 }
 type SalesDataByStaffQueryResponse{
     data:[SalesDataByStaffs]
+    error:QueryError
+}
+
+type ProductSalesQueryResponse{
+    data:[ProductSalesStat]
     error:QueryError
 }
